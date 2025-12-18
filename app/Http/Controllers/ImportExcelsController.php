@@ -104,48 +104,46 @@ class ImportExcelsController extends Controller
                 'AH'=>31
             ];
 
-            /* $dutys = ["persona"=>[
-                "CA"=>["dias"],
-                "PF"=>["dias"],
-                "LOC"=>["dias"]
-            ]]; */
+            
 
             $dutys = [];
 
-            $contador =0;
-            $nombre = null;
-
+            $name = null;
+            $type = null;
+            $types =[];
             foreach($data as $value){
-                if($value['B']!=null && !str_contains($value['B'],'GUARDIAS') && !str_contains($value['B'],'FACULTATIVO')){
-                    foreach($value as $key => $v){
-                        /* if($contador == 2){
-                            $contador = 0;
-                        } */
 
-                        if($key == 'B' && $contador==0){
-                            $dutys[] = $v;
-                            $nombre = $v;
-                            
+
+                if(!str_contains($value['B'],'GUARDIAS') && !str_contains($value['B'],'FACULTATIVO')){
+                    foreach($value as $key => $v){
+                        
+
+                        if($key == 'B' && $v!=null){
+                            $name = $v;
+                        }
+
+                        if($key == 'C'){
+                            $type = $v;             
+                            $types[] = $v;               
                         }
                         
-                        if($key !='B' && $v!=null){
+                        if($key !='B' && $v!=null && $v == 'X'){
                             foreach($dates as $k => $val){
                                 if($key == $k){
-                                    $dutys[$nombre] = $val;
+                                    $dutys[] = "$name . $type . $val ";
                                 }
                             }
                         }
 
                         
                     }
-                    /* $contador++; */
+                    
                     
                 }
-                
-                
+               
                 
             }
-return response()->json($dutys);    
+            return response()->json($dutys);    
         }catch(Exception $e){
             return response()->json(["error"=>"there is a problem to import the dutys of the excel",
                                         "mistake"=>$e->getMessage()]);
