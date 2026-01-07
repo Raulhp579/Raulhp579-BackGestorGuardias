@@ -65,11 +65,15 @@ class ImportExcelsController extends Controller
         
     }
 
+    //function to import the dutys 
+
     public function importDutys(){
         try{
             $file = IOFactory::load('excels/DICIEMBRE2025 ANESTESIA.ods');
             $sheet = $file->getSheet(0);
             $data = $sheet->toArray(null,true,true,true);
+
+            //dates to assoc the column of excel with the date
             $dates = [
                 'D'=>1,
                 'E'=>2,
@@ -110,13 +114,11 @@ class ImportExcelsController extends Controller
 
             $name = null;
             $type = null;
-            $types =[];
             foreach($data as $value){
 
-
+                //Depurate the excel
                 if(!str_contains($value['B'],'GUARDIAS') && !str_contains($value['B'],'FACULTATIVO')){
                     foreach($value as $key => $v){
-                        
 
                         if($key == 'B' && $v!=null){
                             $name = $v;
@@ -140,10 +142,15 @@ class ImportExcelsController extends Controller
                     
                     
                 }
-               
                 
             }
-            return response()->json($dutys);    
+            /* return response()->json($dutys); */ 
+            
+            //separate the data 
+            $pieces = explode(".",$dutys);
+            
+
+
         }catch(Exception $e){
             return response()->json(["error"=>"there is a problem to import the dutys of the excel",
                                         "mistake"=>$e->getMessage()]);
