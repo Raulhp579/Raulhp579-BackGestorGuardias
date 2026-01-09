@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('speciality', function (Blueprint $table) {
             $table->id();
-            $table->string("nombre");
-            $table->boolean("activo");
+            $table->string("name");
+            $table->boolean("active");
             $table->timestamps();
         });
     }

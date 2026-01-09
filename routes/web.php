@@ -9,4 +9,4 @@ Route::get('/', function () {
 
 
 Route::get('/importUsers', [ImportExcelsController::class, "importWorkers"])->name('import.users');
-Route::get('/importDutys',[ImportExcelsController::class, "importDutys"])->name('import.dutys');
+Route::post('/importDutys',[ImportExcelsController::class, "importDutys"])->name('import.dutys');
