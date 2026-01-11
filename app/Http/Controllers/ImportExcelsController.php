@@ -80,7 +80,7 @@ class ImportExcelsController extends Controller
 
 
     // function to import the dutys
-    // it need the month year and the speciality id of the front
+    // it need the month ,the year and the speciality id of the front
     public function importDutys(Request $request)
     {
         try {
@@ -184,7 +184,7 @@ class ImportExcelsController extends Controller
                 $workers[] = [
                     'name' => $name,
                     'type' => $type,
-                    'speciality' => $request->speciality,
+                    'speciality' => $request->speciality,//id
                     'date' => $date,
                     'time' => $time,
                 ];
