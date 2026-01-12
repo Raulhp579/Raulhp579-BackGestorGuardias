@@ -16,4 +16,14 @@ class Worker extends Model
         'discharge_date',
         'id_speciality'
     ];
+
+    public function duties()
+    {
+        return $this->belongsToMany(
+            \App\Models\Duty::class,
+            'duty_worker',
+            'worker_id',
+            'duty_id'
+        );
+    }
 }
