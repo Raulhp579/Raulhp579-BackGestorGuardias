@@ -19,11 +19,6 @@ class Worker extends Model
 
     public function duties()
     {
-        return $this->belongsToMany(
-            \App\Models\Duty::class,
-            'duty_worker',
-            'worker_id',
-            'duty_id'
-        );
+       return $this->hasMany(Duty::class, 'id_worker');
     }
 }
