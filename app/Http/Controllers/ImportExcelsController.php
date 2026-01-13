@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Speciality;
+use App\Models\User;
 use App\Models\Worker;
 use Carbon\Carbon;
 use Exception;
@@ -180,9 +181,10 @@ class ImportExcelsController extends Controller
                 $date = Carbon::parse($dateWithoutFormat);
 
                 $time = $this->calculateTime($type);
+                $idWorker = $this->associateIdUser($name);
 
                 $workers[] = [
-                    'name' => $name,
+                    'idWorker' => $idWorker,
                     'type' => $type,
                     'speciality' => $request->speciality,//id
                     'date' => $date,
@@ -206,5 +208,22 @@ class ImportExcelsController extends Controller
         } elseif (str_contains($type, 'LOC')) {
             return 24;
         }
+    }
+    //mirar falla en algunos nombres
+    public function associateIdUser($name){
+        /* $workers = Worker::where('id',23)->first();
+        return strtoupper($workers->name); */
+        $workers = Worker::all();
+        $nameWithOutSpace = trim($name);
+        
+        
+        foreach( $workers as $worker){
+            if(str_contains(strtoupper($worker->name),strtoupper($nameWithOutSpace))){
+                return $worker->id;
+            }
+        }
+
+        return strtolower($nameWithOutSpace);
+        
     }
 }

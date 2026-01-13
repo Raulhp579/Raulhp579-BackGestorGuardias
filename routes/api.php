@@ -6,7 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SpecialityController;
 use App\Http\Controllers\ImportExcelsController;
 
-Route::get('/user', function (Request $request) {
+Route::get('/userInfo', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
