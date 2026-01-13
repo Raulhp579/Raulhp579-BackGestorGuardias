@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Validator;
 class DutyController extends Controller
 {
     /**
-     * Validation rules + messages (simple style)
+     * Validation rules + messages 
      */
     public function validateDuty()
     {
@@ -50,7 +50,7 @@ class DutyController extends Controller
         try {
             $query = Duty::query();
 
-            // Simple optional filters (no advanced stuff)
+            // Simple optional filters 
             if ($request->date) {
                 $query->whereDate("date", $request->date);
             }
