@@ -20,7 +20,8 @@ class DutyController extends Controller
             "date" => "required|date",
             "duty_type" => "required|in:CA,PF,LOC",
             "id_speciality" => "required|exists:speciality,id",
-            "id_chief_worker" => "nullable|exists:worker,id"
+            "id_chief_worker" => "nullable|exists:worker,id",
+            "id_worker" => "required|exists:worker,id",
         ];
 
         $messages = [
@@ -33,7 +34,10 @@ class DutyController extends Controller
             "id_speciality.required" => "the speciality is required",
             "id_speciality.exists" => "the speciality does not exist",
 
-            "id_chief_worker.exists" => "the chief worker does not exist"
+            "id_chief_worker.exists" => "the chief worker does not exist",
+
+            "id_worker.required" => "the worker is required",
+            "id_worker.exists" => "the worker does not exist",
         ];
 
         return [$rules, $messages];
@@ -47,7 +51,6 @@ class DutyController extends Controller
         try {
             $duties = Duty::all();
             return response()->json($duties);
-
         } catch (Exception $e) {
             return response()->json([
                 "error" => "there is a problem showing the duties",
@@ -78,6 +81,7 @@ class DutyController extends Controller
             $exists = Duty::where("date", $request->date)
                 ->where("id_speciality", $request->id_speciality)
                 ->where("duty_type", $request->duty_type)
+                ->where("id_worker", $request->id_worker)
                 ->first();
 
             if ($exists) {
@@ -91,12 +95,12 @@ class DutyController extends Controller
             $duty->duty_type = $request->duty_type;
             $duty->id_speciality = $request->id_speciality;
             $duty->id_chief_worker = $request->id_chief_worker;
+            $duty->id_worker = $request->id_worker;
             $duty->save();
 
             return response()->json([
                 "success" => "the duty has been created"
             ]);
-
         } catch (Exception $e) {
             return response()->json([
                 "error" => "there is a problem creating the duty",
@@ -120,7 +124,6 @@ class DutyController extends Controller
             }
 
             return response()->json($duty);
-
         } catch (Exception $e) {
             return response()->json([
                 "error" => "there is a problem showing the duty",
@@ -133,45 +136,64 @@ class DutyController extends Controller
      * Update a duty
      */
     public function update(Request $request, string $id)
-    {
-        try {
-            $validate = Validator::make(
-                $request->all(),
-                $this->validateDuty()[0],
-                $this->validateDuty()[1]
-            );
+{
+    try {
+        // Validate data
+        $validate = Validator::make(
+            $request->all(),
+            $this->validateDuty()[0],
+            $this->validateDuty()[1]
+        );
 
-            if ($validate->fails()) {
-                return response()->json([
-                    "error" => $validate->errors()->first()
-                ]);
-            }
-
-            $duty = Duty::where("id", $id)->first();
-
-            if (!$duty) {
-                return response()->json([
-                    "error" => "the duty does not exist"
-                ]);
-            }
-
-            $duty->date = $request->date;
-            $duty->duty_type = $request->duty_type;
-            $duty->id_speciality = $request->id_speciality;
-            $duty->id_chief_worker = $request->id_chief_worker;
-            $duty->save();
-
+        if ($validate->fails()) {
             return response()->json([
-                "success" => "the duty has been updated"
-            ]);
-
-        } catch (Exception $e) {
-            return response()->json([
-                "error" => "there is a problem updating the duty",
-                "mistake" => $e->getMessage()
+                "error" => $validate->errors()->first()
             ]);
         }
+
+        //  Find duty
+        $duty = Duty::where("id", $id)->first();
+
+        if (!$duty) {
+            return response()->json([
+                "error" => "the duty does not exist"
+            ]);
+        }
+
+        //  CHECK DUPLICATE 
+        $exists = Duty::where("date", $request->date)
+            ->where("id_speciality", $request->id_speciality)
+            ->where("duty_type", $request->duty_type)
+            ->where("id_worker", $request->id_worker)
+            ->where("id", "!=", $id)
+            ->first();
+
+        if ($exists) {
+            return response()->json([
+                "error" => "this duty already exists"
+            ]);
+        }
+
+        //  Update data
+        $duty->date = $request->date;
+        $duty->duty_type = $request->duty_type;
+        $duty->id_speciality = $request->id_speciality;
+        $duty->id_worker = $request->id_worker;
+        $duty->id_chief_worker = $request->id_chief_worker;
+        $duty->save();
+
+       
+        return response()->json([
+            "success" => "the duty has been updated"
+        ]);
+
+    } catch (Exception $e) {
+        return response()->json([
+            "error" => "there is a problem updating the duty",
+            "mistake" => $e->getMessage()
+        ]);
     }
+}
 
     /**
      * Delete a duty
@@ -187,13 +209,11 @@ class DutyController extends Controller
                 ]);
             }
 
-            DB::table("duty_worker")->where("duty_id", $duty->id)->delete();
             $duty->delete();
 
             return response()->json([
                 "success" => "the duty has been deleted"
             ]);
-
         } catch (Exception $e) {
             return response()->json([
                 "error" => "there is a problem deleting the duty",
@@ -201,7 +221,6 @@ class DutyController extends Controller
             ]);
         }
     }
-
     /**
      * Daily view of duties
      */
@@ -219,13 +238,12 @@ class DutyController extends Controller
                 ]);
             }
 
-            $duties = Duty::where("date", $date)->get();
+            $duties = Duty::whereDate("date", $date)->get();
 
             return response()->json([
                 "date" => $date,
                 "duties" => $duties
             ]);
-
         } catch (Exception $e) {
             return response()->json([
                 "error" => "there is a problem showing the daily duties",
@@ -234,7 +252,7 @@ class DutyController extends Controller
         }
     }
 
-    /* HAY QUE PROBAR ASIGNAR JEFE U OTRO METODO MAS SENCILLO 
+    /* HAY QUE PROBAR ASIGNAR JEFE U OTRO METODO 
   
 
 
