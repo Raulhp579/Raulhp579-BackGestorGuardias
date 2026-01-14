@@ -40,9 +40,10 @@ return new class extends Migration
                   ->references('id')
                   ->on('worker');
 
-            $table->timestamps();
+            
             
 */
+        $table->timestamps();
 
             // Avoid duplicated duties for the same worker
             $table->unique([

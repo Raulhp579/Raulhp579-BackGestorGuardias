@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Duty;
 use App\Models\Speciality;
 use App\Models\User;
 use App\Models\Worker;
@@ -9,6 +10,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class ImportExcelsController extends Controller
@@ -81,7 +83,7 @@ class ImportExcelsController extends Controller
 
 
     // function to import the dutys
-    // it need the month ,the year and the speciality id of the front
+    // it need the month ,the year and the idspeciality id of the front
     public function importDutys(Request $request)
     {
         try {
@@ -154,6 +156,7 @@ class ImportExcelsController extends Controller
                 }
             }
             $workers = [];
+            $errors = [];
             foreach ($dutys as $duty) {
                 $pieces = explode('.', $duty);
 
@@ -180,19 +183,44 @@ class ImportExcelsController extends Controller
                 $dateWithoutFormat = $request->year.'-'.$request->month.'-'.$day;
                 $date = Carbon::parse($dateWithoutFormat);
 
-                $time = $this->calculateTime($type);
+                /* $time = $this->calculateTime($type); */
                 $idWorker = $this->associateIdUser($name);
 
-                $workers[] = [
+                /* $workers[] = [
                     'idWorker' => $idWorker,
                     'type' => $type,
                     'speciality' => $request->speciality,//id
                     'date' => $date,
                     'time' => $time,
-                ];
-            }
+                ]; */
 
-            return response()->json($workers);
+                if(!Duty::where("id",$request->idSpeciality)){
+                    return response()->json(["error"=>"the speciality does not exists"]);
+                }
+
+                if(!is_int($idWorker)){
+                    $errors[] = [
+                        'Worker' => $idWorker,
+                        'type' => trim($type),
+                        'speciality' => $request->idSpeciality,
+                        'date' => $date
+                     ];
+                }else{
+
+                    $duty = new Duty();
+                    $duty->date = $date;
+                    $duty->duty_type = trim($type);
+                    $duty->id_speciality = $request->idSpeciality;
+                    $duty->id_worker = $idWorker;
+                    //$duty->id_chief_worker = null;para despues
+                    $duty->save();
+                }
+            }
+            return response()->json([
+                "success"=>"dutys has been exported",
+                "dutys not exported"=>$errors
+            ]);
+           /*  return response()->json($workers); */
         } catch (Exception $e) {
             return response()->json(['error' => 'there is a problem to import the dutys of the excel',
                 'mistake' => $e->getMessage()]);
@@ -218,12 +246,15 @@ class ImportExcelsController extends Controller
         
         
         foreach( $workers as $worker){
-            if(str_contains(strtoupper($worker->name),strtoupper($nameWithOutSpace))){
+            if(str_contains(Str::upper($worker->name),Str::upper($nameWithOutSpace))){
                 return $worker->id;
             }
         }
 
-        return strtolower($nameWithOutSpace);
+        
+        return Str::upper($nameWithOutSpace);
         
     }
+
+    
 }

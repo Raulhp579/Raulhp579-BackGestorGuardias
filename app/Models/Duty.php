@@ -15,7 +15,7 @@ class Duty extends Model
         'duty_type',
         'id_speciality',
         'id_worker',
-        'id_chief_worker',
+        //'id_chief_worker',
     ];
 
     protected $casts = [
