@@ -35,11 +35,13 @@ class ImportExcelsController extends Controller
     }
 
     // function to export the excel of workers to db
-    public function importWorkers()
+    public function importWorkers(Request $request)
     {
         try {
-            $file = IOFactory::load('excels/LISTADO DE FACULTATIVOS JEFATURAS DE GUARDIA.xlsx');
-            $sheet = $file->getSheet(0);
+            $file = $request->file('file'); //the fetch mut contain the name file
+            $tmpFile = IOFactory::load($file->getPathname());
+/*             $tmpFile = IOFactory::load('excels/LISTADO DE FACULTATIVOS JEFATURAS DE GUARDIA.xlsx'); */
+            $sheet = $tmpFile->getSheet(0);
             $data = $sheet->toArray(null, true, true, true);
             $persons = [];
             $charges = [];
@@ -87,8 +89,10 @@ class ImportExcelsController extends Controller
     public function importDutys(Request $request)
     {
         try {
-            $file = IOFactory::load('excels/DICIEMBRE2025 ANESTESIA.ods');
-            $sheet = $file->getSheet(0);
+            $file = $request->file("file");
+            $tmpFile = IOFactory::load($file->getPathname());
+            /* $tmpFile = IOFactory::load('excels/DICIEMBRE2025 ANESTESIA.ods'); */
+            $sheet = $tmpFile->getSheet(0);
             $data = $sheet->toArray(null, true, true, true);
 
             // dates to assoc the column of excel with the date
@@ -255,6 +259,8 @@ class ImportExcelsController extends Controller
         return Str::upper($nameWithOutSpace);
         
     }
+
+
 
     
 }

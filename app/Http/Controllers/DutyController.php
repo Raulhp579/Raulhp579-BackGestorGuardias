@@ -252,6 +252,11 @@ class DutyController extends Controller
         }
     }
 
+    public function assignChief(Request $request){
+        //take the duties of one month
+        
+
+    }
     /* HAY QUE PROBAR ASIGNAR JEFE U OTRO METODO 
   
 
