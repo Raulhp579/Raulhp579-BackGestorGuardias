@@ -19,7 +19,7 @@ Route::get('/importUsers', [ImportExcelsController::class, "importWorkers"])->na
 Route::post('/importDuties',[ImportExcelsController::class, "importDuties"])->name('import.duties');
 
 Route::apiResource("/speciality",SpecialityController::class);
-
+Route::get('/assingChiefs',[DutyController::class, "assignChief"]);
 
 
  
