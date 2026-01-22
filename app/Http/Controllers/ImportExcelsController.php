@@ -76,7 +76,7 @@ class ImportExcelsController extends Controller
             return response()->json(['success' => 'The workers has been exported']);
 
         } catch (Exception $e) {
-            return response()->json(['error' => 'there is a problem to import the dutys of the excel',
+            return response()->json(['error' => 'there is a problem to import the duties of the excel',
                 'mistake' => $e->getMessage()]);
         }
 
@@ -84,9 +84,9 @@ class ImportExcelsController extends Controller
 
 
 
-    // function to import the dutys
+    // function to import the Duties
     // it need the month ,the year and the idspeciality id of the front
-    public function importDutys(Request $request)
+    public function importDuties(Request $request)
     {
         try {
             $file = $request->file("file");
@@ -130,7 +130,7 @@ class ImportExcelsController extends Controller
                 'AH' => 31,
             ];
 
-            $dutys = [];
+            $Duties = [];
 
             $name = null;
             $type = null;
@@ -152,7 +152,7 @@ class ImportExcelsController extends Controller
                         if ($key != 'B' && $v != null && $v == 'X') {
                             foreach ($dates as $k => $val) {
                                 if ($key == $k) {
-                                    $dutys[] = "$name . $type . $val ";
+                                    $Duties[] = "$name . $type . $val ";
                                 }
                             }
                         }
@@ -161,7 +161,7 @@ class ImportExcelsController extends Controller
             }
             $workers = [];
             $errors = [];
-            foreach ($dutys as $duty) {
+            foreach ($Duties as $duty) {
                 $pieces = explode('.', $duty);
 
                 if (str_contains($pieces[0], 'Dra')) {
@@ -221,12 +221,12 @@ class ImportExcelsController extends Controller
                 }
             }
             return response()->json([
-                "success"=>"dutys has been exported",
-                "dutys not exported"=>$errors
+                "success"=>"Duties has been exported",
+                "Duties not exported"=>$errors
             ]);
            /*  return response()->json($workers); */
         } catch (Exception $e) {
-            return response()->json(['error' => 'there is a problem to import the dutys of the excel',
+            return response()->json(['error' => 'there is a problem to import the Duties of the excel',
                 'mistake' => $e->getMessage()]);
         }
     }
@@ -241,7 +241,7 @@ class ImportExcelsController extends Controller
             return 24;
         }
     }
-    //mirar falla en algunos nombres
+
     public function associateIdUser($name){
         /* $workers = Worker::where('id',23)->first();
         return strtoupper($workers->name); */
