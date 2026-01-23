@@ -18,9 +18,8 @@ class ImportExcelsController extends Controller
     // function to convert a string(date) to a date to export it to db
     public static function convertDate($date)
     {
-        
-        $timestamp = strtotime($date); //falla
-        return $timestamp;
+        $date = str_replace('/', '-', $date);
+        $timestamp = strtotime($date); //converts a date string into timestamp
         $convertDate = date('Y-m-d', $timestamp);
 
         return $convertDate;
@@ -40,9 +39,9 @@ class ImportExcelsController extends Controller
     public function importWorkers(Request $request)
     {
         try {
-            /* $file = $request->file('file'); //the fetch mut contain the name file
-            $tmpFile = IOFactory::load($file->getPathname()); */
-            $tmpFile = IOFactory::load('excels/LISTADO_FACULTATIVOS_FICTICIO.xlsx');
+            $file = $request->file('file'); //the fetch mut contain the name file
+            $tmpFile = IOFactory::load($file->getPathname());
+            /* $tmpFile = IOFactory::load('excels/LISTADO_FACULTATIVOS_FICTICIO.xlsx'); */
             $sheet = $tmpFile->getSheet(0);
             $data = $sheet->toArray(null, true, true, true);
             $persons = [];
@@ -56,13 +55,12 @@ class ImportExcelsController extends Controller
                         $persons[] = $pieces[0];
                         $charges[] = $pieces[1];
                         $registrationsDate[] = $this->convertDate($person['B']);
-                        return $this->convertDate($person['B']);
+                        
                         
                     } else {
                         $pieces = explode('.', $person['A']);
                         $persons[] = $pieces[0];
                         $charges[] = null;
-                        
                         $registrationsDate[] = $this->convertDate($person['B']);
                         
                     }
@@ -95,9 +93,9 @@ class ImportExcelsController extends Controller
     public function importDuties(Request $request)
     {
         try {
-            /* $file = $request->file("file");
-            $tmpFile = IOFactory::load($file->getPathname()); */
-            $tmpFile = IOFactory::load('excels/DICIEMBRE2025_URGENCIAS.xlsx');
+            $file = $request->file("file");
+            $tmpFile = IOFactory::load($file->getPathname());
+            /* $tmpFile = IOFactory::load('excels/DICIEMBRE2025_URGENCIAS.xlsx'); */
             $sheet = $tmpFile->getSheet(0);
             $data = $sheet->toArray(null, true, true, true);
 
