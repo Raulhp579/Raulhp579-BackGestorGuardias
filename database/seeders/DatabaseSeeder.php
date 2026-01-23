@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
             'password'=>Hash::make('12345')
         ])->assignRole('admin');
         
-        /* $this->call(SpecialitySeeder::class);  */
+        $this->call(SpecialitySeeder::class); 
         
     }
 }
