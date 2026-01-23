@@ -23,13 +23,13 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]); */
-        Role::create(["name"=>"admin"]);
+        /* Role::create(["name"=>"admin"]);
         User::factory()->create([
             'name' => 'Santo Tomás',
             'email' => 'santotomas@gmail.com',
             'password'=>Hash::make('12345')
         ])->assignRole('admin');
-        $this->call(SpecialitySeeder::class);
+        $this->call(SpecialitySeeder::class); */
         
     }
 }

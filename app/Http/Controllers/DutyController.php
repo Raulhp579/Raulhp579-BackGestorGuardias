@@ -257,204 +257,108 @@ class DutyController extends Controller
     // this function need the month
     public function assignChief(Request $request)
     {
-        // take the duties of one month
-        $duties = Duty::whereMonth('date', $request->month)->get();
-        $workers = Worker::orderBy('registration_date', 'ASC')->get();
+        try {
 
-        // iterate the duties and group it with the same day
-        for ($i = 1; $i <= 31; $i++) {
-            $dutiesDay = [];
-            $idWorkers = [];
-            $allWorkers = [];
-            $allWorkers[] = $workers;
+            // take the duties of one month
+            $duties = Duty::whereMonth('date', $request->month)->get();
+            $workers = Worker::orderBy('registration_date', 'ASC')->get();
 
-            foreach ($duties as $duty) {
-                // take only the date to comparete it
-                $timeStamp = strtotime($duty->date);
-                $date = date('d', $timeStamp);
+            // iterate the duties and group it with the same day
+            for ($i = 1; $i <= 31; $i++) {
+                $allWorkers = clone $workers;
+                
+                $dutiesDay = $this->takeOneDay($duties, $i);
 
-                // save the duties of the same day
-                if ($i == $date) {
-                    $dutiesDay[] = $duty;
+                $oldestWorker = $this->selectOldestWorker($allWorkers, $dutiesDay);
+
+                if (! $oldestWorker) {
+                    continue;
                 }
 
-            }
-
-            $oldestWorker = $this->selectOldestWorker($allWorkers, $dutiesDay);
-            $idWorkers[] = $oldestWorker->id; 
-            
-            while($this->countWorkersTime($idWorkers, $oldestWorker->id)){
-                for($i=0; $i<count($allWorkers); $i++){
-                    $worker = $allWorkers[$i];
-                    if($allWorkers[$i]!='' && $oldestWorker->id == $worker->id){
-                        $allWorkers[$i]='';//debo cambiar tambien el ultimo id para el raul del futuro
+                while ($oldestWorker && $this->countWorkersTime($oldestWorker->id, $duties)) {
+                    for ($z = 0; $z < count($allWorkers); $z++) {
+                        $worker = $allWorkers[$z];
+                        if ($worker && $oldestWorker->id == $worker->id) {
+                            $allWorkers[$z] = null;
+                            break;
+                        }
                     }
+                    $oldestWorker = $this->selectOldestWorker($allWorkers, $dutiesDay);
                 }
+
+                if (! $oldestWorker) {
+                    continue;
+                }
+
+                foreach ($dutiesDay as $duty) {
+                    // assign the chief of the day to all duties of the day
+                    $duty->id_chief_worker = $oldestWorker->id;
+                    $duty->save();
+                }
+
             }
 
-            
-            // assign the chief of the day of all duties of the day
-
-            
-             /* foreach($dutiesDay as $duty){//descomentar
-                $duty->id_chief_worker = $oldestWorker->id;
-            }  */
-
-
-
+            return response()->json(['success' => 'success', 'message' => 'Duties assigned successfully to the month'], 200);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Error in assignDuties', 'message' => $e->getMessage()], 500);
         }
 
     }
 
-
-    public function selectOldestWorker($workers, $dutiesDay){
+    public function selectOldestWorker($workers, $dutiesDay)
+    {
         $oldestWorker = null;
-            foreach ($dutiesDay as $duty) {
-                foreach ($workers as $worker) {
-                    if ($duty->id_worker == $worker->id) {
-                        if ($oldestWorker === null ||
-                            Carbon::parse($worker->registration_date)->lt(Carbon::parse($oldestWorker->registration_date))) {
-                                $oldestWorker = $worker;
-                            }
+        foreach ($dutiesDay as $duty) {
+            foreach ($workers as $worker) {
+                if ($worker && $duty->id_worker == $worker->id) {
+                    if ($oldestWorker === null ||
+                        Carbon::parse($worker->registration_date)->lt(Carbon::parse($oldestWorker->registration_date))) {
+                        $oldestWorker = $worker;
                     }
                 }
             }
+        }
 
-            return $oldestWorker;
+        return $oldestWorker;
     }
 
-    //this function return a true if the worker 
-    public function countWorkersTime($ids, $idWorker){
-        $counter =0;
+    // this function return a true if the worker
+    public function countWorkersTime($idWorker, $duties)
+    {
+        $counter = 0;
 
-        foreach($ids as $id){
-            if($id == $idWorker){
+        for ($i = 1; $i <= 31; $i++) {
+            $dutiesDay = $this->takeOneDay($duties, $i);
+
+            if (count($dutiesDay) > 0 && $dutiesDay[0]->id_chief_worker != null && $dutiesDay[0]->id_chief_worker == $idWorker) {
                 $counter++;
+                if ($counter >= 3) {
+                    return true; // worker has been chief for 3
+                }
             }
         }
 
-        if($counter >=3){
-            return true;
+        return false;
+    }
+
+    public function takeOneDay($duties, $i)
+    {
+        $dutiesDay = [];
+
+        foreach ($duties as $duty) {
+            // take only the date to comparete it
+            $timeStamp = strtotime($duty->date);
+            $date = date('d', $timeStamp);
+
+            // save the duties of the same day
+            if ($i == $date) {
+                $dutiesDay[] = $duty;
+            }
+
         }
+
+        return $dutiesDay;
     }
 
 
-
-
-
-    /* HAY QUE PROBAR ASIGNAR JEFE U OTRO METODO
-
-
-
-    public function assignChief(string $date)
-{
-    try {
-        // 1) Validate date
-        $validate = Validator::make(
-            ["date" => $date],
-            ["date" => "required|date"],
-            ["date.required" => "the date is required", "date.date" => "the date must be valid"]
-        );
-
-        if ($validate->fails()) {
-            return response()->json([
-                "error" => $validate->errors()->first()
-            ]);
-        }
-
-        // 2) Get all duties of that day
-        $duties = Duty::where("date", $date)->get();
-
-        if ($duties->isEmpty()) {
-            return response()->json([
-                "error" => "there are no duties for that date"
-            ]);
-        }
-
-        // 3) Get worker candidates that are working that day (pivot duty_worker)
-        $workerIds = DB::table("duty_worker")
-            ->join("duties", "duty_worker.duty_id", "=", "duties.id")
-            ->where("duties.date", $date)
-            ->select("duty_worker.worker_id")
-            ->distinct()
-            ->pluck("worker_id");
-
-        if ($workerIds->isEmpty()) {
-            return response()->json([
-                "error" => "there are no workers assigned for that date"
-            ]);
-        }
-
-        // 4) Order candidates by seniority (oldest registration_date first)
-        $candidates = Worker::whereIn("id", $workerIds)
-            ->orderBy("registration_date", "asc")
-            ->get();
-
-        // 5) Calculate month (YYYY-MM) to apply the 3 chiefs limit
-        $month = date("Y-m", strtotime($date));
-
-        // 6) Build counts of chiefs per worker in that month (count DISTINCT days)
-        $monthDuties = Duty::where("date", "like", $month . "%")
-            ->whereNotNull("id_chief_worker")
-            ->get(["date", "id_chief_worker"]);
-
-        $chiefDaysPerWorker = []; // [worker_id => [date1=>true, date2=>true...]]
-
-        foreach ($monthDuties as $md) {
-            $wid = $md->id_chief_worker;
-            if (!$wid) continue;
-
-            if (!isset($chiefDaysPerWorker[$wid])) {
-                $chiefDaysPerWorker[$wid] = [];
-            }
-
-            // store unique day
-            $chiefDaysPerWorker[$wid][$md->date] = true;
-        }
-
-        // 7) Pick first candidate with < 3 chief days this month
-        $selectedChief = null;
-
-        foreach ($candidates as $w) {
-            $countDays = 0;
-
-            if (isset($chiefDaysPerWorker[$w->id])) {
-                $countDays = count($chiefDaysPerWorker[$w->id]);
-            }
-
-            if ($countDays < 3) {
-                $selectedChief = $w;
-                break;
-            }
-        }
-
-        if (!$selectedChief) {
-            return response()->json([
-                "error" => "no eligible chief (all candidates already have 3 chiefs this month)"
-            ]);
-        }
-
-        // 8) Assign chief to ALL duties of that day
-        Duty::where("date", $date)->update([
-            "id_chief_worker" => $selectedChief->id
-        ]);
-
-        return response()->json([
-            "success" => "chief assigned successfully",
-            "date" => $date,
-            "chief_worker" => [
-                "id" => $selectedChief->id,
-                "name" => $selectedChief->name,
-                "registration_date" => $selectedChief->registration_date
-            ]
-        ]);
-
-    } catch (Exception $e) {
-        return response()->json([
-            "error" => "there is a problem assigning the chief",
-            "mistake" => $e->getMessage()
-        ]);
-    }
-}
-     */
 }

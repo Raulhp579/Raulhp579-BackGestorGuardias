@@ -38,9 +38,9 @@ class ImportExcelsController extends Controller
     public function importWorkers(Request $request)
     {
         try {
-            $file = $request->file('file'); //the fetch mut contain the name file
-            $tmpFile = IOFactory::load($file->getPathname());
-/*             $tmpFile = IOFactory::load('excels/LISTADO DE FACULTATIVOS JEFATURAS DE GUARDIA.xlsx'); */
+            /* $file = $request->file('file'); //the fetch mut contain the name file
+            $tmpFile = IOFactory::load($file->getPathname()); */
+            $tmpFile = IOFactory::load('excels/LISTADO DE FACULTATIVOS JEFATURAS DE GUARDIA.xlsx');
             $sheet = $tmpFile->getSheet(0);
             $data = $sheet->toArray(null, true, true, true);
             $persons = [];
@@ -85,13 +85,13 @@ class ImportExcelsController extends Controller
 
 
     // function to import the Duties
-    // it need the month ,the year and the idspeciality id of the front
+    // it need the month ,the year and the idSpeciality id of the front
     public function importDuties(Request $request)
     {
         try {
-            $file = $request->file("file");
-            $tmpFile = IOFactory::load($file->getPathname());
-            /* $tmpFile = IOFactory::load('excels/DICIEMBRE2025 ANESTESIA.ods'); */
+            /* $file = $request->file("file");
+            $tmpFile = IOFactory::load($file->getPathname()); */
+            $tmpFile = IOFactory::load('excels/DICIEMBRE2025 ANESTESIA.ods');
             $sheet = $tmpFile->getSheet(0);
             $data = $sheet->toArray(null, true, true, true);
 
