@@ -263,10 +263,11 @@ class DutyController extends Controller
             $duties = Duty::whereMonth('date', $request->month)->get();
             $workers = Worker::orderBy('registration_date', 'ASC')->get();
 
-            // iterate the duties and group it with the same day
+            
             for ($i = 1; $i <= 31; $i++) {
                 $allWorkers = clone $workers;
                 
+                // iterate the duties and group it with the same day
                 $dutiesDay = $this->takeOneDay($duties, $i);
 
                 $oldestWorker = $this->selectOldestWorker($allWorkers, $dutiesDay);
