@@ -31,8 +31,6 @@ return new class extends Migration
             $table->foreign('id_worker')
                   ->references('id')
                   ->on('worker');
-/*
-             -------PARA DESPUES-------
 
             // Chief worker of the day (optional)
             $table->unsignedBigInteger('id_chief_worker')->nullable();
@@ -42,7 +40,7 @@ return new class extends Migration
 
             
             
-*/
+
         $table->timestamps();
 
             // Avoid duplicated duties for the same worker

@@ -147,9 +147,9 @@ class ImportExcelsController extends Controller
 
 
 
-    // function to import the dutys
-    // it need the month ,the year and the idspeciality id of the front
-    public function importDutys(Request $request)
+    // function to import the Duties
+    // it need the month ,the year and the idSpeciality id of the front
+    public function importDuties(Request $request)
     {
         try {
             $validate = Validator::make($request->all(), $this->validateDutiesImport($request)[0], $this->validateDutiesImport($request)[1]);
@@ -206,7 +206,7 @@ class ImportExcelsController extends Controller
                 'AH' => 31,
             ];
 
-            $dutys = [];
+            $duties = [];
 
             $name = null;
             $type = null;
@@ -228,7 +228,7 @@ class ImportExcelsController extends Controller
                         if ($key != 'B' && $v != null && $v == 'X') {
                             foreach ($dates as $k => $val) {
                                 if ($key == $k) {
-                                    $dutys[] = "$name . $type . $val ";
+                                    $Duties[] = "$name . $type . $val ";
                                 }
                             }
                         }
@@ -238,7 +238,7 @@ class ImportExcelsController extends Controller
             $workers = [];
             $errors = [];
 
-            foreach ($dutys as $duty) {
+            foreach ($duties as $duty) {
                 $pieces = explode('.', $duty);
 
                 if (str_contains($pieces[0], 'Dra')) {
@@ -341,8 +341,8 @@ class ImportExcelsController extends Controller
                 }
             }
             return response()->json([
-                "success" => "dutys has been exported",
-                "dutys not exported" => $errors
+                "success"=>"Duties has been exported",
+                "Duties not exported"=>$errors
             ]);
             /*  return response()->json($workers); */
         } catch (Exception $e) {

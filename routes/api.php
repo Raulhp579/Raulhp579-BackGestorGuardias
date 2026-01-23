@@ -16,10 +16,10 @@ Route::post("/login",[AuthController::class,"login"]);
 Route::get("/logout",[AuthController::class, "logout"])->middleware('auth:sanctum');
 
 Route::get('/importUsers', [ImportExcelsController::class, "importWorkers"])->name('import.users');
-Route::post('/importDutys',[ImportExcelsController::class, "importDutys"])->name('import.dutys');
+Route::post('/importDuties',[ImportExcelsController::class, "importDuties"])->name('import.duties');
 
 Route::apiResource("/speciality",SpecialityController::class);
-
+Route::get('/assingChiefs',[DutyController::class, "assignChief"]);
 
 
  
