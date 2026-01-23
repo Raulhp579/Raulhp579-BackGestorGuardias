@@ -28,8 +28,9 @@ class DatabaseSeeder extends Seeder
             'name' => 'Santo Tomás',
             'email' => 'santotomas@gmail.com',
             'password'=>Hash::make('12345')
-        ])->assignRole('admin');
-        $this->call(SpecialitySeeder::class); */
+        ])->assignRole('admin');*/
+        
+        $this->call(SpecialitySeeder::class); 
         
     }
 }
