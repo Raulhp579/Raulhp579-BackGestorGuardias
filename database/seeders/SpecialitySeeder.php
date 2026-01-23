@@ -24,7 +24,7 @@ class SpecialitySeeder extends Seeder
         $urgencias->save();
 
         $anestesia = new Speciality();
-        $anestesia->name = "ANESTESIOLOGÍA";
+        $anestesia->name = "ANESTESIA";
         $anestesia->active = true;
         $anestesia->save();
 
@@ -49,14 +49,19 @@ class SpecialitySeeder extends Seeder
         $cirugia->save();
 
         $neumologia = new Speciality();
-        $neumologia->name = "NEUMOLOGIA";
+        $neumologia->name = "NEUMOLOGÍA";
         $neumologia->active = true;
         $neumologia->save();
 
         $intensivos = new Speciality();
-        $intensivos->name = "CUIDADOS INTENSIVOS";
+        $intensivos->name = "MEDICINA INTENSIVA";
         $intensivos->active = true;
         $intensivos->save();
+
+        $direccion = new Speciality();
+        $direccion->name = "DIRECCIÓN MÉDICA";
+        $direccion->active = true;
+        $direccion->save();
         
     }
 }

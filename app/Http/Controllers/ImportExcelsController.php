@@ -18,7 +18,9 @@ class ImportExcelsController extends Controller
     // function to convert a string(date) to a date to export it to db
     public static function convertDate($date)
     {
-        $timestamp = strtotime($date);
+        
+        $timestamp = strtotime($date); //falla
+        return $timestamp;
         $convertDate = date('Y-m-d', $timestamp);
 
         return $convertDate;
@@ -31,7 +33,7 @@ class ImportExcelsController extends Controller
                 return $speciality->id;
             }
         }
-        return "0";
+        return null;
     }
 
     // function to export the excel of workers to db
@@ -40,7 +42,7 @@ class ImportExcelsController extends Controller
         try {
             /* $file = $request->file('file'); //the fetch mut contain the name file
             $tmpFile = IOFactory::load($file->getPathname()); */
-            $tmpFile = IOFactory::load('excels/LISTADO DE FACULTATIVOS JEFATURAS DE GUARDIA.xlsx');
+            $tmpFile = IOFactory::load('excels/LISTADO_FACULTATIVOS_FICTICIO.xlsx');
             $sheet = $tmpFile->getSheet(0);
             $data = $sheet->toArray(null, true, true, true);
             $persons = [];
@@ -54,11 +56,15 @@ class ImportExcelsController extends Controller
                         $persons[] = $pieces[0];
                         $charges[] = $pieces[1];
                         $registrationsDate[] = $this->convertDate($person['B']);
+                        return $this->convertDate($person['B']);
+                        
                     } else {
                         $pieces = explode('.', $person['A']);
                         $persons[] = $pieces[0];
                         $charges[] = null;
+                        
                         $registrationsDate[] = $this->convertDate($person['B']);
+                        
                     }
 
                 }
@@ -91,7 +97,7 @@ class ImportExcelsController extends Controller
         try {
             /* $file = $request->file("file");
             $tmpFile = IOFactory::load($file->getPathname()); */
-            $tmpFile = IOFactory::load('excels/DICIEMBRE2025 ANESTESIA.ods');
+            $tmpFile = IOFactory::load('excels/DICIEMBRE2025_URGENCIAS.xlsx');
             $sheet = $tmpFile->getSheet(0);
             $data = $sheet->toArray(null, true, true, true);
 
@@ -164,26 +170,35 @@ class ImportExcelsController extends Controller
             foreach ($Duties as $duty) {
                 $pieces = explode('.', $duty);
 
+
                 if (str_contains($pieces[0], 'Dra')) {
                     $nameWithDra = explode(' ', $pieces[0]);
 
-                    $name = '';
+                    $name = $pieces[1];
 
-                    for ($i = 1; $i < count($nameWithDra); $i++) {
+                    /* for ($i = 1; $i < count($nameWithDra); $i++) {
                         $name = $name.' '.$nameWithDra[$i];
-                    }
+                    } */
+                    
 
-                    $type = $pieces[1];
+                    $type = $pieces[2];
+
                     // date
-                    $day = trim($pieces[2], ' ');
+                    $day = trim($pieces[3], ' ');
+                    
 
                 } else {
+                    
                     $name = $pieces[1];
+                    
                     $type = $pieces[2];
                     // date
                     $day = trim($pieces[3], ' ');
+
+                    
                 }
 
+                
                 $dateWithoutFormat = $request->year.'-'.$request->month.'-'.$day;
                 $date = Carbon::parse($dateWithoutFormat);
 
