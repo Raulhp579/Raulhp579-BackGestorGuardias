@@ -21,4 +21,10 @@ class Worker extends Model
     {
        return $this->hasMany(Duty::class, 'id_worker');
     }
+
+    // Cada trabajador pertenece a UNA especialidad
+    public function speciality()
+    {
+        return $this->belongsTo(Speciality::class, 'id_speciality');
+    }
 }

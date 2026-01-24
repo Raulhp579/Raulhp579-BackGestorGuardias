@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DutyController;
 use App\Http\Controllers\SpecialityController;
+use App\Http\Controllers\WorkerController;
 use App\Http\Controllers\ImportExcelsController;
 
 $origin = request()->header('Origin');
@@ -33,6 +34,14 @@ Route::post('/importDuties',[ImportExcelsController::class, "importDuties"])->na
 Route::apiResource("/speciality",SpecialityController::class);
 Route::get('/assingChiefs',[DutyController::class, "assignChief"]);
 
+//---------------------Workers routes-----------------------------
+
+// CRUD Routes for workers
+Route::apiResource("/workers", WorkerController::class);
+
+// Additional filter routes for workers
+Route::get('/workers/active/list', [WorkerController::class, 'getActive']);
+Route::get('/workers/speciality/{idSpeciality}', [WorkerController::class, 'getBySpeciality']);
 
  
 //---------------------Duties routes-----------------------------
