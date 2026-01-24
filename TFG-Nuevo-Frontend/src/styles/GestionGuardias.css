@@ -1,0 +1,533 @@
+:root {
+    --primary: #2E7D32;
+    --secondary: #1B5E20;
+
+    --bg: #F3F4F6;
+    --surface: #FFFFFF;
+    --border: #E5E7EB;
+
+    --text: #111827;
+    --muted: #6B7280;
+
+    --shadow: 0 10px 18px rgba(0, 0, 0, .08);
+    --shadow-soft: 0 6px 12px rgba(0, 0, 0, .06);
+
+    --r-xl: 16px;
+    --r-2xl: 20px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+    background: var(--bg);
+}
+
+.ggPage {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Roboto, system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+}
+
+/* ===== Main ===== */
+.ggMain {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 18px 16px 90px;
+    /* espacio bottomNav en móvil */
+}
+
+/* =========================
+     Tabla Guardias (PRO)
+     ========================= */
+.ggCard {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-2xl);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+}
+
+.ggCardTop {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border-bottom: 1px solid rgba(0, 0, 0, .06);
+    background: linear-gradient(to bottom, rgba(46, 125, 50, .10), rgba(255, 255, 255, 0));
+}
+
+.ggCardTitle {
+    font-weight: 900;
+    color: var(--text);
+    font-size: 18px;
+}
+
+.ggCount {
+    font-weight: 800;
+    color: rgba(17, 24, 39, .65);
+    background: rgba(46, 125, 50, .10);
+    border: 1px solid rgba(46, 125, 50, .20);
+    padding: 6px 10px;
+    border-radius: 999px;
+}
+
+/* wrapper scroll */
+.ggTableWrap {
+    width: 100%;
+    overflow: auto;
+}
+
+/* tabla */
+.ggTable {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 820px;
+    /* en móvil hace scroll horizontal */
+    background: #fff;
+}
+
+.ggTable thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+
+    text-align: left;
+    font-size: 12px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: rgba(17, 24, 39, .65);
+
+    background: #fff;
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(0, 0, 0, .08);
+}
+
+.ggTable tbody td {
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(0, 0, 0, .06);
+    color: var(--text);
+    vertical-align: middle;
+}
+
+.ggTable tbody tr:hover {
+    background: rgba(46, 125, 50, .05);
+}
+
+/* num/fechas monospace */
+.ggMono {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 13px;
+}
+
+/* pill */
+.ggPill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-weight: 900;
+    font-size: 12px;
+    border: 1px solid rgba(0, 0, 0, .08);
+    background: rgba(0, 0, 0, .04);
+}
+
+.ggPill.ca {
+    background: rgba(16, 185, 129, .12);
+    border-color: rgba(16, 185, 129, .25);
+    color: #065f46;
+}
+
+.ggPill.pf {
+    background: rgba(59, 130, 246, .12);
+    border-color: rgba(59, 130, 246, .25);
+    color: #1e3a8a;
+}
+
+.ggPill.loc {
+    background: rgba(245, 158, 11, .12);
+    border-color: rgba(245, 158, 11, .28);
+    color: #92400e;
+}
+
+/* ===== ACCIONES (perfecto con el TH) ===== */
+.ggThActions {
+    text-align: center;
+}
+
+/* TD de acciones */
+.ggActions {
+    text-align: center;
+}
+
+/* wrapper interno: centra sin tocar padding del td */
+.ggActionsCenter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+/* botones */
+.ggIconBtn {
+    width: 44px;
+    height: 44px;
+    border-radius: 16px;
+    border: 1px solid rgba(0, 0, 0, .10);
+    background: #fff;
+    cursor: pointer;
+
+    display: grid;
+    place-items: center;
+
+    margin: 0;
+    padding: 0;
+}
+
+.ggIconBtn:hover {
+    background: rgba(46, 125, 50, .06);
+    border-color: rgba(46, 125, 50, .30);
+}
+
+.ggIconBtn .material-icons-outlined {
+    font-size: 22px;
+    line-height: 1;
+    color: rgba(17, 24, 39, .75);
+}
+
+.ggIconBtn.danger:hover {
+    background: rgba(185, 28, 28, .08);
+    border-color: rgba(185, 28, 28, .25);
+}
+
+.ggIconBtn.danger .material-icons-outlined {
+    color: #b91c1c;
+}
+
+.ggEmpty {
+    padding: 22px 14px;
+    text-align: center;
+    color: rgba(17, 24, 39, .55);
+    font-weight: 700;
+}
+
+/* CTA debajo de la tabla */
+.ctaWrap {
+    margin-top: 18px;
+}
+
+.ctaBtn {
+    width: 100%;
+    background: #fff;
+    border: 2px dashed var(--primary);
+    color: var(--primary);
+    border-radius: var(--r-xl);
+    padding: 14px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    box-shadow: var(--shadow-soft);
+    font-weight: 800;
+}
+
+.ctaBtn:hover {
+    background: #ECFDF5;
+}
+
+/* Bottom nav */
+.bottomNav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 14px 14px;
+    z-index: 40;
+}
+
+.navItem {
+    text-decoration: none;
+    color: #9CA3AF;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.navItem .material-icons {
+    font-size: 22px;
+}
+
+.navItem.active {
+    color: var(--primary);
+}
+
+/* Modal */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    background: rgba(17, 24, 39, .72);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 16px;
+}
+
+.modalSheet {
+    width: 100%;
+    max-width: 560px;
+    background: var(--surface);
+    border-radius: var(--r-2xl);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.modalBody {
+    padding: 16px 16px 10px;
+}
+
+.modalHeader {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.modalIcon {
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    background: #DCFCE7;
+    color: var(--primary);
+    display: grid;
+    place-items: center;
+}
+
+.modalIcon .material-icons {
+    font-size: 22px;
+}
+
+.modalTitle {
+    font-weight: 900;
+    font-size: 16px;
+}
+
+.modalSubtitle {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+}
+
+.formGrid {
+    display: grid;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.label {
+    font-size: 12px;
+    font-weight: 800;
+    color: #374151;
+    display: grid;
+    gap: 6px;
+}
+
+.control {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #fff;
+    padding: 10px 12px;
+    font-size: 13px;
+    outline: none;
+}
+
+.control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(46, 125, 50, .18);
+}
+
+.codeField {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 8px 10px;
+    background: #F9FAFB;
+}
+
+.codeField .material-icons {
+    color: #9CA3AF;
+    font-size: 18px;
+}
+
+.codeInput {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 13px;
+}
+
+.codeBadge {
+    font-size: 11px;
+    font-weight: 900;
+    background: #E5E7EB;
+    color: #4B5563;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.modalFooter {
+    padding: 12px 16px 16px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    background: #F9FAFB;
+    border-top: 1px solid var(--border);
+}
+
+.btnPrimary {
+    border: none;
+    background: var(--primary);
+    color: #fff;
+    font-weight: 900;
+    padding: 10px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.btnPrimary:hover {
+    background: #256D2B;
+}
+
+.btnSecondary {
+    border: 1px solid var(--border);
+    background: #fff;
+    color: #374151;
+    font-weight: 900;
+    padding: 10px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.btnSecondary:hover {
+    background: #F3F4F6;
+}
+
+/* Centrar algunos modales (editar/borrar) */
+.modalOverlay.centered {
+    align-items: center;
+    /* en vez de flex-end */
+}
+
+
+
+/* ===== Paginación ===== */
+.ggPager {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border-top: 1px solid rgba(0, 0, 0, .06);
+    background: #fff;
+}
+
+.ggPagerBtn {
+    border: 1px solid rgba(0, 0, 0, .10);
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 800;
+    color: rgba(17, 24, 39, .80);
+}
+
+.ggPagerBtn:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+.ggPagerBtn:hover:not(:disabled) {
+    background: rgba(46, 125, 50, .06);
+    border-color: rgba(46, 125, 50, .25);
+}
+
+.ggPagerBtn .material-icons-outlined {
+    font-size: 18px;
+}
+
+.ggPagerNums {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.ggPagerNum {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, .10);
+    background: #fff;
+    font-weight: 900;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    color: rgba(17, 24, 39, .80);
+}
+
+.ggPagerNum:hover {
+    background: rgba(46, 125, 50, .06);
+    border-color: rgba(46, 125, 50, .25);
+}
+
+.ggPagerNum.active {
+    background: rgba(46, 125, 50, .14);
+    border-color: rgba(46, 125, 50, .35);
+    color: #14532d;
+}
+
+.ggPagerEllipsis {
+    padding: 0 4px;
+    color: rgba(17, 24, 39, .45);
+    font-weight: 900;
+}
+
+/* Desktop */
+@media (min-width: 992px) {
+    .ggMain {
+        max-width: 1100px;
+        padding-bottom: 24px;
+    }
+
+    .bottomNav {
+        display: none;
+    }
+}

@@ -1,0 +1,1106 @@
+:root {
+    --primary: #2F5D4E;
+    --primary-hover: #244a3e;
+    --bg: #F3F4F6;
+    --surface: #FFFFFF;
+    --border: #E5E7EB;
+    --text: #111827;
+    --muted: #6B7280;
+    --accent: #007A33;
+
+    --shadow: 0 10px 18px rgba(0, 0, 0, .08);
+    --shadow-soft: 0 6px 12px rgba(0, 0, 0, .06);
+    --r: 14px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+    background: var(--bg);
+}
+
+.hdPage {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+}
+
+/* ===== Mobile topbar ===== */
+.hdMobileTopbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: var(--primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    z-index: 50;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, .12);
+}
+
+.hdIconBtn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .10);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    position: relative;
+}
+
+.hdIconBtn:hover {
+    background: rgba(255, 255, 255, .16);
+}
+
+.hdIconBtn.ghost {
+    background: transparent;
+}
+
+.hdIconBtn.ghost:hover {
+    background: rgba(255, 255, 255, .10);
+}
+
+.hdTopBrand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+}
+
+.hdLogo {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+}
+
+.hdTopTitle {
+    font-size: 16px;
+    letter-spacing: -0.01em;
+}
+
+.hdNotifDot {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #EF4444;
+    border: 2px solid var(--primary);
+}
+
+/* ===== Shell ===== */
+.hdShell {
+    display: flex;
+    min-height: 100vh;
+    padding-top: 64px;
+    /* topbar móvil */
+}
+
+/* Overlay */
+.hdOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .45);
+    backdrop-filter: blur(4px);
+    z-index: 40;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease;
+}
+
+.hdOverlay.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* ===== Sidebar ===== */
+.hdSidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 288px;
+    background: var(--primary);
+    color: #fff;
+    transform: translateX(-100%);
+    transition: transform .25s ease;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, .25);
+}
+
+.hdSidebar.open {
+    transform: translateX(0);
+}
+
+.hdSidebarBrand {
+    padding: 20px 18px;
+    display: none;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, .10);
+}
+
+.hdSidebarLogo {
+    width: 32px;
+    height: 32px;
+    fill: currentColor;
+}
+
+.hdSidebarTitle {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.1;
+    font-weight: 800;
+}
+
+.hdSidebarMobileHead {
+    padding: 14px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, .10);
+}
+
+.hdSidebarMobileTitle {
+    font-weight: 700;
+}
+
+.hdNav {
+    padding: 16px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow: auto;
+}
+
+.hdNavItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    color: rgba(255, 255, 255, .82);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.hdNavItem:hover {
+    background: rgba(255, 255, 255, .10);
+    color: #fff;
+}
+
+.hdNavItem.active {
+    background: rgba(255, 255, 255, .20);
+    color: #fff;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .10);
+}
+
+.hdNavDivider {
+    height: 1px;
+    background: rgba(255, 255, 255, .10);
+    margin: 10px 6px;
+}
+
+.hdSidebarFooter {
+    margin-top: auto;
+    padding: 14px 16px;
+    border-top: 1px solid rgba(255, 255, 255, .10);
+    font-size: 12px;
+    color: rgba(255, 255, 255, .55);
+    text-align: center;
+}
+
+/* ===== Main ===== */
+.hdMain {
+    flex: 1;
+    width: 100%;
+    padding: 16px;
+    overflow-x: hidden;
+}
+
+/* Desktop header hidden in mobile */
+.hdDesktopHeader {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+}
+
+.hdBreadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.hdBreadcrumb .material-icons-outlined {
+    font-size: 18px;
+}
+
+.hdBreadcrumbStrong {
+    font-weight: 700;
+    color: var(--text);
+}
+
+.hdUser {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.hdUserInfo {
+    text-align: right;
+}
+
+.hdUserName {
+    font-weight: 800;
+}
+
+.hdUserRole {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.hdUserAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    background: #D1FAE5;
+    color: var(--primary);
+    display: grid;
+    place-items: center;
+    font-weight: 900;
+}
+
+/* Mobile header */
+.hdMobileHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 12px;
+    margin: 8px 0 18px;
+}
+
+.hdTitle {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 900;
+}
+
+.hdSubtitle {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.hdStatus {
+    text-align: right;
+}
+
+.hdStatusLabel {
+    display: block;
+    font-size: 11px;
+    color: #9CA3AF;
+    margin-bottom: 6px;
+}
+
+.hdStatusPill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    background: #DCFCE7;
+    color: #166534;
+    border: 1px solid #BBF7D0;
+}
+
+.hdStatusDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #22C55E;
+}
+
+/* Stats */
+.hdStats {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.hdStatCard {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    box-shadow: var(--shadow-soft);
+    padding: 14px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.hdStatTitle {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.hdStatValue {
+    margin-top: 6px;
+    font-size: 26px;
+    font-weight: 900;
+}
+
+.hdStatNote {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #9CA3AF;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.hdStatNote.green {
+    color: #16A34A;
+}
+
+.hdStatNote.red {
+    color: #EF4444;
+}
+
+.hdStatNote.blue {
+    color: #2563EB;
+}
+
+.hdStatIcon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+}
+
+.hdStatIcon .material-icons-outlined {
+    font-size: 22px;
+}
+
+.hdStatIcon.blue {
+    background: #DBEAFE;
+    color: #2563EB;
+}
+
+.hdStatIcon.green {
+    background: #D1FAE5;
+    color: #059669;
+}
+
+.hdStatIcon.red {
+    background: #FEE2E2;
+    color: #DC2626;
+}
+
+/* Calendar card */
+.hdCalendarCard {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+}
+
+.hdCalendarTop {
+    padding: 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.hdMonthPicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: #F3F4F6;
+    border-radius: 12px;
+    padding: 6px;
+    width: fit-content;
+}
+
+.hdMiniBtn {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: #fff;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .06);
+    display: grid;
+    place-items: center;
+    color: #6B7280;
+}
+
+.hdMiniBtn:hover {
+    background: #F9FAFB;
+}
+
+.hdMonthLabel {
+    font-weight: 800;
+    color: #374151;
+    font-size: 13px;
+    padding: 0 6px;
+}
+
+.hdActions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.hdBtn {
+    border: none;
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hdBtn.light {
+    background: rgba(47, 93, 78, .10);
+    color: var(--primary);
+    border: 1px solid rgba(47, 93, 78, .18);
+}
+
+.hdBtn.light:hover {
+    background: rgba(47, 93, 78, .16);
+}
+
+.hdBtn.primary {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 8px 14px rgba(0, 0, 0, .10);
+}
+
+.hdBtn.primary:hover {
+    background: var(--primary-hover);
+}
+
+.hdBtn .material-icons-outlined {
+    font-size: 18px;
+}
+
+.hideOnMobile {
+    display: none;
+}
+
+.showOnMobile {
+    display: inline;
+}
+
+/* Calendar */
+.hdCalendar {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.hdCalendarHeader {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(90px, 1fr));
+    background: #F9FAFB;
+    border-bottom: 1px solid var(--border);
+}
+
+.hdDow {
+    padding: 10px 0;
+    text-align: center;
+    font-size: 12px;
+    color: #6B7280;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.hdCalendarGrid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(90px, 1fr));
+    background: #E5E7EB;
+    gap: 1px;
+    border-bottom: 1px solid var(--border);
+}
+
+.hdCell {
+    background: var(--surface);
+    min-height: 105px;
+    padding: 6px;
+    position: relative;
+    cursor: pointer;
+    transition: background .15s ease;
+}
+
+.hdCell:hover {
+    background: #FAFAFA;
+}
+
+.hdCell.off {
+    opacity: .55;
+    cursor: default;
+}
+
+.hdCell.highlight .hdCellDay {
+    background: var(--primary);
+    color: #fff;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    display: inline-grid;
+    place-items: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, .12);
+}
+
+.hdCellDay {
+    font-size: 12px;
+    font-weight: 800;
+    color: #374151;
+    padding: 2px 4px;
+    display: inline-block;
+}
+
+.hdEvents {
+    margin-top: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.hdEvent {
+    font-size: 11px;
+    border-radius: 8px;
+    padding: 4px 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.hdEventType {
+    font-weight: 900;
+}
+
+.hdEvent.ca {
+    background: #DCFCE7;
+    color: #166534;
+    border: 1px solid #BBF7D0;
+}
+
+.hdEvent.pf {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+}
+
+.hdEvent.loc {
+    background: #F3F4F6;
+    color: #4B5563;
+    border: 1px solid #E5E7EB;
+}
+
+.hdJefe {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    color: #F59E0B;
+}
+
+.hdJefe .material-icons-outlined {
+    font-size: 16px;
+}
+
+.hdLegendCard {
+    margin-top: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    box-shadow: var(--shadow-soft);
+    padding: 14px;
+}
+
+.hdLegendTitle {
+    margin: 0 0 10px;
+    font-size: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #6B7280;
+}
+
+.hdLegendGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+.hdLegendItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #4B5563;
+    font-weight: 600;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    display: inline-block;
+}
+
+.dot.ca {
+    background: #BBF7D0;
+    border: 2px solid #16A34A;
+}
+
+.dot.pf {
+    background: var(--primary);
+    border: 2px solid var(--primary);
+}
+
+.dot.loc {
+    background: #E5E7EB;
+    border: 2px solid #6B7280;
+}
+
+.amber {
+    color: #F59E0B;
+}
+
+/* ===== Desktop behavior ===== */
+@media (min-width: 1024px) {
+    .hdMobileTopbar {
+        display: none;
+    }
+
+    .hdShell {
+        padding-top: 0;
+    }
+
+    .hdOverlay {
+        display: none;
+    }
+
+    .hdSidebar {
+        position: static;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .hdSidebarBrand {
+        display: flex;
+    }
+
+    .hdSidebarMobileHead {
+        display: none;
+    }
+
+    .hdMain {
+        padding: 28px;
+    }
+
+    .hdDesktopHeader {
+        display: flex;
+    }
+
+    .hdMobileHeader {
+        display: none;
+    }
+
+    .hdStats {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .hdCalendarTop {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .hideOnMobile {
+        display: inline;
+    }
+
+    .showOnMobile {
+        display: none;
+    }
+
+    .hdLegendGrid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Evita que el CSS viejo del HomeDashboard cree otro layout */
+.hdPage,
+.hdShell,
+.hdSidebar,
+.hdMobileTopbar,
+.hdOverlay {
+    display: none !important;
+}
+
+/* Nuevo wrapper del contenido dentro del AppLayout */
+.hdContent {
+    padding: 16px;
+}
+
+/* En escritorio, un poco más de aire */
+@media (min-width: 1024px) {
+    .hdContent {
+        padding: 28px;
+    }
+}
+
+
+/* Wrapper para que no se desborde */
+.hdFullCalendarWrap {
+    width: 100%;
+}
+
+/* Ajustes generales */
+.fc {
+    font-family: inherit;
+}
+
+/* Celdas más limpias */
+.fc .fc-daygrid-day-frame {
+    padding: 6px;
+}
+
+/* Chips tipo CA/PF/LOC */
+.hdFcChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 8px;
+    padding: 4px 6px;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+/* Colores aproximados a tu diseño */
+.hdFcChip.CA {
+    background: rgba(0, 112, 65, 0.12);
+    color: #0b5a35;
+    border: 1px solid rgba(0, 112, 65, 0.25);
+}
+
+.hdFcChip.PF {
+    background: rgba(47, 93, 78, 0.15);
+    color: #244a3e;
+    border: 1px solid rgba(47, 93, 78, 0.25);
+}
+
+.hdFcChip.LOC {
+    background: rgba(107, 114, 128, 0.16);
+    color: #374151;
+    border: 1px solid rgba(107, 114, 128, 0.25);
+}
+
+.hdFcChipText {
+    min-width: 0;
+    /* CLAVE para que elipsis funcione en flex */
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* Icono de jefe dentro del chip */
+.hdFcJefe {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+
+/* ===== FullCalendar (HomeDashboard) ===== */
+.hdFullCalendarWrap .fc {
+    font-family: inherit;
+    color: #111827;
+}
+
+/* Barra superior dentro de la card */
+.hdFullCalendarWrap .fc .fc-toolbar {
+    margin: 10px 0 12px;
+    gap: 10px;
+}
+
+.hdFullCalendarWrap .fc .fc-toolbar-title {
+    font-size: 16px;
+    font-weight: 800;
+    text-transform: capitalize;
+    /* “abril 2024” */
+    color: #1f2937;
+}
+
+/* Botones prev/next estilo “pill” */
+.hdFullCalendarWrap .fc .fc-button {
+    border: 1px solid rgba(17, 24, 39, 0.12) !important;
+    background: #f3f4f6 !important;
+    color: #1f2937 !important;
+    box-shadow: none !important;
+    border-radius: 12px !important;
+    padding: 6px 10px !important;
+}
+
+.hdFullCalendarWrap .fc .fc-button:hover {
+    background: #e5e7eb !important;
+}
+
+.hdFullCalendarWrap .fc .fc-button:focus {
+    box-shadow: 0 0 0 3px rgba(0, 112, 65, 0.18) !important;
+}
+
+.hdFullCalendarWrap .fc .fc-button-active {
+    background: rgba(0, 112, 65, 0.12) !important;
+    border-color: rgba(0, 112, 65, 0.25) !important;
+    color: #0b5a35 !important;
+}
+
+/* Cabecera de días (lun, mar, ...) */
+.hdFullCalendarWrap .fc .fc-col-header-cell-cushion {
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #6b7280;
+    padding: 10px 0;
+}
+
+/* Grid */
+.hdFullCalendarWrap .fc .fc-scrollgrid {
+    border: 1px solid rgba(17, 24, 39, 0.10);
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.hdFullCalendarWrap .fc .fc-daygrid-day-frame {
+    padding: 8px;
+    background: #ffffff;
+}
+
+.hdFullCalendarWrap .fc .fc-daygrid-day-number {
+    font-size: 12px;
+    font-weight: 700;
+    color: #374151;
+}
+
+/* Hoy (highlight suave verde) */
+.hdFullCalendarWrap .fc .fc-day-today {
+    background: rgba(0, 112, 65, 0.06) !important;
+}
+
+/* Quita el estilo azul default de eventos */
+.hdFullCalendarWrap .fc .fc-daygrid-event,
+.hdFullCalendarWrap .fc .fc-event {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 2px 0 !important;
+}
+
+/* ===== Chips CA / PF / LOC (tu estilo) ===== */
+.hdFcChip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 10px;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.hdFcChipText {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Verde Junta */
+.hdFcChip.CA {
+    background: rgba(0, 112, 65, 0.12);
+    color: #0b5a35;
+    border: 1px solid rgba(0, 112, 65, 0.25);
+}
+
+.hdFcChip.PF {
+    background: rgba(47, 93, 78, 0.14);
+    color: #244a3e;
+    border: 1px solid rgba(47, 93, 78, 0.25);
+}
+
+.hdFcChip.LOC {
+    background: rgba(107, 114, 128, 0.14);
+    color: #374151;
+    border: 1px solid rgba(107, 114, 128, 0.25);
+}
+
+.hdFcJefe {
+    font-size: 14px;
+    opacity: 0.85;
+    color: #b45309;
+    /* ámbar suave */
+}
+
+
+/* ===== Filtros dropdown ===== */
+.hdFilterMenu {
+    position: absolute;
+    top: 46px;
+    right: 120px;
+    /* ajusta si lo quieres pegado al botón */
+    width: 220px;
+    background: #fff;
+    border: 1px solid rgba(17, 24, 39, 0.12);
+    border-radius: 12px;
+    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.12);
+    padding: 6px;
+    z-index: 20;
+}
+
+.hdFilterItem {
+    width: 100%;
+    text-align: left;
+    padding: 10px 10px;
+    border-radius: 10px;
+    border: 0;
+    background: transparent;
+    font-weight: 700;
+    font-size: 13px;
+    color: #1f2937;
+    cursor: pointer;
+}
+
+.hdFilterItem:hover {
+    background: rgba(0, 112, 65, 0.08);
+}
+
+.hdFilterItem.active {
+    background: rgba(0, 112, 65, 0.12);
+    color: #0b5a35;
+}
+
+
+/* ===== Modal Nueva Guardia ===== */
+
+.cdActions{
+    margin-top: 2vh;
+}
+
+
+
+.hdModalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.45);
+    display: grid;
+    place-items: center;
+    z-index: 80;
+    padding: 16px;
+    margin-top: 5%;
+}
+
+.hdModalCard {
+    width: min(520px, 100%);
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid rgba(17, 24, 39, 0.12);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+    overflow: hidden;
+}
+
+.hdModalHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+}
+
+.hdModalTitle {
+    font-size: 16px;
+    font-weight: 900;
+    color: #1f2937;
+}
+
+.hdModalClose {
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 10px;
+}
+
+.hdModalClose:hover {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+.hdModalBody {
+    padding: 14px 16px;
+    display: grid;
+    gap: 12px;
+}
+
+.hdField {
+    display: grid;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 800;
+    color: #374151;
+}
+
+.hdControl {
+    border: 1px solid rgba(17, 24, 39, 0.14);
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-weight: 700;
+    outline: none;
+}
+
+.hdControl:focus {
+    border-color: rgba(0, 112, 65, 0.45);
+    box-shadow: 0 0 0 4px rgba(0, 112, 65, 0.14);
+}
+
+.hdModalFooter {
+    padding: 14px 16px;
+    border-top: 1px solid rgba(17, 24, 39, 0.08);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}

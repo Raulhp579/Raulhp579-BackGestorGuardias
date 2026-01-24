@@ -1,0 +1,153 @@
+:root {
+    --primary: #007041;
+    --secondary: #2D453C;
+
+    --bg: #F3F4F6;
+    --card: #FFFFFF;
+    --border: #E5E7EB;
+
+    --text: #111827;
+    --muted: #6B7280;
+
+    --shadow-soft: 0 6px 12px rgba(0, 0, 0, .06);
+    --r: 14px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+    background: var(--bg);
+}
+
+/* Page */
+.legalPage {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+}
+
+/* Main */
+.legalMain {
+    width: 80%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 16px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* Card */
+.legalCard {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+    padding: 18px;
+}
+
+.legalHead {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.legalTitle {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+}
+
+.legalMeta {
+    margin: 4px 0 0 0;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.legalDivider {
+    height: 1px;
+    background: var(--border);
+    margin: 14px 0;
+}
+
+/* Content */
+.legalContent {
+    display: grid;
+    gap: 12px;
+}
+
+.legalContent h2 {
+    margin: 10px 0 6px;
+    font-size: 14px;
+    font-weight: 900;
+    color: #374151;
+}
+
+.legalContent p {
+    margin: 0;
+    color: #374151;
+    font-size: 13px;
+    line-height: 1.65;
+}
+
+.legalContent ul {
+    margin: 0;
+    padding-left: 18px;
+    color: #374151;
+    font-size: 13px;
+    line-height: 1.65;
+}
+
+.legalContent a {
+    color: var(--primary);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.legalContent a:hover {
+    text-decoration: underline;
+}
+
+/* Small callout */
+.legalCallout {
+    background: #F9FAFB;
+    border: 1px solid rgba(229, 231, 235, .7);
+    border-radius: 12px;
+    padding: 12px 12px;
+    color: #374151;
+    font-size: 13px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .legalMain {
+        width: 92%;
+        padding: 16px 12px 88px;
+    }
+}
+
+@media (max-width: 560px) {
+    .legalMain {
+        width: 100%;
+        padding: 14px 14px 84px;
+    }
+
+    .legalCard {
+        padding: 14px;
+    }
+
+    .legalTitle {
+        font-size: 16px;
+    }
+}

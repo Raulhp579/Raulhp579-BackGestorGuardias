@@ -1,0 +1,306 @@
+.cdHeader {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--primary);
+    /* usa tu verde */
+    color: #fff;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, .12);
+}
+
+.cdHeaderInner {
+    padding: 16px 16px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+}
+
+.cdHeaderLeft {
+    justify-self: start;
+    min-width: 40px;
+}
+
+/* Botones/iconos */
+.cdIconBtn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 999px;
+    background: rgba(63, 46, 46, 0.862);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+
+}
+
+.cdIconBtn:hover {
+    background: rgba(255, 1, 1, 0.16);
+
+}
+
+.cdBrand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+}
+
+.cdBrandCenter {
+    justify-self: center;
+}
+
+.cdLogo {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+}
+
+
+.cdHeaderRight {
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cdNotifBtn .material-icons-outlined {
+    color: #fff;
+    font-size: 22px;
+    line-height: 1;
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+.cdNotifBtn .material-icons-outlined:hover {
+    color: #ffffffc8;
+}
+
+/* Avatar */
+.cdAvatarWrap {
+    position: relative;
+}
+
+.cdAvatarBtn {
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    border: 2px solid rgba(255, 255, 255, .22);
+    background: rgba(255, 255, 255, .10);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.cdAvatarBtn:hover {
+    background: rgba(255, 255, 255, .16);
+}
+
+.cdAvatarImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.cdAvatarInitials {
+    font-weight: 900;
+    letter-spacing: -0.02em;
+}
+
+/* En desktop NO hace falta hamburguesa (porque sidebar está visible) */
+@media (min-width: 1024px) {
+    .cdMenuBtn {
+        display: none !important;
+    }
+}
+
+/* ===== FIX: Aislar estilos del menú del avatar (evitar CSS global de buttons) ===== */
+
+.cdAvatarWrap .cdMenu {
+    background: #fff !important;
+    border: 1.5px solid rgba(0, 0, 0, .08) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45) !important;
+    overflow: hidden !important;
+    width: 240px !important;
+}
+
+.cdAvatarWrap .cdMenuHeader {
+    padding: 12px 12px 10px !important;
+    border-bottom: 1px solid rgba(0, 0, 0, .06) !important;
+    background: #fff !important;
+}
+
+.cdAvatarWrap .cdMenuName {
+    font-weight: 900 !important;
+    color: #111827 !important;
+}
+
+.cdAvatarWrap .cdMenuEmail {
+    margin-top: 2px !important;
+    font-size: 12px !important;
+    color: rgba(17, 24, 39, .65) !important;
+}
+
+/* Fuerza los botones del menú a "fila" (y quita bordes/background globales) */
+.cdAvatarWrap .cdMenuItem {
+    all: unset;
+    /* resetea estilos globales */
+    box-sizing: border-box;
+    width: 100%;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    color: #111827;
+}
+
+.cdAvatarWrap .cdMenuItem:hover {
+    background: rgba(17, 24, 39, .06);
+}
+
+.cdAvatarWrap .cdMenuItem .material-icons-outlined {
+    font-size: 20px;
+    line-height: 1;
+    color: rgba(17, 24, 39, .75);
+}
+
+.cdAvatarWrap .cdMenuDivider {
+    height: 1px;
+    background: rgba(0, 0, 0, .06);
+    margin: 6px 0;
+}
+
+.cdAvatarWrap .cdMenuItem.danger {
+    color: #b91c1c;
+}
+
+.cdAvatarWrap .cdMenuItem.danger:hover {
+    background: rgba(185, 28, 28, .08);
+}
+
+/* El wrapper del avatar debe ser el "anchor" del menú */
+.cdAvatarWrap {
+    position: relative;
+}
+
+/* El menú debe flotar, NO empujar el header */
+.cdAvatarWrap .cdMenu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    z-index: 200;
+    /* por encima del header */
+}
+
+/* El overlay debe cubrir toda la pantalla (para cerrar click fuera) */
+.cdMenuOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 150;
+    background: transparent;
+}
+
+.cdNotifWrap {
+    position: relative;
+    display: inline-flex;
+}
+
+.cdNotifBtn {
+    position: relative;
+}
+
+.cdNotifBadge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: #ef4444;
+    /* rojo */
+    color: #fff;
+    font-size: 11px;
+    font-weight: 900;
+    display: grid;
+    place-items: center;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, .18);
+    border: 2px solid rgba(255, 255, 255, .65);
+}
+
+.cdNotifMenu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 10px);
+    width: 320px;
+    max-width: calc(100vw - 24px);
+    background: #fff;
+    color: #111827;
+    border-radius: 14px;
+    border: 1px solid rgba(0, 0, 0, .10);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, .18);
+    overflow: hidden;
+    z-index: 200;
+}
+
+.cdNotifHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 12px;
+    border-bottom: 1px solid rgba(0, 0, 0, .08);
+    background: #f9fafb;
+}
+
+.cdNotifTitle {
+    font-weight: 900;
+}
+
+.cdNotifClear {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-weight: 800;
+    color: rgba(17, 24, 39, .70);
+}
+
+.cdNotifClear:hover {
+    color: rgba(17, 24, 39, .95);
+}
+
+.cdNotifEmpty {
+    padding: 14px 12px;
+    color: rgba(17, 24, 39, .55);
+    font-weight: 700;
+}
+
+.cdNotifList {
+    max-height: 320px;
+    overflow: auto;
+}
+
+.cdNotifItem {
+    padding: 12px 12px;
+    border-bottom: 1px solid rgba(0, 0, 0, .06);
+}
+
+.cdNotifItem:last-child {
+    border-bottom: none;
+}
+
+.cdNotifText {
+    font-weight: 800;
+    font-size: 13px;
+}
+
+.cdNotifTime {
+    margin-top: 4px;
+    font-size: 12px;
+    color: rgba(17, 24, 39, .55);
+}

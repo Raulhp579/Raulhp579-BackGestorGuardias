@@ -1,0 +1,202 @@
+import { useEffect, useState } from "react";
+import "../styles/CalculosDocumentos.css";
+import "../styles/AppLayout.css";
+import { getWorkers, getAdmins } from "../services/userService";
+
+export default function CalculosDocumentos() {
+    // ver trabajadores y admins
+    const [view, setView] = useState("workers");
+
+
+    //para gettear los trabalhadores y users 
+
+    const [workers, setWorkers] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+
+    const [admins, setAdmins] = useState([]);
+    const [adminsLoading, setAdminsLoading] = useState(false);
+    const [adminsError, setAdminsError] = useState("");
+
+
+    async function loadWorkers() {
+        setLoading(true);
+        setError("");
+        try {
+            const data = await getWorkers();
+            setWorkers(data);
+        } catch (e) {
+            setError(e.message || "Error desconocido");
+        } finally {
+            setLoading(false);
+        }
+    }
+    useEffect(() => {
+        if (view === "workers") {
+            loadWorkers();
+        } else {
+            loadAdmins();
+        }
+    }, [view]);
+
+
+    async function loadAdmins() {
+        setAdminsLoading(true);
+        setAdminsError("");
+        try {
+            const data = await getAdmins();
+            setAdmins(data);
+        } catch (e) {
+            setAdminsError(e.message || "Error desconocido");
+        } finally {
+            setAdminsLoading(false);
+        }
+    }
+
+
+    // clases botones 
+    let workersBtnClass = "cdToggleBtn";
+    let adminsBtnClass = "cdToggleBtn";
+
+    if (view === "workers") {
+        workersBtnClass += " isActive";
+    } else {
+        adminsBtnClass += " isActive";
+    }
+
+    // tabla 
+    let title = "";
+    let headers = [];
+    let colSpan = 0;
+    let rows = [];
+
+    if (view === "workers") {
+        title = "Trabajadores";
+        headers = ["ID", "Nombre", "Rango", "Alta", "Baja", "Especialidad"];
+        colSpan = 6;
+        rows = workers;
+    } else {
+        title = "Administradores";
+        headers = ["ID", "Nombre", "Email", "Creado"];
+        colSpan = 4;
+        rows = admins;
+    }
+
+    // filas
+    let tableRows = null;
+
+    if (view === "workers") {
+        tableRows = rows.map((w) => (
+            <tr key={w.id}>
+                <td>{w.id}</td>
+                <td>{w.name}</td>
+                <td>{w.rank}</td>
+                <td>{w.registration_date}</td>
+                <td>{w.discharge_date ?? "-"}</td>
+                <td>{w.id_speciality}</td>
+            </tr>
+        ));
+    } else {
+        tableRows = rows.map((a) => (
+            <tr key={a.id}>
+                <td>{a.id}</td>
+                <td>{a.name}</td>
+                <td>{a.email}</td>
+                <td>{a.created_at}</td>
+            </tr>
+        ));
+    }
+
+    function downloadMock(name) {
+        const blob = new Blob([`Mock file: ${name}`], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = name;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    return (
+        <div className="cdPage">
+            <main className="cdMain">
+                <div className="cdToggle">
+                    <button
+                        className={workersBtnClass}
+                        type="button"
+                        onClick={() => setView("workers")}
+                    >
+                        Ver trabajadores
+                    </button>
+
+                    <button
+                        className={adminsBtnClass}
+                        type="button"
+                        onClick={() => setView("admins")}
+                    >
+                        Ver administradores
+                    </button>
+                </div>
+
+                <h3 className="cdSectionTitle">{title}</h3>
+
+                {view === "workers" && loading && <p>Cargando trabajadores...</p>}
+                {view === "workers" && error && <p className="cdError">{error}</p>}
+
+                {view === "admins" && adminsLoading && <p>Cargando administradores...</p>}
+                {view === "admins" && adminsError && <p className="cdError">{adminsError}</p>}
+
+                <table className="cdTable">
+                    <thead>
+                        <tr>
+                            {headers.map((header) => (
+                                <th key={header}>{header}</th>
+                            ))}
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {rows.length === 0 && (
+                            <tr>
+                                <td colSpan={colSpan}>No hay datos</td>
+                            </tr>
+                        )}
+
+                        {tableRows}
+                    </tbody>
+                </table>
+
+                <div className="cdActions">
+                    <button
+                        className="cdBtnSecondary"
+                        type="button"
+                        onClick={() => downloadMock("informe.pdf")}
+                    >
+                        <span className="material-icons">picture_as_pdf</span>
+                        Descargar PDF
+                    </button>
+
+                    <div className="cdActionsGrid">
+                        <button
+                            className="cdBtnGhost"
+                            type="button"
+                            onClick={() => downloadMock("resumen.xlsx")}
+                        >
+                            <span className="material-icons excel">table_view</span>
+                            Excel
+                        </button>
+
+                        <button
+                            className="cdBtnGhost"
+                            type="button"
+                            onClick={() => alert("Mock: Enviado por correo")}
+                        >
+                            <span className="material-icons email">email</span>
+                            Correo
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    );
+}

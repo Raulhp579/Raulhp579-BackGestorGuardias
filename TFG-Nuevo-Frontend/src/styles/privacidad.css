@@ -1,0 +1,129 @@
+:root {
+    --primary: #007041;
+    --secondary: #2D453C;
+
+    --bg: #F3F4F6;
+    --card: #FFFFFF;
+    --border: #E5E7EB;
+
+    --text: #111827;
+    --muted: #6B7280;
+
+    --shadow-soft: 0 6px 12px rgba(0, 0, 0, .06);
+    --r: 14px;
+}
+
+.legalPage {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+}
+
+.legalMain {
+    width: 80%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 16px 16px 32px;
+}
+
+.legalCard {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+}
+
+.legalHead {
+    padding: 18px 18px;
+    border-bottom: 1px solid var(--border);
+}
+
+.legalTitle {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+}
+
+.legalSubtitle {
+    margin: 8px 0 0 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.legalBody {
+    padding: 18px 18px 20px;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+.legalBody h2 {
+    margin: 18px 0 8px;
+    font-size: 14px;
+    font-weight: 900;
+    color: #374151;
+}
+
+.legalBody p {
+    margin: 0 0 10px 0;
+    color: #374151;
+}
+
+.legalBody ul {
+    margin: 0 0 12px 18px;
+    padding: 0;
+    color: #374151;
+}
+
+.legalBody li {
+    margin: 6px 0;
+}
+
+.legalNote {
+    margin-top: 16px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 12px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 112, 65, .22);
+    background: rgba(0, 112, 65, .06);
+    color: #374151;
+}
+
+.legalNote .material-icons-outlined {
+    color: var(--primary);
+    font-size: 20px;
+    margin-top: 1px;
+}
+
+.legalNote p {
+    margin: 0;
+    font-size: 13px;
+    color: #374151;
+}
+
+@media (max-width: 900px) {
+    .legalMain {
+        width: 100%;
+        max-width: 900px;
+    }
+}
+
+@media (max-width: 600px) {
+    .legalMain {
+        padding: 14px 14px 24px;
+    }
+
+    .legalHead,
+    .legalBody {
+        padding: 14px;
+    }
+
+    .legalTitle {
+        font-size: 18px;
+    }
+}
