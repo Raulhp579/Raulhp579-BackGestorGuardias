@@ -7,6 +7,18 @@ use App\Http\Controllers\DutyController;
 use App\Http\Controllers\SpecialityController;
 use App\Http\Controllers\ImportExcelsController;
 
+$origin = request()->header('Origin');
+$allowed = ['https://proyecto4.arenadaw.com.es', 'http://localhost:5173'];
+
+return response('', 204)
+  ->header('Access-Control-Allow-Origin', in_array($origin, $allowed) ? $origin : $allowed[0])
+  ->header('Vary', 'Origin')
+  ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS')
+  ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept, X-Requested-With')
+  ->header('Access-Control-Max-Age', '86400');
+
+
+
 Route::get('/userInfo', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
