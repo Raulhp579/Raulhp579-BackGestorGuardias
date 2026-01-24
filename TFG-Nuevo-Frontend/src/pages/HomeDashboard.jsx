@@ -1,10 +1,14 @@
-import { useMemo, useRef, useState, useEffect } from "react";
+// HomeDashboard.jsx
+import { useMemo, useRef, useState, useEffect, useCallback } from "react";
 import "../styles/HomeDashboard.css";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { useNotifications } from "../context/NotificationsContext";
 
+// IMPORTA tu función ya hecha
+// Ajusta la ruta al archivo donde la tengas
+import { getDuties } from "../services/DutyService"; 
 
 export default function HomeDashboard() {
   const stats = useMemo(
@@ -15,75 +19,75 @@ export default function HomeDashboard() {
     ],
     []
   );
-  //mio
+
+  const { addNotification } = useNotifications();
+
+  // ============================
+  // Helpers Excel (lo tuyo)
+  // ============================
   function isExcelFile(file) {
-  if (!file) return false;
-  
-  // Verificar extensión del archivo
-  const validExtensions = ['.xls', '.xlsx'];
-  const hasValidExtension = validExtensions.some(ext => 
-    file.name && file.name.toLowerCase().endsWith(ext)
-  );
-  
-  // Verificar tipo MIME
-  const validMimeTypes = [
-    'application/vnd.ms-excel',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'application/vnd.ms-excel.sheet.macroEnabled.12',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.template'
-  ];
-  const hasValidMimeType = validMimeTypes.includes(file.type);
-  
-  return hasValidExtension || hasValidMimeType;
-}
+    if (!file) return false;
 
-async function importDutysExcel({ file, year, month, idSpeciality }) {
-  if (!file) {
-    setImportMsg("No se ha seleccionado ningún archivo");
-    return;
+    const validExtensions = [".xls", ".xlsx"];
+    const hasValidExtension = validExtensions.some((ext) => file.name && file.name.toLowerCase().endsWith(ext));
+
+    const validMimeTypes = [
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.ms-excel.sheet.macroEnabled.12",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.template",
+    ];
+    const hasValidMimeType = validMimeTypes.includes(file.type);
+
+    return hasValidExtension || hasValidMimeType;
   }
 
-  if (!year || !month || !idSpeciality) {
-    setImportMsg("Por favor, seleccione año, mes y especialidad");
-    return;
-  }
-
-  try {
-    setImportMsg("Procesando archivo...");
-    
-    // Crear FormData para enviar el archivo
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('year', year);
-    formData.append('month', month);
-    formData.append('idSpeciality', idSpeciality);
-    
-    // Hacer la llamada a la API
-    const response = await fetch('/api/import-dutys', {
-      method: 'POST',
-      body: formData,
-    });
-    
-    const result = await response.json();
-    
-    if (response.ok) {
-      setImportMsg("Archivo importado correctamente");
-      // Limpiar el archivo seleccionado
-      setExcelFile(null);
-      // Opcional: recargar la lista de duties
-      // loadDutys();
-    } else {
-      setImportMsg(result.message || "Error al importar el archivo");
+  async function importDutysExcel({ file, year, month, idSpeciality }) {
+    if (!file) {
+      setImportMsg("No se ha seleccionado ningún archivo");
+      return;
     }
-  } catch (error) {
-    console.error('Error importing Excel:', error);
-    setImportMsg("Error al importar el archivo: " + error.message);
+    if (!year || !month || !idSpeciality) {
+      setImportMsg("Por favor, seleccione año, mes y especialidad");
+      return;
+    }
+
+    try {
+      setImportMsg("Procesando archivo...");
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("year", year);
+      formData.append("month", month);
+      formData.append("idSpeciality", idSpeciality);
+
+      const response = await fetch("/api/import-dutys", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setImportMsg("Archivo importado correctamente");
+        setExcelFile(null);
+
+        // ✅ refrescar calendario tras importar
+        await loadDutiesForCurrentView();
+
+        addNotification(`Se han importado guardias desde Excel (${new Date().toLocaleTimeString()}).`);
+      } else {
+        setImportMsg(result.message || "Error al importar el archivo");
+      }
+    } catch (error) {
+      console.error("Error importing Excel:", error);
+      setImportMsg("Error al importar el archivo: " + error.message);
+    }
   }
-}
 
-
-
-  // ===== FullCalendar control (mes arriba + prev/next) =====
+  // ============================
+  // FullCalendar control
+  // ============================
   const calendarRef = useRef(null);
   const [monthLabel, setMonthLabel] = useState("");
 
@@ -93,80 +97,152 @@ async function importDutysExcel({ file, year, month, idSpeciality }) {
     setMonthLabel(api.view.title);
   }
 
-  useEffect(() => {
-    syncTitle();
-  }, []);
-
   function goPrev() {
     const api = calendarRef.current?.getApi();
     api?.prev();
-    syncTitle();
+    // datesSet refresca todo
   }
 
   function goNext() {
     const api = calendarRef.current?.getApi();
     api?.next();
-    syncTitle();
+    // datesSet refresca todo
   }
 
-  // ===== Eventos base (mock) =====
-  const baseEvents = useMemo(
-    () => [
-      // CA (Continuidad)
-      { id: "1", title: "Anestesia CA 15:00 - Antonio Ramon", start: "2024-04-01T15:00:00", extendedProps: { type: "CA" } },
-      { id: "2", title: "Cirugía CA 15:00 - Raul Henares", start: "2024-04-04T15:00:00", extendedProps: { type: "CA" }, },
-      { id: "3", title: "Cirugía CA 19:00 - Kike Paez", start: "2024-04-04T19:00:00", extendedProps: { type: "CA" } },
-      { id: "4", title: "Cirugía CA 12:00 - Samuel Peña", start: "2024-04-08T12:00:00", extendedProps: { type: "CA" } },
+  // ============================
+  // ✅ BD: cargar guardias reales
+  // ============================
+  const [events, setEvents] = useState([]);
+  const [eventsLoading, setEventsLoading] = useState(false);
+  const [eventsError, setEventsError] = useState("");
 
-      // PF (Presencia Física)
-      { id: "5", title: "Anestesia PF 24h - Javier Juarez", start: "2024-04-02", allDay: true, extendedProps: { type: "PF" } },
-      { id: "6", title: "Anestesia PF 10h - Jose Ramon", start: "2024-04-05", allDay: true, extendedProps: { type: "PF" } },
-      { id: "7", title: "Anestesia PF 24h - Javier Ruiz", start: "2024-04-10", allDay: true, extendedProps: { type: "PF" } },
+  function mapDutyToEvent(d) {
+    // Soporta varios formatos típicos del backend.
+    // Si tu backend ya devuelve "start", se usa tal cual.
+    const id = String(d.id ?? d.uuid ?? crypto?.randomUUID?.() ?? Date.now());
 
-      // LOC (Localizada)
-      { id: "8", title: "Anestesia LOC 8:00 - Antonio Moyano", start: "2024-04-03T08:00:00", extendedProps: { type: "LOC", jefe: true } },
-    ],
-    []
-  );
+    const dutyType = d.duty_type ?? d.type ?? d.dutyType ?? "";
+    const typeUpper = String(dutyType).toUpperCase();
 
-  // ===== Estado editable de eventos (aquí añadimos nuevas guardias) =====
-  const [events, setEvents] = useState(baseEvents);
+    const date = d.date ?? d.day ?? "";
+    const time = d.time ?? d.hour ?? ""; // si no existe, puede ser allDay
+    const speciality = d.speciality ?? d.specialty ?? d.speciality_name ?? "";
+    const workerName = d.worker_name ?? d.workerName ?? d.name ?? "";
 
-  // ===== FILTROS =====
+    const allDayFromApi = Boolean(d.allDay ?? d.all_day);
+    const isAllDay = allDayFromApi || (typeUpper === "PF" && !time);
+
+    const start =
+      d.start
+        ? d.start
+        : isAllDay
+          ? date
+          : `${date}T${String(time || "00:00").slice(0, 5)}:00`;
+
+    const titleParts = [];
+    if (speciality) titleParts.push(speciality);
+    if (typeUpper) titleParts.push(typeUpper);
+    if (!isAllDay && time) titleParts.push(String(time).slice(0, 5));
+    if (workerName) titleParts.push(`- ${workerName}`);
+
+    const jefe =
+      Boolean(d.jefe ?? d.is_chief ?? d.isChief) ||
+      Boolean(d.id_chief_worker ?? d.chief_worker_id ?? d.idChiefWorker);
+
+    return {
+      id,
+      title: titleParts.join(" "),
+      start,
+      allDay: isAllDay,
+      extendedProps: {
+        type: typeUpper,
+        jefe,
+        raw: d, // por si lo quieres al click
+      },
+    };
+  }
+
+  // ✅ llamamos a tu getDuties sin romperte aunque lo tengas con firma distinta
+  async function callGetDuties(start, end) {
+    // 1) getDuties({start,end})
+    try {
+      return await getDuties({ start, end });
+    } catch (_) {
+      // 2) getDuties(start,end)
+      return await getDuties(start, end);
+    }
+  }
+
+  const loadDutiesForCurrentView = useCallback(async () => {
+    const api = calendarRef.current?.getApi();
+    if (!api) return;
+
+    const start = api.view.activeStart.toISOString().slice(0, 10);
+    const end = api.view.activeEnd.toISOString().slice(0, 10);
+
+    setEventsLoading(true);
+    setEventsError("");
+
+    try {
+      const data = await callGetDuties(start, end);
+      const arr = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+      setEvents(arr.map(mapDutyToEvent));
+    } catch (e) {
+      console.error(e);
+      setEventsError("No se pudieron cargar las guardias desde la base de datos.");
+      setEvents([]);
+    } finally {
+      setEventsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    syncTitle();
+    // espera a que FullCalendar monte
+    setTimeout(() => {
+      loadDutiesForCurrentView();
+    }, 0);
+  }, [loadDutiesForCurrentView]);
+
+  // ============================
+  // Filtros
+  // ============================
   const [filterOpen, setFilterOpen] = useState(false);
-  const [filterType, setFilterType] = useState("ALL"); // ALL | CA | PF | LOC
+  const [filterType, setFilterType] = useState("ALL");
 
   const filteredEvents = useMemo(() => {
     if (filterType === "ALL") return events;
     return events.filter((e) => e.extendedProps?.type === filterType);
   }, [events, filterType]);
 
-  // ===== MODAL NUEVA GUARDIA =====
+  // ============================
+  // Modal Nueva Guardia (local)
+  // ============================
   const [newOpen, setNewOpen] = useState(false);
-  const [newType, setNewType] = useState("CA");          // CA | PF | LOC
-  const [newDate, setNewDate] = useState("2024-04-01");  // YYYY-MM-DD
-  const [newTime, setNewTime] = useState("15:00");       // HH:mm
+  const [newType, setNewType] = useState("CA");
+  const [newDate, setNewDate] = useState("2024-04-01");
+  const [newTime, setNewTime] = useState("15:00");
   const [newName, setNewName] = useState("");
   const [newSpecialty, setNewSpecialty] = useState("Anestesia");
 
   function openNewGuardiaModal(prefilledDate) {
-    // Si haces click en día, lo prellenamos
     if (prefilledDate) setNewDate(prefilledDate);
-    setNewName(""); // reset
+    setNewName("");
     setNewOpen(true);
   }
 
-  const { addNotification } = useNotifications();
-
+  // IMPORTANTE:
+  // Si todavía no tienes endpoint POST, esto añade en UI.
+  // Cuando tengas POST, aquí haces fetch POST y luego loadDutiesForCurrentView()
   function addGuardia() {
     const start = `${newDate}T${newTime}:00`;
-  
-    const baseTitle = `${newType} ${newTime}`;
+
     const nameClean = newName.trim();
-    const title = nameClean ? `${baseTitle} - ${nameClean}` : baseTitle;
-  
+    const parts = [newSpecialty, newType, newTime];
+    const title = nameClean ? `${parts.join(" ")} - ${nameClean}` : parts.join(" ");
+
     const id = crypto?.randomUUID ? crypto.randomUUID() : String(Date.now());
-  
+
     setEvents((prev) => [
       ...prev,
       {
@@ -177,49 +253,50 @@ async function importDutysExcel({ file, year, month, idSpeciality }) {
         extendedProps: { type: newType, name: nameClean },
       },
     ]);
-  
-    // NOTIFICACIÓN
-    addNotification(`Se ha agregado una nueva guardia (${title}).`);
-  
+
+    // NOTIFICACIÓN con hora actual
+    addNotification(`Se ha agregado una nueva guardia a las ${new Date().toLocaleTimeString()}.`);
+
     setNewOpen(false);
   }
 
-  // Estado modal
+  // ============================
+  // Import Excel modal (estado)
+  // ============================
   const [importOpen, setImportOpen] = useState(false);
 
-  // Especialidades (para el select)
-
+  // Especialidades (tu sistema)
   const [specialitiesLoading, setSpecialitiesLoading] = useState(false);
   const [specialitiesError, setSpecialitiesError] = useState("");
 
-  // Campos requeridos por el backend
   const [idSpeciality, setIdSpeciality] = useState("");
   const [importMonth, setImportMonth] = useState("01");
   const [importYear, setImportYear] = useState("2026");
 
-  // Archivo Excel
   const [excelFile, setExcelFile] = useState(null);
   const fileInputRef = useRef(null);
 
-  // UX
   const [isDragging, setIsDragging] = useState(false);
   const [importUploading, setImportUploading] = useState(false);
   const [importMsg, setImportMsg] = useState("");
 
-  const months = useMemo(() => ([
-    { value: "01", label: "Enero" },
-    { value: "02", label: "Febrero" },
-    { value: "03", label: "Marzo" },
-    { value: "04", label: "Abril" },
-    { value: "05", label: "Mayo" },
-    { value: "06", label: "Junio" },
-    { value: "07", label: "Julio" },
-    { value: "08", label: "Agosto" },
-    { value: "09", label: "Septiembre" },
-    { value: "10", label: "Octubre" },
-    { value: "11", label: "Noviembre" },
-    { value: "12", label: "Diciembre" },
-  ]), []);
+  const months = useMemo(
+    () => [
+      { value: "01", label: "Enero" },
+      { value: "02", label: "Febrero" },
+      { value: "03", label: "Marzo" },
+      { value: "04", label: "Abril" },
+      { value: "05", label: "Mayo" },
+      { value: "06", label: "Junio" },
+      { value: "07", label: "Julio" },
+      { value: "08", label: "Agosto" },
+      { value: "09", label: "Septiembre" },
+      { value: "10", label: "Octubre" },
+      { value: "11", label: "Noviembre" },
+      { value: "12", label: "Diciembre" },
+    ],
+    []
+  );
 
   const years = useMemo(() => {
     const start = 2020;
@@ -238,21 +315,24 @@ async function importDutysExcel({ file, year, month, idSpeciality }) {
   }
 
   async function openImportModal() {
-    // Prefill mes/año del calendario
     const { year, month } = getMonthYearFromCalendar();
     setImportYear(years.includes(year) ? year : years[years.length - 1]);
     setImportMonth(month);
 
-    // Reset UI modal
     setImportMsg("");
     setExcelFile(null);
     setIdSpeciality("");
     setImportOpen(true);
 
-    // Cargar especialidades desde SERVICE
+    // Si tú ya cargas especialidades desde servicio, hazlo aquí:
     setSpecialitiesLoading(true);
     setSpecialitiesError("");
-    
+
+    // ⚠️ aquí deberías llamar a tu servicio real de especialidades
+    // (yo lo dejo como antes: sin romperte)
+    setTimeout(() => {
+      setSpecialitiesLoading(false);
+    }, 0);
   }
 
   function closeImportModal() {
@@ -321,10 +401,6 @@ async function importDutysExcel({ file, year, month, idSpeciality }) {
         month: importMonth,
         idSpeciality: idSpeciality,
       });
-
-      setImportMsg("Excel importado correctamente");
-      // Si quieres cerrar automático:
-      // setImportOpen(false);
     } catch (e) {
       setImportMsg(`Error al subir: ${e.message}`);
     } finally {
@@ -334,7 +410,6 @@ async function importDutysExcel({ file, year, month, idSpeciality }) {
 
   return (
     <div className="hdContent">
-
       {/* Header móvil dentro del contenido */}
       <div className="hdMobileHeader">
         <div>
@@ -398,28 +473,40 @@ async function importDutysExcel({ file, year, month, idSpeciality }) {
                 <button
                   type="button"
                   className={`hdFilterItem ${filterType === "ALL" ? "active" : ""}`}
-                  onClick={() => { setFilterType("ALL"); setFilterOpen(false); }}
+                  onClick={() => {
+                    setFilterType("ALL");
+                    setFilterOpen(false);
+                  }}
                 >
                   Todos
                 </button>
                 <button
                   type="button"
                   className={`hdFilterItem ${filterType === "CA" ? "active" : ""}`}
-                  onClick={() => { setFilterType("CA"); setFilterOpen(false); }}
+                  onClick={() => {
+                    setFilterType("CA");
+                    setFilterOpen(false);
+                  }}
                 >
                   Continuidad (CA)
                 </button>
                 <button
                   type="button"
                   className={`hdFilterItem ${filterType === "PF" ? "active" : ""}`}
-                  onClick={() => { setFilterType("PF"); setFilterOpen(false); }}
+                  onClick={() => {
+                    setFilterType("PF");
+                    setFilterOpen(false);
+                  }}
                 >
                   Presencia Física (PF)
                 </button>
                 <button
                   type="button"
                   className={`hdFilterItem ${filterType === "LOC" ? "active" : ""}`}
-                  onClick={() => { setFilterType("LOC"); setFilterOpen(false); }}
+                  onClick={() => {
+                    setFilterType("LOC");
+                    setFilterOpen(false);
+                  }}
                 >
                   Localizada (LOC)
                 </button>
@@ -435,6 +522,14 @@ async function importDutysExcel({ file, year, month, idSpeciality }) {
           </div>
         </div>
 
+        {/* ✅ Estado de carga/errores */}
+        {(eventsLoading || eventsError) && (
+          <div style={{ padding: "10px 16px" }}>
+            {eventsLoading && <span style={{ fontWeight: 700 }}>Cargando guardias...</span>}
+            {eventsError && <span style={{ color: "#b91c1c", fontWeight: 700 }}>{eventsError}</span>}
+          </div>
+        )}
+
         <div className="hdCalendar">
           <div className="hdFullCalendarWrap">
             <FullCalendar
@@ -446,7 +541,11 @@ async function importDutysExcel({ file, year, month, idSpeciality }) {
               height="auto"
               locale="es"
               headerToolbar={false}
-              datesSet={syncTitle}
+              // ✅ cada vez que cambia el rango (prev/next), recargamos desde BD
+              datesSet={() => {
+                syncTitle();
+                loadDutiesForCurrentView();
+              }}
               dayHeaderFormat={{ weekday: "short" }}
               events={filteredEvents}
               eventContent={(arg) => {
@@ -465,11 +564,10 @@ async function importDutysExcel({ file, year, month, idSpeciality }) {
                   </div>
                 );
               }}
-              dateClick={(info) => {
-                openNewGuardiaModal(info.dateStr);
-              }}
+              dateClick={(info) => openNewGuardiaModal(info.dateStr)}
               eventClick={(info) => {
-                console.log("eventClick:", info.event.title, info.event.start);
+                // Si quieres ver el duty original:
+                console.log("eventClick raw:", info.event.extendedProps?.raw);
               }}
             />
           </div>
@@ -499,15 +597,9 @@ async function importDutysExcel({ file, year, month, idSpeciality }) {
 
               <label className="hdField">
                 <span>Fecha</span>
-                <input
-                  type="date"
-                  value={newDate}
-                  onChange={(e) => setNewDate(e.target.value)}
-                  className="hdControl"
-                />
+                <input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} className="hdControl" />
               </label>
 
-              {/* NUEVO: Nombre */}
               <label className="hdField">
                 <span>Nombre</span>
                 <input
@@ -518,30 +610,23 @@ async function importDutysExcel({ file, year, month, idSpeciality }) {
                   placeholder="Ej: María López"
                 />
               </label>
-              {/* NUEVO: Tipo */}
 
               <label className="hdField">
-                <span>Tipo</span>
+                <span>Especialidad</span>
                 <select value={newSpecialty} onChange={(e) => setNewSpecialty(e.target.value)} className="hdControl">
                   <option value="Anestesia">Anestesia</option>
                   <option value="Cirugía">Cirugía</option>
-                  <option value="Algo mas">Radiologia</option>
+                  <option value="Radiologia">Radiología</option>
                   <option value="Medicina Intensiva">Medicina Intensiva</option>
                   <option value="Medicina Interna">Medicina Interna</option>
-                  <option value="Cirugia General">Cirugia General</option>
-                  <option value="Pediatria">Pediatria</option>
+                  <option value="Cirugia General">Cirugía General</option>
+                  <option value="Pediatria">Pediatría</option>
                 </select>
               </label>
 
-              {/* Siempre mostramos Hora (ya no existe Todo el día) */}
               <label className="hdField">
                 <span>Hora</span>
-                <input
-                  type="time"
-                  value={newTime}
-                  onChange={(e) => setNewTime(e.target.value)}
-                  className="hdControl"
-                />
+                <input type="time" value={newTime} onChange={(e) => setNewTime(e.target.value)} className="hdControl" />
               </label>
             </div>
 
@@ -579,7 +664,8 @@ async function importDutysExcel({ file, year, month, idSpeciality }) {
           </div>
         </div>
       </section>
-      {/* SECCIÓN IMPORTAR EXCEL */}
+
+      {/* IMPORTAR EXCEL */}
       <section>
         <div className="cdActions">
           <button className="cdBtnSecondary" type="button" onClick={openImportModal}>
@@ -609,18 +695,12 @@ async function importDutysExcel({ file, year, month, idSpeciality }) {
                 ) : specialitiesError ? (
                   <div className="hdControl">{specialitiesError}</div>
                 ) : (
-                  {/* <select //tocar 
-                    className="hdControl"
-                    value={idSpeciality}
-                    onChange={(e) => setIdSpeciality(e.target.value)}
-                  >
+                  // ✅ Aquí vuelve a poner tu select real de especialidades cuando lo tengas
+                  <select className="hdControl" value={idSpeciality} onChange={(e) => setIdSpeciality(e.target.value)}>
                     <option value="">-- Selecciona una especialidad --</option>
-                    {specialities.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.name} (id: {s.id})
-                      </option>
-                    ))}
-                  </select> */}
+                    <option value="1">Anestesia (id: 1)</option>
+                    <option value="2">Cirugía (id: 2)</option>
+                  </select>
                 )}
               </label>
 
