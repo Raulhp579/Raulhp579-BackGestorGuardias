@@ -1,4 +1,3 @@
-// HomeDashboard.jsx
 import { useMemo, useRef, useState, useEffect, useCallback } from "react";
 import "../styles/HomeDashboard.css";
 import FullCalendar from "@fullcalendar/react";
@@ -6,9 +5,25 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { useNotifications } from "../context/NotificationsContext";
 
-// IMPORTA tu función ya hecha
-// Ajusta la ruta al archivo donde la tengas
-import { getDuties } from "../services/DutyService"; 
+// IMPORTA tu función ya hecha (ajusta la ruta si hace falta)
+import { getDuties } from "../services/DutyService";
+
+function normalizeTime(t) {
+  if (!t) return "";
+  const s = String(t).trim();
+  if (/^\d{2}:\d{2}$/.test(s)) return s;
+  if (/^\d{2}:\d{2}:\d{2}$/.test(s)) return s.slice(0, 5);
+  return s.slice(0, 5);
+}
+
+function getInitials(name) {
+  const n = String(name || "").trim();
+  if (!n) return "";
+  const parts = n.split(/\s+/).filter(Boolean);
+  const first = parts[0]?.[0] ?? "";
+  const second = parts.length > 1 ? parts[1][0] : "";
+  return (first + second).toUpperCase();
+}
 
 export default function HomeDashboard() {
   const stats = useMemo(
@@ -22,9 +37,8 @@ export default function HomeDashboard() {
 
   const { addNotification } = useNotifications();
 
-  // ============================
-  // Helpers Excel (lo tuyo)
-  // ============================
+  // Helpers Excel 
+
   function isExcelFile(file) {
     if (!file) return false;
 
@@ -72,7 +86,7 @@ export default function HomeDashboard() {
         setImportMsg("Archivo importado correctamente");
         setExcelFile(null);
 
-        // ✅ refrescar calendario tras importar
+        // refrescar calendario tras importar
         await loadDutiesForCurrentView();
 
         addNotification(`Se han importado guardias desde Excel (${new Date().toLocaleTimeString()}).`);
@@ -85,9 +99,8 @@ export default function HomeDashboard() {
     }
   }
 
-  // ============================
   // FullCalendar control
-  // ============================
+
   const calendarRef = useRef(null);
   const [monthLabel, setMonthLabel] = useState("");
 
@@ -100,64 +113,74 @@ export default function HomeDashboard() {
   function goPrev() {
     const api = calendarRef.current?.getApi();
     api?.prev();
-    // datesSet refresca todo
   }
 
   function goNext() {
     const api = calendarRef.current?.getApi();
     api?.next();
-    // datesSet refresca todo
   }
 
-  // ============================
-  // ✅ BD: cargar guardias reales
-  // ============================
+
+  // BD: cargar guardias reales
+
   const [events, setEvents] = useState([]);
   const [eventsLoading, setEventsLoading] = useState(false);
   const [eventsError, setEventsError] = useState("");
 
+  /**
+   *  IMPORTANTE (por tu JSON ejemplo):
+   * El backend solo manda "date" y NO manda "hora".
+   * - Si NO hay hora => lo pintamos allDay (solo día).
+   * - Si añades "time" o "start_time" en el JSON, automáticamente se mostrará hora.
+   *
+   *  NOMBRES:
+   * Tu JSON ejemplo NO trae nombres (solo ids). Así que:
+   * - si el backend manda speciality_name / worker_name / chief_worker_name => se usan
+   * - si NO manda => fallback a "Especialidad #ID" / "Trabajador #ID" / etc
+   */
   function mapDutyToEvent(d) {
-    // Soporta varios formatos típicos del backend.
-    // Si tu backend ya devuelve "start", se usa tal cual.
-    const id = String(d.id ?? d.uuid ?? crypto?.randomUUID?.() ?? Date.now());
+    const id = String(d.id ?? d.uuid ?? (crypto?.randomUUID ? crypto.randomUUID() : Date.now()));
 
-    const dutyType = d.duty_type ?? d.type ?? d.dutyType ?? "";
-    const typeUpper = String(dutyType).toUpperCase();
+    const dutyType = String(d.duty_type ?? d.type ?? d.dutyType ?? "").toUpperCase();
 
-    const date = d.date ?? d.day ?? "";
-    const time = d.time ?? d.hour ?? ""; // si no existe, puede ser allDay
-    const speciality = d.speciality ?? d.specialty ?? d.speciality_name ?? "";
-    const workerName = d.worker_name ?? d.workerName ?? d.name ?? "";
+    const date = String(d.date ?? d.day ?? "");
+    const time = normalizeTime(d.time ?? d.start_time ?? d.hour); // si no existe => ""
+
+    const specialityName = String(d.speciality_name ?? d.speciality ?? d.specialty ?? "");
+    const workerName = String(d.worker_name ?? d.workerName ?? d.name ?? "");
+    const chiefName = String(d.chief_worker_name ?? d.chiefWorkerName ?? "");
+
+    const specialityLabel = specialityName || (d.id_speciality != null ? `Especialidad #${d.id_speciality}` : "");
+    const workerLabel = workerName || (d.id_worker != null ? `Trabajador #${d.id_worker}` : "");
+    const chiefLabel = chiefName || (d.id_chief_worker != null ? `Jefe #${d.id_chief_worker}` : "");
 
     const allDayFromApi = Boolean(d.allDay ?? d.all_day);
-    const isAllDay = allDayFromApi || (typeUpper === "PF" && !time);
+    const isAllDay = allDayFromApi || !time;
 
-    const start =
-      d.start
-        ? d.start
-        : isAllDay
-          ? date
-          : `${date}T${String(time || "00:00").slice(0, 5)}:00`;
+    const start = d.start ? d.start : isAllDay ? date : `${date}T${time}:00`;
 
-    const titleParts = [];
-    if (speciality) titleParts.push(speciality);
-    if (typeUpper) titleParts.push(typeUpper);
-    if (!isAllDay && time) titleParts.push(String(time).slice(0, 5));
-    if (workerName) titleParts.push(`- ${workerName}`);
+    // Título “bonito” + completo
+    // Ej: "Especialidad #2 · CA 15:00 — Trabajador #23"
+    const title = `${specialityLabel}${specialityLabel ? " · " : ""}${dutyType}${!isAllDay && time ? ` ${time}` : ""}${workerLabel ? ` — ${workerLabel}` : ""
+      }`;
 
+    // jefe: si existe id_chief_worker
     const jefe =
       Boolean(d.jefe ?? d.is_chief ?? d.isChief) ||
       Boolean(d.id_chief_worker ?? d.chief_worker_id ?? d.idChiefWorker);
 
     return {
       id,
-      title: titleParts.join(" "),
+      title,
       start,
       allDay: isAllDay,
       extendedProps: {
-        type: typeUpper,
+        type: dutyType,
         jefe,
-        raw: d, // por si lo quieres al click
+        specialityLabel,
+        workerLabel,
+        chiefLabel,
+        raw: d,
       },
     };
   }
@@ -198,15 +221,14 @@ export default function HomeDashboard() {
 
   useEffect(() => {
     syncTitle();
-    // espera a que FullCalendar monte
     setTimeout(() => {
       loadDutiesForCurrentView();
     }, 0);
   }, [loadDutiesForCurrentView]);
 
-  // ============================
+  
   // Filtros
-  // ============================
+
   const [filterOpen, setFilterOpen] = useState(false);
   const [filterType, setFilterType] = useState("ALL");
 
@@ -215,9 +237,9 @@ export default function HomeDashboard() {
     return events.filter((e) => e.extendedProps?.type === filterType);
   }, [events, filterType]);
 
-  // ============================
+  
   // Modal Nueva Guardia (local)
-  // ============================
+
   const [newOpen, setNewOpen] = useState(false);
   const [newType, setNewType] = useState("CA");
   const [newDate, setNewDate] = useState("2024-04-01");
@@ -238,8 +260,7 @@ export default function HomeDashboard() {
     const start = `${newDate}T${newTime}:00`;
 
     const nameClean = newName.trim();
-    const parts = [newSpecialty, newType, newTime];
-    const title = nameClean ? `${parts.join(" ")} - ${nameClean}` : parts.join(" ");
+    const title = `${newSpecialty} · ${newType} ${newTime}${nameClean ? ` — ${nameClean}` : ""}`;
 
     const id = crypto?.randomUUID ? crypto.randomUUID() : String(Date.now());
 
@@ -250,7 +271,13 @@ export default function HomeDashboard() {
         title,
         start,
         allDay: false,
-        extendedProps: { type: newType, name: nameClean },
+        extendedProps: {
+          type: newType,
+          jefe: false,
+          specialityLabel: newSpecialty,
+          workerLabel: nameClean || `Trabajador ${getInitials(nameClean)}`,
+          raw: null,
+        },
       },
     ]);
 
@@ -260,12 +287,10 @@ export default function HomeDashboard() {
     setNewOpen(false);
   }
 
-  // ============================
   // Import Excel modal (estado)
-  // ============================
+
   const [importOpen, setImportOpen] = useState(false);
 
-  // Especialidades (tu sistema)
   const [specialitiesLoading, setSpecialitiesLoading] = useState(false);
   const [specialitiesError, setSpecialitiesError] = useState("");
 
@@ -324,13 +349,11 @@ export default function HomeDashboard() {
     setIdSpeciality("");
     setImportOpen(true);
 
-    // Si tú ya cargas especialidades desde servicio, hazlo aquí:
     setSpecialitiesLoading(true);
     setSpecialitiesError("");
     getDuties()
 
-    // ⚠️ aquí deberías llamar a tu servicio real de especialidades
-    // (yo lo dejo como antes: sin romperte)
+    // aquí deberías llamar a tu servicio real de especialidades
     setTimeout(() => {
       setSpecialitiesLoading(false);
     }, 0);
@@ -542,7 +565,6 @@ export default function HomeDashboard() {
               height="auto"
               locale="es"
               headerToolbar={false}
-              // ✅ cada vez que cambia el rango (prev/next), recargamos desde BD
               datesSet={() => {
                 syncTitle();
                 loadDutiesForCurrentView();
@@ -567,7 +589,6 @@ export default function HomeDashboard() {
               }}
               dateClick={(info) => openNewGuardiaModal(info.dateStr)}
               eventClick={(info) => {
-                // Si quieres ver el duty original:
                 console.log("eventClick raw:", info.event.extendedProps?.raw);
               }}
             />
