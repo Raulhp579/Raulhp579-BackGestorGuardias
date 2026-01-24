@@ -15,7 +15,7 @@ Route::post('/register', [AuthController::class, "register"]);
 Route::post("/login",[AuthController::class,"login"]);
 Route::get("/logout",[AuthController::class, "logout"])->middleware('auth:sanctum');
 
-Route::get('/importUsers', [ImportExcelsController::class, "importWorkers"])->name('import.users');
+Route::post('/importUsers', [ImportExcelsController::class, "importWorkers"])->name('import.users');
 Route::post('/importDuties',[ImportExcelsController::class, "importDuties"])->name('import.duties');
 
 Route::apiResource("/speciality",SpecialityController::class);

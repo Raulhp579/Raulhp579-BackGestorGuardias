@@ -46,7 +46,7 @@ class ImportExcelsController extends Controller
     {
         $rules = [
             'file' => 'required|file|mimes:xlsx,xls,ods',
-            'year' => 'required|digits:4|between:2000,3000',
+            'year' => 'required|digits:4|numeric|min:1900|max:3000',
             'month' => 'required|integer|min:1|max:12',
             'idSpeciality' => 'required|exists:speciality,id',
         ];
@@ -58,7 +58,7 @@ class ImportExcelsController extends Controller
 
             'year.required' => 'the year is required',
             'year.digits' => 'the year must have 4 digits',
-            'year.between' => 'the year must be between 2000 and 3000',
+            'year.between' => 'the year must be between 1900 and 3000',
 
             'month.required' => 'the month is required',
             'month.integer' => 'the month must be a number',
@@ -98,9 +98,10 @@ class ImportExcelsController extends Controller
                 ]);
             }
 
-            $file = $request->file('file'); //the fetch mut contain the name file. COMENTAR ESTO PARA PROBAR
-            $tmpFile = IOFactory::load($file->getPathname());
-            /*             $tmpFile = IOFactory::load('excels/LISTADO DE FACULTATIVOS JEFATURAS DE GUARDIA.xlsx'); */
+           $file = $request->file('file'); //the fetch mut contain the name file. COMENTAR ESTO PARA PROBAR
+           $tmpFile = IOFactory::load($file->getPathname());
+            
+            /* $tmpFile = IOFactory::load('excels/LISTADO_FACULTATIVOS_FICTICIO.xlsx'); */
             $sheet = $tmpFile->getSheet(0);
             $data = $sheet->toArray(null, true, true, true);
             $persons = [];
@@ -168,9 +169,9 @@ class ImportExcelsController extends Controller
                 'month' => str_pad((string) $request->month, 2, '0', STR_PAD_LEFT)
             ]);
 
-            $file = $request->file("file");
+           $file = $request->file("file");
             $tmpFile = IOFactory::load($file->getPathname());
-            /* $tmpFile = IOFactory::load('excels/DICIEMBRE2025 ANESTESIA.ods'); */
+           /*  $tmpFile = IOFactory::load('excels/DICIEMBRE2025_ANESTESIA.ods'); */
             $sheet = $tmpFile->getSheet(0);
             $data = $sheet->toArray(null, true, true, true);
 
@@ -231,7 +232,7 @@ class ImportExcelsController extends Controller
                         if ($key != 'B' && $v != null && $v == 'X') {
                             foreach ($dates as $k => $val) {
                                 if ($key == $k) {
-                                    $Duties[] = "$name . $type . $val ";
+                                    $duties[] = "$name . $type . $val ";
                                 }
                             }
                         }
@@ -386,7 +387,7 @@ class ImportExcelsController extends Controller
 
 
         foreach ($workers as $worker) {
-            if (str_contains(Str::upper($worker->name), Str::upper($nameWithOutSpace))) {
+            if (str_contains(strtoupper($worker->name), strtoupper($nameWithOutSpace))) {
                 return $worker->id;
             }
         }
