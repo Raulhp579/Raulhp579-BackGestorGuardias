@@ -20,11 +20,19 @@ class ImportExcelsController extends Controller
     // function to convert a string(date) to a date to export it to db
     public static function convertDate($date)
     {
+<<<<<<< HEAD
+        try {
+            return Carbon::parse($date)->format('Y-m-d');
+        } catch (\Exception $e) {
+            return null;
+        }
+=======
         $date = str_replace('/', '-', $date);
         $timestamp = strtotime($date); //converts a date string into timestamp
         $convertDate = date('Y-m-d', $timestamp);
 
         return $convertDate;
+>>>>>>> main
     }
 
     private function validateWorkersImport(Request $request)
@@ -90,6 +98,7 @@ class ImportExcelsController extends Controller
     public function importWorkers(Request $request)
     {
         try {
+<<<<<<< HEAD
             $validate = Validator::make($request->all(), $this->validateWorkersImport($request)[0], $this->validateWorkersImport($request)[1]);
 
             if ($validate->fails()) {
@@ -101,6 +110,11 @@ class ImportExcelsController extends Controller
             $file = $request->file('file'); //the fetch mut contain the name file. COMENTAR ESTO PARA PROBAR
             $tmpFile = IOFactory::load($file->getPathname());
             /*             $tmpFile = IOFactory::load('excels/LISTADO DE FACULTATIVOS JEFATURAS DE GUARDIA.xlsx'); */
+=======
+            $file = $request->file('file'); //the fetch mut contain the name file
+            $tmpFile = IOFactory::load($file->getPathname());
+            /* $tmpFile = IOFactory::load('excels/LISTADO_FACULTATIVOS_FICTICIO.xlsx'); */
+>>>>>>> main
             $sheet = $tmpFile->getSheet(0);
             $data = $sheet->toArray(null, true, true, true);
             $persons = [];
@@ -155,6 +169,7 @@ class ImportExcelsController extends Controller
     public function importDuties(Request $request)
     {
         try {
+<<<<<<< HEAD
             $validate = Validator::make($request->all(), $this->validateDutiesImport($request)[0], $this->validateDutiesImport($request)[1]);
 
             if ($validate->fails()) {
@@ -171,6 +186,11 @@ class ImportExcelsController extends Controller
             $file = $request->file("file");
             $tmpFile = IOFactory::load($file->getPathname());
             /* $tmpFile = IOFactory::load('excels/DICIEMBRE2025 ANESTESIA.ods'); */
+=======
+            $file = $request->file("file");
+            $tmpFile = IOFactory::load($file->getPathname());
+            /* $tmpFile = IOFactory::load('excels/DICIEMBRE2025_URGENCIAS.xlsx'); */
+>>>>>>> main
             $sheet = $tmpFile->getSheet(0);
             $data = $sheet->toArray(null, true, true, true);
 
@@ -250,17 +270,27 @@ class ImportExcelsController extends Controller
 
                     $name = $pieces[1];
 
+<<<<<<< HEAD
+                    for ($i = 1; $i < count($nameWithDra); $i++) {
+                        $name = $name . ' ' . $nameWithDra[$i];
+                    }
+=======
                     /* for ($i = 1; $i < count($nameWithDra); $i++) {
                         $name = $name.' '.$nameWithDra[$i];
                     } */
                     
 
                     $type = $pieces[2];
+>>>>>>> main
 
                     // date
+<<<<<<< HEAD
+                    $day = trim($pieces[2], ' ');
+=======
                     $day = trim($pieces[3], ' ');
                     
 
+>>>>>>> main
                 } else {
                     
                     $name = $pieces[1];
@@ -272,6 +302,7 @@ class ImportExcelsController extends Controller
                     
                 }
 
+<<<<<<< HEAD
                 $dateWithoutFormat = $request->year . '-' . $request->month . '-' . $day;
 
                 try {
@@ -293,6 +324,11 @@ class ImportExcelsController extends Controller
                     ];
                     continue;
                 }
+=======
+                
+                $dateWithoutFormat = $request->year.'-'.$request->month.'-'.$day;
+                $date = Carbon::parse($dateWithoutFormat);
+>>>>>>> main
 
                 /* $time = $this->calculateTime($type); */
                 $idWorker = $this->associateIdUser($name);
