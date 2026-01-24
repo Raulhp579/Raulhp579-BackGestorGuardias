@@ -1,23 +1,46 @@
 import { useEffect, useMemo, useState } from "react";
 import "../styles/GestionGuardias.css";
+import { getDuties } from "../services/DutyService";
 
 export default function GestionGuardias() {
   // Modal "Asignar jefe automáticamente"
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Estado tabla
-  const [guardias, setGuardias] = useState([
-    { id: 1, date: "2024-04-01", duty_type: "CA", id_speciality: 3, id_worker: 12, id_chief_worker: 7 },
-    { id: 2, date: "2024-04-02", duty_type: "PF", id_speciality: 2, id_worker: 8, id_chief_worker: null },
-    { id: 3, date: "2024-04-03", duty_type: "LOC", id_speciality: 5, id_worker: 15, id_chief_worker: 15 },
-    { id: 4, date: "2024-04-04", duty_type: "CA", id_speciality: 1, id_worker: 10, id_chief_worker: null },
-    { id: 5, date: "2024-04-05", duty_type: "PF", id_speciality: 4, id_worker: 9, id_chief_worker: 2 },
-    { id: 6, date: "2024-04-06", duty_type: "LOC", id_speciality: 5, id_worker: 6, id_chief_worker: null },
-    { id: 7, date: "2024-04-07", duty_type: "CA", id_speciality: 2, id_worker: 3, id_chief_worker: 7 },
-    { id: 8, date: "2024-04-08", duty_type: "PF", id_speciality: 3, id_worker: 14, id_chief_worker: null },
-    { id: 9, date: "2024-04-09", duty_type: "LOC", id_speciality: 1, id_worker: 11, id_chief_worker: 11 },
-    { id: 10, date: "2024-04-10", duty_type: "CA", id_speciality: 2, id_worker: 5, id_chief_worker: null },
-  ]);
+  // ✅ Estado tabla (empieza vacío)
+  const [guardias, setGuardias] = useState([]);
+
+  // ✅ estados extra para UX
+  const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState("");
+
+  // ✅ cargar guardias desde API al montar
+  useEffect(() => {
+    let alive = true;
+
+    async function loadDuties() {
+      setLoading(true);
+      setLoadError("");
+
+      try {
+        const data = await getDuties(); // tu endpoint
+        const arr = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+        if (alive) setGuardias(arr);
+      } catch (e) {
+        console.error(e);
+        if (alive) {
+          setGuardias([]);
+          setLoadError("No se pudieron cargar las guardias.");
+        }
+      } finally {
+        if (alive) setLoading(false);
+      }
+    }
+
+    loadDuties();
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   // Modal editar
   const [editOpen, setEditOpen] = useState(false);
@@ -35,14 +58,13 @@ export default function GestionGuardias() {
   const [deleteRow, setDeleteRow] = useState(null);
 
   // ✅ Paginación
-  const PAGE_SIZE = 8; // <-- cambia a tu gusto
+  const PAGE_SIZE = 8;
   const [page, setPage] = useState(1);
 
   const totalPages = useMemo(() => {
     return Math.max(1, Math.ceil(guardias.length / PAGE_SIZE));
   }, [guardias.length]);
 
-  // Si borras y te quedas fuera de rango, ajusta página
   useEffect(() => {
     if (page > totalPages) setPage(totalPages);
   }, [page, totalPages]);
@@ -118,13 +140,12 @@ export default function GestionGuardias() {
     setPage((p) => Math.min(totalPages, p + 1));
   }
 
-  // Botones 1 2 3 ... (ventana centrada)
   const pageButtons = useMemo(() => {
-    const maxButtons = 7; // cuantos números mostrar
+    const maxButtons = 7;
     if (totalPages <= maxButtons) {
       return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
-    const windowSize = 5; // números en la ventana central
+    const windowSize = 5;
     const half = Math.floor(windowSize / 2);
     let start = Math.max(2, page - half);
     let end = Math.min(totalPages - 1, page + half);
@@ -153,9 +174,16 @@ export default function GestionGuardias() {
           <div className="ggCardTop">
             <div className="ggCardTitle">Guardias</div>
             <div className="ggCount">
-              {guardias.length} registros · Página {page} / {totalPages}
+              {loading ? "Cargando..." : `${guardias.length} registros · Página ${page} / ${totalPages}`}
             </div>
           </div>
+
+          {/* ✅ error de carga */}
+          {loadError && (
+            <div style={{ padding: "10px 14px", color: "#b91c1c", fontWeight: 700 }}>
+              {loadError}
+            </div>
+          )}
 
           <div className="ggTableWrap">
             <table className="ggTable">
@@ -171,7 +199,13 @@ export default function GestionGuardias() {
               </thead>
 
               <tbody>
-                {pagedGuardias.length === 0 ? (
+                {loading ? (
+                  <tr>
+                    <td className="ggEmpty" colSpan={6}>
+                      Cargando guardias...
+                    </td>
+                  </tr>
+                ) : pagedGuardias.length === 0 ? (
                   <tr>
                     <td className="ggEmpty" colSpan={6}>
                       No hay guardias registradas.
@@ -196,7 +230,12 @@ export default function GestionGuardias() {
                             <span className="material-icons-outlined">edit</span>
                           </button>
 
-                          <button className="ggIconBtn danger" type="button" onClick={() => handleDelete(g)} title="Borrar">
+                          <button
+                            className="ggIconBtn danger"
+                            type="button"
+                            onClick={() => handleDelete(g)}
+                            title="Borrar"
+                          >
                             <span className="material-icons-outlined">delete</span>
                           </button>
                         </div>
@@ -208,9 +247,8 @@ export default function GestionGuardias() {
             </table>
           </div>
 
-          {/* ✅ Paginación */}
           <div className="ggPager">
-            <button className="ggPagerBtn" type="button" onClick={goPrev} disabled={page === 1}>
+            <button className="ggPagerBtn" type="button" onClick={goPrev} disabled={page === 1 || loading}>
               <span className="material-icons-outlined">chevron_left</span>
               Anterior
             </button>
@@ -227,6 +265,7 @@ export default function GestionGuardias() {
                     type="button"
                     className={`ggPagerNum ${p === page ? "active" : ""}`}
                     onClick={() => setPage(p)}
+                    disabled={loading}
                   >
                     {p}
                   </button>
@@ -234,14 +273,13 @@ export default function GestionGuardias() {
               )}
             </div>
 
-            <button className="ggPagerBtn" type="button" onClick={goNext} disabled={page === totalPages}>
+            <button className="ggPagerBtn" type="button" onClick={goNext} disabled={page === totalPages || loading}>
               Siguiente
               <span className="material-icons-outlined">chevron_right</span>
             </button>
           </div>
         </section>
 
-        {/* CTA */}
         <div className="ctaWrap">
           <button className="ctaBtn" type="button" onClick={() => setIsModalOpen(true)}>
             <span className="material-icons">add_circle_outline</span>
@@ -270,7 +308,7 @@ export default function GestionGuardias() {
         </a>
       </nav>
 
-      {/* MODAL EDITAR (centrado) */}
+      {/* MODAL EDITAR */}
       {editOpen && (
         <div className="modalOverlay centered" role="dialog" aria-modal="true" aria-label="Editar Guardia">
           <div className="modalSheet">
@@ -360,7 +398,7 @@ export default function GestionGuardias() {
         </div>
       )}
 
-      {/* MODAL BORRAR (centrado) */}
+      {/* MODAL BORRAR */}
       {deleteOpen && deleteRow && (
         <div className="modalOverlay centered" role="dialog" aria-modal="true" aria-label="Confirmar borrado">
           <div className="modalSheet">

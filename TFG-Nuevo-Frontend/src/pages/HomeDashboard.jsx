@@ -327,6 +327,7 @@ export default function HomeDashboard() {
     // Si tú ya cargas especialidades desde servicio, hazlo aquí:
     setSpecialitiesLoading(true);
     setSpecialitiesError("");
+    getDuties()
 
     // ⚠️ aquí deberías llamar a tu servicio real de especialidades
     // (yo lo dejo como antes: sin romperte)

@@ -4,7 +4,7 @@ const endpoint = "/api";
 
 export async function getDuties() {
     try {
-        let response = await fetch(`${endpoint}/login`, {
+        let response = await fetch(`${endpoint}/duties`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
