@@ -29,14 +29,14 @@ function getInitials(name) {
 }
 
 export default function HomeDashboard() {
-  const stats = useMemo(
+  /* const stats = useMemo(
     () => [
       { title: "Sustituciones", value: "3", note: "Pendientes de validar", icon: "people", accent: "blue" },
       { title: "Total Guardias", value: "150", note: "+12% vs mes anterior", icon: "bar_chart", accent: "green" },
       { title: "Alertas", value: "5", note: "Errores de importación", icon: "warning", accent: "red" },
     ],
     []
-  );
+  ); */
 
   const { addNotification } = useNotifications();
 
@@ -424,7 +424,7 @@ function mapDutyToEvent(d) {
       </div>
 
       {/* Cards stats */}
-      <section className="hdStats">
+      {/* <section className="hdStats">
         {stats.map((s) => (
           <div className="hdStatCard" key={s.title}>
             <div>
@@ -437,7 +437,7 @@ function mapDutyToEvent(d) {
             </div>
           </div>
         ))}
-      </section>
+      </section> */}
 
       {/* Calendar card */}
       <section className="hdCalendarCard">
