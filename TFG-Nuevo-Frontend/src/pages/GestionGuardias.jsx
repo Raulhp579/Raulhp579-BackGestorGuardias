@@ -191,9 +191,9 @@ export default function GestionGuardias() {
                 <tr>
                   <th className="ggColDate">FECHA</th>
                   <th className="ggColCenter">TIPO</th>
-                  <th className="ggColCenter">ID ESPECIALIDAD</th>
-                  <th className="ggColCenter">ID TRABAJADOR</th>
-                  <th className="ggColCenter">ID JEFE</th>
+                  <th className="ggColCenter">ESPECIALIDAD</th>
+                  <th className="ggColCenter">TRABAJADOR</th>
+                  <th className="ggColCenter">JEFE</th>
                   <th className="ggColActions">ACCIONES</th>
                 </tr>
               </thead>
@@ -220,9 +220,9 @@ export default function GestionGuardias() {
                         <span className={`ggPill ${pillClass(g.duty_type)}`}>{g.duty_type}</span>
                       </td>
 
-                      <td className="ggColCenter ggMono">{g.id_speciality}</td>
-                      <td className="ggColCenter ggMono">{g.id_worker}</td>
-                      <td className="ggColCenter ggMono">{g.id_chief_worker ?? "—"}</td>
+                      <td className="ggColCenter ggMono">{g.speciality}</td>
+                      <td className="ggColCenter ggMono">{g.worker}</td>
+                      <td className="ggColCenter ggMono">{g.chief_worker ?? "—"}</td>
 
                       <td className="ggColActions">
                         <div className="ggActionsCenter">
