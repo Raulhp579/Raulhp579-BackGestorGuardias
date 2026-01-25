@@ -8,7 +8,7 @@ use App\Http\Controllers\SpecialityController;
 use App\Http\Controllers\WorkerController;
 use App\Http\Controllers\ImportExcelsController;
 
-// ✅ Preflight CORS para /api/*
+// Preflight CORS para /api/*
 Route::options('/{any}', function (Request $request) {
     $origin = $request->header('Origin');
     $allowed = ['https://proyecto4.arenadaw.com.es', 'http://localhost:5173'];
