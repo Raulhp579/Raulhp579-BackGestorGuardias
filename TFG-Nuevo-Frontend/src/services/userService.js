@@ -21,3 +21,13 @@ export async function getAdmins() {
     return await response.json();
 }
 
+
+export async function assignChiefs(month,year) {
+    
+
+    const response = await fetch(`${API_BASE_URL}/assingChiefs?month=${month}&year=${year}`)
+    if (!response.ok) {
+        throw new Error("Error al obtener administradores");
+    }
+    return await response.json()
+}
