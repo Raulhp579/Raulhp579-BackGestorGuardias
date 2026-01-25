@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "../styles/CalculosDocumentos.css";
 import "../styles/AppLayout.css";
+import { importWorkersExcel } from "../services/importExcelService"
 import { getWorkers, getAdmins } from "../services/userService";
 
 export default function CalculosDocumentos() {
@@ -18,6 +19,33 @@ export default function CalculosDocumentos() {
     const [adminsLoading, setAdminsLoading] = useState(false);
     const [adminsError, setAdminsError] = useState("");
 
+    // import excel
+    const fileInputRef = useRef(null);
+    const [importMsg, setImportMsg] = useState("");
+    const [importing, setImporting] = useState(false);
+
+    async function onPickExcel(e) {
+        // coge el archivo elegido
+        const file = e.target.files[0];
+        e.target.value = "";// resetea el input para poder elegir el mismo archivo otra vez
+        if (!file) return;
+
+        // limpìa mensaje pa cuando importando
+        setImportMsg("");
+        setImporting(true);
+
+        try {
+            await importWorkersExcel(file);
+            setImportMsg("Usuarios importados correctamente");
+            setView("workers");
+            await loadWorkers();
+
+        } catch (err) {
+            setImportMsg("Error al importar: " + err.message);
+        } finally {
+            setImporting(false);
+        }
+    }
 
     async function loadWorkers() {
         setLoading(true);
@@ -167,34 +195,24 @@ export default function CalculosDocumentos() {
                 </table>
 
                 <div className="cdActions">
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".xls,.xlsx"
+                        style={{ display: "none" }}
+                        onChange={onPickExcel}
+                    />
                     <button
                         className="cdBtnSecondary"
                         type="button"
-                        onClick={() => downloadMock("informe.pdf")}
+                        disabled={importing}
+                        onClick={() => fileInputRef.current?.click()}
                     >
-                        <span className="material-icons">picture_as_pdf</span>
-                        Descargar PDF
+                        <span className="material-icons excel">table_view</span>
+                        {importing ? "Importando..." : "Importar usuarios"}
                     </button>
+                    {importMsg && <p className="cdInfo">{importMsg}</p>}
 
-                    <div className="cdActionsGrid">
-                        <button
-                            className="cdBtnGhost"
-                            type="button"
-                            onClick={() => downloadMock("resumen.xlsx")}
-                        >
-                            <span className="material-icons excel">table_view</span>
-                            Excel
-                        </button>
-
-                        <button
-                            className="cdBtnGhost"
-                            type="button"
-                            onClick={() => alert("Mock: Enviado por correo")}
-                        >
-                            <span className="material-icons email">email</span>
-                            Correo
-                        </button>
-                    </div>
                 </div>
             </main>
         </div>
