@@ -6,14 +6,14 @@ export default function GestionGuardias() {
   // Modal "Asignar jefe automáticamente"
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // ✅ Estado tabla (empieza vacío)
+  // Estado tabla (empieza vacío)
   const [guardias, setGuardias] = useState([]);
 
-  // ✅ estados extra para UX
+  // estados extra para UX
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState("");
 
-  // ✅ cargar guardias desde API al montar
+  // cargar guardias desde API al montar
   useEffect(() => {
     let alive = true;
 
@@ -57,7 +57,7 @@ export default function GestionGuardias() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteRow, setDeleteRow] = useState(null);
 
-  // ✅ Paginación
+  // Paginación
   const PAGE_SIZE = 8;
   const [page, setPage] = useState(1);
 
@@ -132,7 +132,7 @@ export default function GestionGuardias() {
     setDeleteRow(null);
   }
 
-  // ✅ Helpers paginación
+  // Helpers paginación
   function goPrev() {
     setPage((p) => Math.max(1, p - 1));
   }
@@ -178,7 +178,7 @@ export default function GestionGuardias() {
             </div>
           </div>
 
-          {/* ✅ error de carga */}
+          {/* error de carga */}
           {loadError && (
             <div style={{ padding: "10px 14px", color: "#b91c1c", fontWeight: 700 }}>
               {loadError}

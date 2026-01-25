@@ -185,7 +185,7 @@ export default function HomeDashboard() {
     };
   }
 
-  // ✅ llamamos a tu getDuties sin romperte aunque lo tengas con firma distinta
+  // llamamos a tu getDuties sin romperte aunque lo tengas con firma distinta
   async function callGetDuties(start, end) {
     // 1) getDuties({start,end})
     try {
@@ -242,7 +242,7 @@ export default function HomeDashboard() {
 
   const [newOpen, setNewOpen] = useState(false);
   const [newType, setNewType] = useState("CA");
-  const [newDate, setNewDate] = useState("2024-04-01");
+  const [newDate, setNewDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [newTime, setNewTime] = useState("15:00");
   const [newName, setNewName] = useState("");
   const [newSpecialty, setNewSpecialty] = useState("Anestesia");
@@ -546,7 +546,7 @@ export default function HomeDashboard() {
           </div>
         </div>
 
-        {/* ✅ Estado de carga/errores */}
+        {/*  Estado de carga/errores */}
         {(eventsLoading || eventsError) && (
           <div style={{ padding: "10px 16px" }}>
             {eventsLoading && <span style={{ fontWeight: 700 }}>Cargando guardias...</span>}
@@ -560,7 +560,7 @@ export default function HomeDashboard() {
               ref={calendarRef}
               plugins={[dayGridPlugin, interactionPlugin]}
               initialView="dayGridMonth"
-              initialDate="2024-04-01"
+              initialDate={new Date()}
               firstDay={1}
               height="auto"
               locale="es"
