@@ -58,7 +58,7 @@ class DutyController extends Controller
                     "duty_type"=>$duty->duty_type,
                     "speciality"=>$duty->worker->speciality->name,
                     "worker" =>$duty->worker->name,
-                    "chief_worker"=>$duty->chief->name,
+                    "chief_worker"=>$duty->chief->name??null,
                     "is_chief"   => (int) $duty->id_worker === (int) $duty->id_chief_worker,
                 ];
             }

@@ -37,7 +37,8 @@ export async function importExcel({ file, year, month, idSpeciality }) {
         const formData = new FormData();
         formData.append("file", file);
         formData.append("year", String(year));
-        formData.append("month", Number(month));
+        const monthNumber = Number(String(month).replace(/^0+/, "")) || 0; // "01"->1, "10"->10
+        formData.append("month", String(monthNumber));
         formData.append("idSpeciality", String(idSpeciality));
 
         const response = await fetch(`${API_BASE}/importDuties`, {
@@ -54,7 +55,6 @@ export async function importExcel({ file, year, month, idSpeciality }) {
             const msg = data?.message || `HTTP error! status: ${response.status}`;
             throw new Error(msg);
         }
-
         return data;
     } catch (error) {
         console.error("Error al importar guardias:", error);
