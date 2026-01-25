@@ -8,6 +8,9 @@ import { useNotifications } from "../context/NotificationsContext";
 // IMPORTA tu función ya hecha (ajusta la ruta si hace falta)
 import { getDuties } from "../services/DutyService";
 
+import { getSpecialities } from "../services/SpecialitiesService";
+import { importExcel } from "../services/importExcelService";
+
 function normalizeTime(t) {
   if (!t) return "";
   const s = String(t).trim();
@@ -37,6 +40,8 @@ export default function HomeDashboard() {
 
   const { addNotification } = useNotifications();
 
+  const [specialities, setSpecialities] = useState([]);
+
   // Helpers Excel 
 
   function isExcelFile(file) {
@@ -56,46 +61,25 @@ export default function HomeDashboard() {
     return hasValidExtension || hasValidMimeType;
   }
 
+  
   async function importDutysExcel({ file, year, month, idSpeciality }) {
-    if (!file) {
-      setImportMsg("No se ha seleccionado ningún archivo");
-      return;
-    }
-    if (!year || !month || !idSpeciality) {
-      setImportMsg("Por favor, seleccione año, mes y especialidad");
-      return;
-    }
+    if (!file) return setImportMsg("No se ha seleccionado ningún archivo");
+    if (!year || !month || !idSpeciality) return setImportMsg("Por favor, seleccione año, mes y especialidad");
 
     try {
       setImportMsg("Procesando archivo...");
 
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("year", year);
-      formData.append("month", month);
-      formData.append("idSpeciality", idSpeciality);
+      await importExcel({ file, year, month, idSpeciality });
 
-      const response = await fetch("/api/import-dutys", {
-        method: "POST",
-        body: formData,
-      });
+      setImportMsg("Archivo importado correctamente");
+      setExcelFile(null);
 
-      const result = await response.json();
+      // refrescar eventos del calendario desde BD
+      await loadDutiesForCurrentView();
 
-      if (response.ok) {
-        setImportMsg("Archivo importado correctamente");
-        setExcelFile(null);
-
-        // refrescar calendario tras importar
-        await loadDutiesForCurrentView();
-
-        addNotification(`Se han importado guardias desde Excel (${new Date().toLocaleTimeString()}).`);
-      } else {
-        setImportMsg(result.message || "Error al importar el archivo");
-      }
+      addNotification(`Se han importado guardias desde Excel (${new Date().toLocaleTimeString()}).`);
     } catch (error) {
-      console.error("Error importing Excel:", error);
-      setImportMsg("Error al importar el archivo: " + error.message);
+      setImportMsg(error?.message || "Error al importar el archivo");
     }
   }
 
@@ -226,7 +210,7 @@ export default function HomeDashboard() {
     }, 0);
   }, [loadDutiesForCurrentView]);
 
-  
+
   // Filtros
 
   const [filterOpen, setFilterOpen] = useState(false);
@@ -237,7 +221,7 @@ export default function HomeDashboard() {
     return events.filter((e) => e.extendedProps?.type === filterType);
   }, [events, filterType]);
 
-  
+
   // Modal Nueva Guardia (local)
 
   const [newOpen, setNewOpen] = useState(false);
@@ -245,11 +229,12 @@ export default function HomeDashboard() {
   const [newDate, setNewDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [newTime, setNewTime] = useState("15:00");
   const [newName, setNewName] = useState("");
-  const [newSpecialty, setNewSpecialty] = useState("Anestesia");
+  const [newIdSpeciality, setNewIdSpeciality] = useState("");
 
   function openNewGuardiaModal(prefilledDate) {
     if (prefilledDate) setNewDate(prefilledDate);
     setNewName("");
+    setNewIdSpeciality("");
     setNewOpen(true);
   }
 
@@ -274,7 +259,7 @@ export default function HomeDashboard() {
         extendedProps: {
           type: newType,
           jefe: false,
-          specialityLabel: newSpecialty,
+          specialityLabel: newIdSpeciality,
           workerLabel: nameClean || `Trabajador ${getInitials(nameClean)}`,
           raw: null,
         },
@@ -351,12 +336,18 @@ export default function HomeDashboard() {
 
     setSpecialitiesLoading(true);
     setSpecialitiesError("");
-    getDuties()
 
-    // aquí deberías llamar a tu servicio real de especialidades
-    setTimeout(() => {
+    try {
+      const data = await getSpecialities();
+      const arr = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+      setSpecialities(arr);
+    } catch (e) {
+      console.error(e);
+      setSpecialities([]);
+      setSpecialitiesError("No se pudieron cargar las especialidades.");
+    } finally {
       setSpecialitiesLoading(false);
-    }, 0);
+    }
   }
 
   function closeImportModal() {
@@ -635,14 +626,17 @@ export default function HomeDashboard() {
 
               <label className="hdField">
                 <span>Especialidad</span>
-                <select value={newSpecialty} onChange={(e) => setNewSpecialty(e.target.value)} className="hdControl">
-                  <option value="Anestesia">Anestesia</option>
-                  <option value="Cirugía">Cirugía</option>
-                  <option value="Radiologia">Radiología</option>
-                  <option value="Medicina Intensiva">Medicina Intensiva</option>
-                  <option value="Medicina Interna">Medicina Interna</option>
-                  <option value="Cirugia General">Cirugía General</option>
-                  <option value="Pediatria">Pediatría</option>
+                <select
+                  className="hdControl"
+                  value={newIdSpeciality}
+                  onChange={(e) => setNewIdSpeciality(e.target.value)}
+                >
+                  <option value="">Selecciona una especialidad</option>
+                  {specialities.map((s) => (
+                    <option key={s.id} value={String(s.id)}>
+                      {s.name} (id: {s.id})
+                    </option>
+                  ))}
                 </select>
               </label>
 
@@ -717,12 +711,21 @@ export default function HomeDashboard() {
                 ) : specialitiesError ? (
                   <div className="hdControl">{specialitiesError}</div>
                 ) : (
-                  // ✅ Aquí vuelve a poner tu select real de especialidades cuando lo tengas
-                  <select className="hdControl" value={idSpeciality} onChange={(e) => setIdSpeciality(e.target.value)}>
+
+
+                  <select
+                    className="hdControl"
+                    value={idSpeciality}
+                    onChange={(e) => setIdSpeciality(e.target.value)}
+                  >
                     <option value="">-- Selecciona una especialidad --</option>
-                    <option value="1">Anestesia (id: 1)</option>
-                    <option value="2">Cirugía (id: 2)</option>
+                    {specialities.map((s) => (
+                      <option key={s.id} value={String(s.id)}>
+                        {s.name} (id: {s.id})
+                      </option>
+                    ))}
                   </select>
+
                 )}
               </label>
 

@@ -4,7 +4,7 @@ const url = "/api";
 
 export async function getSpecialities() {
     try {
-        let response = await fetch(`${url}/specialities`, {
+        let response = await fetch(`${url}/speciality`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
