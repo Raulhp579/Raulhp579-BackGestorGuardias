@@ -121,7 +121,7 @@ export default function CalculosDocumentos() {
                 <td>{w.rank}</td>
                 <td>{w.registration_date}</td>
                 <td>{w.discharge_date ?? "-"}</td>
-                <td>{w.id_speciality}</td>
+                <td>{w.speciality}</td>
             </tr>
         ));
     } else {

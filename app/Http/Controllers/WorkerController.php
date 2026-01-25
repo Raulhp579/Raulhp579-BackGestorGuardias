@@ -51,7 +51,18 @@ class WorkerController extends Controller
     {
         try {
             // Traer trabajadores con su especialidad relacionada
-            $workers = Worker::with('speciality')->get();
+            $workersAll = Worker::with('speciality')->get();
+            $workers = [];
+            foreach($workersAll as $worker){
+                $workers[]=[
+                    "id"=>$worker->id,
+                    "name"=>$worker->name,
+                    "rank"=>$worker->rank,
+                    "registration_date"=>$worker->registration_date,
+                    "discharge_date"=>$worker->discharge_date,
+                    "speciality"=>$worker->speciality ? $worker->speciality->name : null
+                ];
+            }
 
             return response()->json($workers);
         } catch (Exception $e) {
