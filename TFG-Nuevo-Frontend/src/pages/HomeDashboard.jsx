@@ -138,52 +138,35 @@ export default function HomeDashboard() {
    * - si el backend manda speciality_name / worker_name / chief_worker_name => se usan
    * - si NO manda => fallback a "Especialidad #ID" / "Trabajador #ID" / etc
    */
-  function mapDutyToEvent(d) {
-    const id = String(d.id ?? d.uuid ?? (crypto?.randomUUID ? crypto.randomUUID() : Date.now()));
+function mapDutyToEvent(d) {
+  const id = String(d.id ?? d.uuid ?? (crypto?.randomUUID ? crypto.randomUUID() : Date.now()));
 
-    const dutyType = String(d.duty_type ?? d.type ?? d.dutyType ?? "").toUpperCase();
+  const date = String(d.date ?? "");
+  const typeUpper = String(d.duty_type ?? "").toUpperCase();
 
-    const date = String(d.date ?? d.day ?? "");
-    const time = normalizeTime(d.time ?? d.start_time ?? d.hour); // si no existe => ""
+  const workerName = String(d.worker ?? "").trim();
+  const specialityName = String(d.speciality ?? "").trim();
 
-    const specialityName = String(d.speciality_name ?? d.speciality ?? d.specialty ?? "");
-    const workerName = String(d.worker_name ?? d.workerName ?? d.name ?? "");
-    const chiefName = String(d.chief_worker_name ?? d.chiefWorkerName ?? "");
+  // ✅ AHORA ES ESTO
+  const jefe = Boolean(d.is_chief);
 
-    const specialityLabel = specialityName || (d.id_speciality != null ? `Especialidad #${d.id_speciality}` : "");
-    const workerLabel = workerName || (d.id_worker != null ? `Trabajador #${d.id_worker}` : "");
-    const chiefLabel = chiefName || (d.id_chief_worker != null ? `Jefe #${d.id_chief_worker}` : "");
+  // ✅ Título como quieres: trabajador + tipo (+ especialidad opcional)
+  const title = `${workerName} · ${typeUpper}${specialityName ? ` · ${specialityName}` : ""}`;
 
-    const allDayFromApi = Boolean(d.allDay ?? d.all_day);
-    const isAllDay = allDayFromApi || !time;
+  return {
+    id,
+    title,
+    start: date,     // allDay
+    allDay: true,    // porque no hay hora
+    extendedProps: {
+      type: typeUpper,
+      jefe,
+      raw: d,
+    },
+  };
+}
 
-    const start = d.start ? d.start : isAllDay ? date : `${date}T${time}:00`;
 
-    // Título “bonito” + completo
-    // Ej: "Especialidad #2 · CA 15:00 — Trabajador #23"
-    const title = `${specialityLabel}${specialityLabel ? " · " : ""}${dutyType}${!isAllDay && time ? ` ${time}` : ""}${workerLabel ? ` — ${workerLabel}` : ""
-      }`;
-
-    // jefe: si existe id_chief_worker
-    const jefe =
-      Boolean(d.jefe ?? d.is_chief ?? d.isChief) ||
-      Boolean(d.id_chief_worker ?? d.chief_worker_id ?? d.idChiefWorker);
-
-    return {
-      id,
-      title,
-      start,
-      allDay: isAllDay,
-      extendedProps: {
-        type: dutyType,
-        jefe,
-        specialityLabel,
-        workerLabel,
-        chiefLabel,
-        raw: d,
-      },
-    };
-  }
 
   // llamamos a tu getDuties sin romperte aunque lo tengas con firma distinta
   async function callGetDuties(start, end) {
@@ -351,7 +334,6 @@ export default function HomeDashboard() {
 
     setSpecialitiesLoading(true);
     setSpecialitiesError("");
-    getDuties()
 
     // aquí deberías llamar a tu servicio real de especialidades
     setTimeout(() => {
