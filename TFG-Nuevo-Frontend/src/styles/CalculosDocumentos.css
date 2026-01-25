@@ -22,13 +22,13 @@ body {
     height: 100%;
     margin: 0;
     background: var(--bg);
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Arial, sans-serif;
 }
 
 .cdPage {
     min-height: 100vh;
     background: var(--bg);
     color: var(--text);
-    font-family: Inter, system-ui, -apple-system, Segoe UI, Arial, sans-serif;
 }
 
 /* Header */
