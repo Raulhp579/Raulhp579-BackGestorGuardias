@@ -172,29 +172,9 @@ export default function CalculosDocumentos() {
                         type="button"
                         onClick={() => downloadMock("informe.pdf")}
                     >
-                        <span className="material-icons">picture_as_pdf</span>
-                        Descargar PDF
+                        <span className="material-icons excel">table_view</span>
+                        importar usuarios
                     </button>
-
-                    <div className="cdActionsGrid">
-                        <button
-                            className="cdBtnGhost"
-                            type="button"
-                            onClick={() => downloadMock("resumen.xlsx")}
-                        >
-                            <span className="material-icons excel">table_view</span>
-                            Excel
-                        </button>
-
-                        <button
-                            className="cdBtnGhost"
-                            type="button"
-                            onClick={() => alert("Mock: Enviado por correo")}
-                        >
-                            <span className="material-icons email">email</span>
-                            Correo
-                        </button>
-                    </div>
                 </div>
             </main>
         </div>

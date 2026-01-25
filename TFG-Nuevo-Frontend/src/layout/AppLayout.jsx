@@ -71,7 +71,7 @@ export default function AppLayout() {
 
           <NavLink to="/calculos" onClick={closeMenu} className={({ isActive }) => `appNavItem ${isActive ? "active" : ""}`}>
             <span className="material-icons-outlined">calculate</span>
-            <span>Cálculos y Documentos</span>
+            <span>Administrar usuarios</span>
           </NavLink>
 
           <div className="appNavDivider" />
