@@ -50,7 +50,17 @@ class DutyController extends Controller
     public function index()
     {
         try {
-            $duties = Duty::all();
+            $allDuties = Duty::all();
+            $duties = [];
+            foreach($allDuties as $duty){
+                $duties[] = [
+                    "date"=>$duty->date,
+                    "duty_type"=>$duty->duty_type,
+                    "speciality"=>$duty->worker->speciality->name,
+                    "worker" =>$duty->worker->name,
+                    "chief_worker"=>$duty->chief->name
+                ];
+            }
 
             return response()->json($duties);
         } catch (Exception $e) {
@@ -254,13 +264,13 @@ class DutyController extends Controller
         }
     }
 
-    // this function need the month
+    // this function need the month and the year
     public function assignChief(Request $request)
     {
         try {
 
             // take the duties of one month
-            $duties = Duty::whereMonth('date', $request->month)->get();
+            $duties = Duty::whereMonth('date', $request->month)->whereYear('date', $request->year)->get();
             $workers = Worker::orderBy('registration_date', 'ASC')->get();
 
             
