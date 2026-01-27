@@ -82,8 +82,11 @@ class UserController extends Controller
     /**
      * Obtener todos los usuarios (solo para administradores)
      */
-    public function index()
+    public function index(Request $request)
     {
+        if(isset($request->name)){
+            return response()->json(User::where("name",'LIKE',"%{$request->name}%")->first());
+        }
         return response()->json(User::all(), 200);
     }
 

@@ -47,11 +47,16 @@ class WorkerController extends Controller
     /**
      * Get all workers
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
             // Traer trabajadores con su especialidad relacionada
-            $workersAll = Worker::with('speciality')->get();
+            if(isset($request->name)){
+                $workersAll = Worker::where("name",'LIKE',"%$request->name%")->get();
+            }else{
+                $workersAll = Worker::with('speciality')->get();
+            }
+            
             $workers = [];
             foreach($workersAll as $worker){
                 $workers[]=[
