@@ -1,46 +1,128 @@
 import { useEffect, useMemo, useState } from "react";
 import "../styles/GestionGuardias.css";
 import { getDuties } from "../services/DutyService";
+import { assignChiefs } from "../services/userService";
 
 export default function GestionGuardias() {
   // Modal "Asignar jefe automáticamente"
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // ✅ Estado tabla (empieza vacío)
+  // Estado tabla (empieza vacío)
   const [guardias, setGuardias] = useState([]);
 
-  // ✅ estados extra para UX
+  // estados extra para UX
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState("");
 
-  // ✅ cargar guardias desde API al montar
+  // ✅ estado modal asignar
+  const [assignMonth, setAssignMonth] = useState(() => String(new Date().getMonth() + 1).padStart(2, "0")); // "01".."12"
+  const [assignYear, setAssignYear] = useState(() => String(new Date().getFullYear()));
+  const [assignLoading, setAssignLoading] = useState(false);
+  const [assignMsg, setAssignMsg] = useState("");
+
+  const months = useMemo(
+    () => [
+      { value: "01", label: "Enero" },
+      { value: "02", label: "Febrero" },
+      { value: "03", label: "Marzo" },
+      { value: "04", label: "Abril" },
+      { value: "05", label: "Mayo" },
+      { value: "06", label: "Junio" },
+      { value: "07", label: "Julio" },
+      { value: "08", label: "Agosto" },
+      { value: "09", label: "Septiembre" },
+      { value: "10", label: "Octubre" },
+      { value: "11", label: "Noviembre" },
+      { value: "12", label: "Diciembre" },
+    ],
+    []
+  );
+
+  const years = useMemo(() => {
+    const now = new Date().getFullYear();
+    const start = now - 3;
+    const end = now + 3;
+    const arr = [];
+    for (let y = start; y <= end; y++) arr.push(String(y));
+    return arr;
+  }, []);
+
+  // ✅ recargar guardias (reutilizable)
+  async function reloadDuties() {
+    setLoading(true);
+    setLoadError("");
+
+    try {
+      const data = await getDuties();
+      const arr = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+      setGuardias(arr);
+    } catch (e) {
+      console.error(e);
+      setGuardias([]);
+      setLoadError("No se pudieron cargar las guardias.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // cargar guardias al montar
   useEffect(() => {
-    let alive = true;
+    reloadDuties();
+  }, []);
 
-    async function loadDuties() {
-      setLoading(true);
-      setLoadError("");
+  // ✅ abrir modal: pre-rellena mes/año con el primer registro si existe
+  function openAssignModal() {
+    setAssignMsg("");
 
-      try {
-        const data = await getDuties(); // tu endpoint
-        const arr = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
-        if (alive) setGuardias(arr);
-      } catch (e) {
-        console.error(e);
-        if (alive) {
-          setGuardias([]);
-          setLoadError("No se pudieron cargar las guardias.");
-        }
-      } finally {
-        if (alive) setLoading(false);
+    if (guardias?.length) {
+      const d = new Date(guardias[0].date); // espera "YYYY-MM-DD"
+      if (!Number.isNaN(d.getTime())) {
+        setAssignYear(String(d.getFullYear()));
+        setAssignMonth(String(d.getMonth() + 1).padStart(2, "0"));
       }
+    } else {
+      const now = new Date();
+      setAssignYear(String(now.getFullYear()));
+      setAssignMonth(String(now.getMonth() + 1).padStart(2, "0"));
     }
 
-    loadDuties();
-    return () => {
-      alive = false;
-    };
-  }, []);
+    setIsModalOpen(true);
+  }
+
+  // ✅ confirmar asignación
+  async function handleAssignChiefs() {
+    setAssignLoading(true);
+    setAssignMsg("");
+    setLoadError("");
+
+    try {
+      const monthNum = Number(assignMonth); // backend quiere number
+      const yearNum = Number(assignYear);
+
+      if (!monthNum || monthNum < 1 || monthNum > 12) {
+        setAssignMsg("Mes inválido.");
+        return;
+      }
+      if (!yearNum || yearNum < 2000 || yearNum > 2100) {
+        setAssignMsg("Año inválido.");
+        return;
+      }
+
+      // ✅ llama a tu endpoint /assingChiefs?month=&year=
+      await assignChiefs(monthNum, yearNum);
+
+      // ✅ recargar tabla
+      await reloadDuties();
+
+      setAssignMsg("Jefes asignados correctamente.");
+      setIsModalOpen(false);
+    } catch (e) {
+      console.error(e);
+      setAssignMsg(e.message || "Error asignando jefes.");
+    } finally {
+      setAssignLoading(false);
+    }
+  }
 
   // Modal editar
   const [editOpen, setEditOpen] = useState(false);
@@ -57,7 +139,7 @@ export default function GestionGuardias() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteRow, setDeleteRow] = useState(null);
 
-  // ✅ Paginación
+  // Paginación
   const PAGE_SIZE = 8;
   const [page, setPage] = useState(1);
 
@@ -132,7 +214,7 @@ export default function GestionGuardias() {
     setDeleteRow(null);
   }
 
-  // ✅ Helpers paginación
+  // Helpers paginación
   function goPrev() {
     setPage((p) => Math.max(1, p - 1));
   }
@@ -178,11 +260,9 @@ export default function GestionGuardias() {
             </div>
           </div>
 
-          {/* ✅ error de carga */}
+          {/* error de carga */}
           {loadError && (
-            <div style={{ padding: "10px 14px", color: "#b91c1c", fontWeight: 700 }}>
-              {loadError}
-            </div>
+            <div style={{ padding: "10px 14px", color: "#b91c1c", fontWeight: 700 }}>{loadError}</div>
           )}
 
           <div className="ggTableWrap">
@@ -191,9 +271,9 @@ export default function GestionGuardias() {
                 <tr>
                   <th className="ggColDate">FECHA</th>
                   <th className="ggColCenter">TIPO</th>
-                  <th className="ggColCenter">ID ESPECIALIDAD</th>
-                  <th className="ggColCenter">ID TRABAJADOR</th>
-                  <th className="ggColCenter">ID JEFE</th>
+                  <th className="ggColCenter">ESPECIALIDAD</th>
+                  <th className="ggColCenter">TRABAJADOR</th>
+                  <th className="ggColCenter">JEFE</th>
                   <th className="ggColActions">ACCIONES</th>
                 </tr>
               </thead>
@@ -220,9 +300,9 @@ export default function GestionGuardias() {
                         <span className={`ggPill ${pillClass(g.duty_type)}`}>{g.duty_type}</span>
                       </td>
 
-                      <td className="ggColCenter ggMono">{g.id_speciality}</td>
-                      <td className="ggColCenter ggMono">{g.id_worker}</td>
-                      <td className="ggColCenter ggMono">{g.id_chief_worker ?? "—"}</td>
+                      <td className="ggColCenter ggMono">{g.speciality}</td>
+                      <td className="ggColCenter ggMono">{g.worker}</td>
+                      <td className="ggColCenter ggMono">{g.chief_worker ?? "—"}</td>
 
                       <td className="ggColActions">
                         <div className="ggActionsCenter">
@@ -230,12 +310,7 @@ export default function GestionGuardias() {
                             <span className="material-icons-outlined">edit</span>
                           </button>
 
-                          <button
-                            className="ggIconBtn danger"
-                            type="button"
-                            onClick={() => handleDelete(g)}
-                            title="Borrar"
-                          >
+                          <button className="ggIconBtn danger" type="button" onClick={() => handleDelete(g)} title="Borrar">
                             <span className="material-icons-outlined">delete</span>
                           </button>
                         </div>
@@ -281,7 +356,8 @@ export default function GestionGuardias() {
         </section>
 
         <div className="ctaWrap">
-          <button className="ctaBtn" type="button" onClick={() => setIsModalOpen(true)}>
+          {/* ✅ abre modal con mes/año */}
+          <button className="ctaBtn" type="button" onClick={openAssignModal} disabled={loading}>
             <span className="material-icons">add_circle_outline</span>
             <span>Asignar jefe automaticamente</span>
           </button>
@@ -418,10 +494,18 @@ export default function GestionGuardias() {
                   Resumen
                   <div className="control" style={{ background: "#F9FAFB" }}>
                     <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                      <span><b>ID:</b> {deleteRow.id}</span>
-                      <span><b>Fecha:</b> {deleteRow.date}</span>
-                      <span><b>Tipo:</b> {deleteRow.duty_type}</span>
-                      <span><b>Trabajador:</b> {deleteRow.id_worker}</span>
+                      <span>
+                        <b>ID:</b> {deleteRow.id}
+                      </span>
+                      <span>
+                        <b>Fecha:</b> {deleteRow.date}
+                      </span>
+                      <span>
+                        <b>Tipo:</b> {deleteRow.duty_type}
+                      </span>
+                      <span>
+                        <b>Trabajador:</b> {deleteRow.id_worker}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -440,7 +524,7 @@ export default function GestionGuardias() {
         </div>
       )}
 
-      {/* Modal original: Asignar jefe */}
+      {/* ✅ MODAL ASIGNAR JEFE AUTOMÁTICO (funcional) */}
       {isModalOpen && (
         <div className="modalOverlay" role="dialog" aria-modal="true" aria-label="Asignar Jefe de Guardia">
           <div className="modalSheet">
@@ -451,42 +535,48 @@ export default function GestionGuardias() {
                 </div>
                 <div>
                   <div className="modalTitle">Asignar Jefe de Guardia</div>
-                  <div className="modalSubtitle">Asignación manual con motivo y autorización.</div>
+                  <div className="modalSubtitle">Selecciona mes y año y asigna automáticamente.</div>
                 </div>
               </div>
 
               <div className="formGrid">
                 <label className="label">
-                  Profesional
-                  <select className="control">
-                    <option>Seleccione un profesional...</option>
-                    <option>Dr. Ana Sánchez</option>
-                    <option>Dr. Juan Gómez</option>
-                    <option>Dra. Beatriz López</option>
+                  Mes
+                  <select className="control" value={assignMonth} onChange={(e) => setAssignMonth(e.target.value)} disabled={assignLoading}>
+                    {months.map((m) => (
+                      <option key={m.value} value={m.value}>
+                        {m.label} ({m.value})
+                      </option>
+                    ))}
                   </select>
                 </label>
 
                 <label className="label">
-                  Motivo del cambio
-                  <textarea className="control" rows={3} placeholder="Especifique la razón del cambio manual..." />
+                  Año
+                  <select className="control" value={assignYear} onChange={(e) => setAssignYear(e.target.value)} disabled={assignLoading}>
+                    {years.map((y) => (
+                      <option key={y} value={y}>
+                        {y}
+                      </option>
+                    ))}
+                  </select>
                 </label>
 
-                <label className="label">
-                  Código de autorización
-                  <div className="codeField">
-                    <span className="material-icons">lock</span>
-                    <input className="codeInput" placeholder="0000" />
-                    <span className="codeBadge">REQ</span>
+                {assignMsg && (
+                  <div className="label" style={{ gridColumn: "1 / -1" }}>
+                    <div className="control" style={{ background: "#F9FAFB" }}>
+                      {assignMsg}
+                    </div>
                   </div>
-                </label>
+                )}
               </div>
             </div>
 
             <div className="modalFooter">
-              <button className="btnPrimary" onClick={() => setIsModalOpen(false)} type="button">
-                Confirmar
+              <button className="btnPrimary" onClick={handleAssignChiefs} type="button" disabled={assignLoading}>
+                {assignLoading ? "Asignando..." : "Asignar automáticamente"}
               </button>
-              <button className="btnSecondary" onClick={() => setIsModalOpen(false)} type="button">
+              <button className="btnSecondary" onClick={() => setIsModalOpen(false)} type="button" disabled={assignLoading}>
                 Cancelar
               </button>
             </div>

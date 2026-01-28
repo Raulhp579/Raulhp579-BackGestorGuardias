@@ -22,13 +22,13 @@ body {
     height: 100%;
     margin: 0;
     background: var(--bg);
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Arial, sans-serif;
 }
 
 .cdPage {
     min-height: 100vh;
     background: var(--bg);
     color: var(--text);
-    font-family: Inter, system-ui, -apple-system, Segoe UI, Arial, sans-serif;
 }
 
 /* Header */
@@ -571,10 +571,210 @@ body {
 }
 
 /* Responsive */
-@media (max-width: 560px) {
+@media (max-width: 1024px) {
     .cdMain {
-        padding: 14px 14px 84px;
+        width: 95%;
+        padding: 12px 12px;
     }
 
+    .cdFilters {
+        grid-template-columns: 1fr;
+    }
 
+    .cdActionsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .cdToggle {
+        flex-direction: column;
+    }
+
+    .cdToggleBtn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .cdMain {
+        width: 100%;
+        padding: 12px 12px;
+    }
+
+    .cdHeader {
+        position: relative;
+    }
+
+    .cdTitle {
+        font-size: 16px;
+    }
+
+    .cdCardHead {
+        padding: 10px 12px;
+    }
+
+    .cdCardHeadTitle {
+        font-size: 12px;
+    }
+
+    .cdCell {
+        height: 50px;
+        padding: 4px;
+    }
+
+    .cdDay {
+        font-size: 14px;
+    }
+
+    .cdTag {
+        font-size: 9px;
+        padding: 2px 4px;
+    }
+
+    .cdHoursNum {
+        font-size: 28px;
+    }
+
+    .cdTable thead th,
+    .cdTable tbody td {
+        padding: 10px 8px;
+        font-size: 12px;
+    }
+
+    .cdRow {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    .cdSectionTitle {
+        font-size: 13px;
+    }
+
+    .cdBtnSecondary,
+    .cdBtnGhost {
+        padding: 10px 12px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 560px) {
+    .cdMain {
+        padding: 12px 12px 84px;
+    }
+
+    .cdTitle {
+        font-size: 14px;
+    }
+
+    .cdHeaderInner {
+        padding: 12px 12px;
+    }
+
+    .cdMenuBtn {
+        width: 36px;
+        height: 36px;
+    }
+
+    .cdOverline {
+        font-size: 10px;
+    }
+
+    .cdDow {
+        padding: 6px 0;
+        font-size: 10px;
+    }
+
+    .cdCell {
+        height: 45px;
+        padding: 3px;
+    }
+
+    .cdDay {
+        font-size: 12px;
+    }
+
+    .cdTag {
+        font-size: 8px;
+        padding: 2px 3px;
+    }
+
+    .cdSummaryTop {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .cdHoursNum {
+        font-size: 24px;
+    }
+
+    .cdHoursUnit {
+        font-size: 12px;
+    }
+
+    .cdBreakdown {
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    .cdRow {
+        padding: 8px;
+        font-size: 11px;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .cdRowLeft,
+    .cdRowRight {
+        width: 100%;
+    }
+
+    .cdRowRight {
+        text-align: left;
+    }
+
+    .cdTotals {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .cdTable {
+        font-size: 11px;
+        overflow-x: auto;
+    }
+
+    .cdTable thead th,
+    .cdTable tbody td {
+        padding: 8px 6px;
+        font-size: 11px;
+    }
+
+    .cdIconBtn {
+        width: 32px;
+        height: 32px;
+    }
+
+    .cdBtnSecondary,
+    .cdBtnGhost {
+        padding: 10px;
+        font-size: 11px;
+        gap: 6px;
+    }
+
+    .cdActionsGrid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .cdCard {
+        border-radius: 10px;
+    }
+
+    .cdSelect {
+        padding: 8px 30px 8px 30px;
+        font-size: 12px;
+    }
+
+    .cdSelectIcon,
+    .cdSelectChevron {
+        font-size: 16px;
+    }
 }

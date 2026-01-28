@@ -9,6 +9,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Controllers\Controller;
 
 class DutyController extends Controller
 {
@@ -50,7 +51,18 @@ class DutyController extends Controller
     public function index()
     {
         try {
-            $duties = Duty::all();
+            $allDuties = Duty::all();
+            $duties = [];
+            foreach($allDuties as $duty){
+                $duties[] = [
+                    "date"=>$duty->date,
+                    "duty_type"=>$duty->duty_type,
+                    "speciality"=>$duty->worker->speciality->name,
+                    "worker" =>$duty->worker->name,
+                    "chief_worker"=>$duty->chief->name??null,
+                    "is_chief"   => (int) $duty->id_worker === (int) $duty->id_chief_worker,
+                ];
+            }
 
             return response()->json($duties);
         } catch (Exception $e) {
@@ -254,13 +266,13 @@ class DutyController extends Controller
         }
     }
 
-    // this function need the month
+    // this function need the month and the year
     public function assignChief(Request $request)
     {
         try {
 
             // take the duties of one month
-            $duties = Duty::whereMonth('date', $request->month)->get();
+            $duties = Duty::whereMonth('date', $request->month)->whereYear('date', $request->year)->get();
             $workers = Worker::orderBy('registration_date', 'ASC')->get();
 
             

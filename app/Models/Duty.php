@@ -29,6 +29,11 @@ class Duty extends Model
         return $this->belongsTo(Worker::class, 'id_worker');
     }
 
+    public function chief()
+    {
+        return $this->belongsTo(Worker::class, 'id_chief_worker');
+    }
+
     // Chief worker (optional)
     public function chiefWorker()
     {

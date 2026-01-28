@@ -8,6 +8,9 @@ import { useNotifications } from "../context/NotificationsContext";
 // IMPORTA tu función ya hecha (ajusta la ruta si hace falta)
 import { getDuties } from "../services/DutyService";
 
+import { getSpecialities } from "../services/SpecialitiesService";
+import { importExcel } from "../services/importExcelService";
+
 function normalizeTime(t) {
   if (!t) return "";
   const s = String(t).trim();
@@ -26,16 +29,18 @@ function getInitials(name) {
 }
 
 export default function HomeDashboard() {
-  const stats = useMemo(
+  /* const stats = useMemo(
     () => [
       { title: "Sustituciones", value: "3", note: "Pendientes de validar", icon: "people", accent: "blue" },
       { title: "Total Guardias", value: "150", note: "+12% vs mes anterior", icon: "bar_chart", accent: "green" },
       { title: "Alertas", value: "5", note: "Errores de importación", icon: "warning", accent: "red" },
     ],
     []
-  );
+  ); */
 
   const { addNotification } = useNotifications();
+
+  const [specialities, setSpecialities] = useState([]);
 
   // Helpers Excel 
 
@@ -56,46 +61,25 @@ export default function HomeDashboard() {
     return hasValidExtension || hasValidMimeType;
   }
 
+  
   async function importDutysExcel({ file, year, month, idSpeciality }) {
-    if (!file) {
-      setImportMsg("No se ha seleccionado ningún archivo");
-      return;
-    }
-    if (!year || !month || !idSpeciality) {
-      setImportMsg("Por favor, seleccione año, mes y especialidad");
-      return;
-    }
+    if (!file) return setImportMsg("No se ha seleccionado ningún archivo");
+    if (!year || !month || !idSpeciality) return setImportMsg("Por favor, seleccione año, mes y especialidad");
 
     try {
       setImportMsg("Procesando archivo...");
 
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("year", year);
-      formData.append("month", month);
-      formData.append("idSpeciality", idSpeciality);
+      await importExcel({ file, year, month, idSpeciality });
 
-      const response = await fetch("/api/import-dutys", {
-        method: "POST",
-        body: formData,
-      });
+      setImportMsg("Archivo importado correctamente");
+      setExcelFile(null);
 
-      const result = await response.json();
+      // refrescar eventos del calendario desde BD
+      await loadDutiesForCurrentView();
 
-      if (response.ok) {
-        setImportMsg("Archivo importado correctamente");
-        setExcelFile(null);
-
-        // refrescar calendario tras importar
-        await loadDutiesForCurrentView();
-
-        addNotification(`Se han importado guardias desde Excel (${new Date().toLocaleTimeString()}).`);
-      } else {
-        setImportMsg(result.message || "Error al importar el archivo");
-      }
+      addNotification(`Se han importado guardias desde Excel (${new Date().toLocaleTimeString()}).`);
     } catch (error) {
-      console.error("Error importing Excel:", error);
-      setImportMsg("Error al importar el archivo: " + error.message);
+      setImportMsg(error?.message || "Error al importar el archivo");
     }
   }
 
@@ -138,54 +122,37 @@ export default function HomeDashboard() {
    * - si el backend manda speciality_name / worker_name / chief_worker_name => se usan
    * - si NO manda => fallback a "Especialidad #ID" / "Trabajador #ID" / etc
    */
-  function mapDutyToEvent(d) {
-    const id = String(d.id ?? d.uuid ?? (crypto?.randomUUID ? crypto.randomUUID() : Date.now()));
+function mapDutyToEvent(d) {
+  const id = String(d.id ?? d.uuid ?? (crypto?.randomUUID ? crypto.randomUUID() : Date.now()));
 
-    const dutyType = String(d.duty_type ?? d.type ?? d.dutyType ?? "").toUpperCase();
+  const date = String(d.date ?? "");
+  const typeUpper = String(d.duty_type ?? "").toUpperCase();
 
-    const date = String(d.date ?? d.day ?? "");
-    const time = normalizeTime(d.time ?? d.start_time ?? d.hour); // si no existe => ""
+  const workerName = String(d.worker ?? "").trim();
+  const specialityName = String(d.speciality ?? "").trim();
 
-    const specialityName = String(d.speciality_name ?? d.speciality ?? d.specialty ?? "");
-    const workerName = String(d.worker_name ?? d.workerName ?? d.name ?? "");
-    const chiefName = String(d.chief_worker_name ?? d.chiefWorkerName ?? "");
+  // ✅ AHORA ES ESTO
+  const jefe = Boolean(d.is_chief);
 
-    const specialityLabel = specialityName || (d.id_speciality != null ? `Especialidad #${d.id_speciality}` : "");
-    const workerLabel = workerName || (d.id_worker != null ? `Trabajador #${d.id_worker}` : "");
-    const chiefLabel = chiefName || (d.id_chief_worker != null ? `Jefe #${d.id_chief_worker}` : "");
+  // ✅ Título como quieres: trabajador + tipo (+ especialidad opcional)
+  const title = `${workerName} · ${typeUpper}${specialityName ? ` · ${specialityName}` : ""}`;
 
-    const allDayFromApi = Boolean(d.allDay ?? d.all_day);
-    const isAllDay = allDayFromApi || !time;
+  return {
+    id,
+    title,
+    start: date,     // allDay
+    allDay: true,    // porque no hay hora
+    extendedProps: {
+      type: typeUpper,
+      jefe,
+      raw: d,
+    },
+  };
+}
 
-    const start = d.start ? d.start : isAllDay ? date : `${date}T${time}:00`;
 
-    // Título “bonito” + completo
-    // Ej: "Especialidad #2 · CA 15:00 — Trabajador #23"
-    const title = `${specialityLabel}${specialityLabel ? " · " : ""}${dutyType}${!isAllDay && time ? ` ${time}` : ""}${workerLabel ? ` — ${workerLabel}` : ""
-      }`;
 
-    // jefe: si existe id_chief_worker
-    const jefe =
-      Boolean(d.jefe ?? d.is_chief ?? d.isChief) ||
-      Boolean(d.id_chief_worker ?? d.chief_worker_id ?? d.idChiefWorker);
-
-    return {
-      id,
-      title,
-      start,
-      allDay: isAllDay,
-      extendedProps: {
-        type: dutyType,
-        jefe,
-        specialityLabel,
-        workerLabel,
-        chiefLabel,
-        raw: d,
-      },
-    };
-  }
-
-  // ✅ llamamos a tu getDuties sin romperte aunque lo tengas con firma distinta
+  // llamamos a tu getDuties sin romperte aunque lo tengas con firma distinta
   async function callGetDuties(start, end) {
     // 1) getDuties({start,end})
     try {
@@ -226,7 +193,7 @@ export default function HomeDashboard() {
     }, 0);
   }, [loadDutiesForCurrentView]);
 
-  
+
   // Filtros
 
   const [filterOpen, setFilterOpen] = useState(false);
@@ -237,19 +204,20 @@ export default function HomeDashboard() {
     return events.filter((e) => e.extendedProps?.type === filterType);
   }, [events, filterType]);
 
-  
+
   // Modal Nueva Guardia (local)
 
   const [newOpen, setNewOpen] = useState(false);
   const [newType, setNewType] = useState("CA");
-  const [newDate, setNewDate] = useState("2024-04-01");
+  const [newDate, setNewDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [newTime, setNewTime] = useState("15:00");
   const [newName, setNewName] = useState("");
-  const [newSpecialty, setNewSpecialty] = useState("Anestesia");
+  const [newIdSpeciality, setNewIdSpeciality] = useState("");
 
   function openNewGuardiaModal(prefilledDate) {
     if (prefilledDate) setNewDate(prefilledDate);
     setNewName("");
+    setNewIdSpeciality("");
     setNewOpen(true);
   }
 
@@ -274,7 +242,7 @@ export default function HomeDashboard() {
         extendedProps: {
           type: newType,
           jefe: false,
-          specialityLabel: newSpecialty,
+          specialityLabel: newIdSpeciality,
           workerLabel: nameClean || `Trabajador ${getInitials(nameClean)}`,
           raw: null,
         },
@@ -351,12 +319,18 @@ export default function HomeDashboard() {
 
     setSpecialitiesLoading(true);
     setSpecialitiesError("");
-    getDuties()
 
-    // aquí deberías llamar a tu servicio real de especialidades
-    setTimeout(() => {
+    try {
+      const data = await getSpecialities();
+      const arr = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+      setSpecialities(arr);
+    } catch (e) {
+      console.error(e);
+      setSpecialities([]);
+      setSpecialitiesError("No se pudieron cargar las especialidades.");
+    } finally {
       setSpecialitiesLoading(false);
-    }, 0);
+    }
   }
 
   function closeImportModal() {
@@ -450,7 +424,7 @@ export default function HomeDashboard() {
       </div>
 
       {/* Cards stats */}
-      <section className="hdStats">
+      {/* <section className="hdStats">
         {stats.map((s) => (
           <div className="hdStatCard" key={s.title}>
             <div>
@@ -463,7 +437,7 @@ export default function HomeDashboard() {
             </div>
           </div>
         ))}
-      </section>
+      </section> */}
 
       {/* Calendar card */}
       <section className="hdCalendarCard">
@@ -538,15 +512,15 @@ export default function HomeDashboard() {
             )}
 
             {/* NUEVA GUARDIA */}
-            <button className="hdBtn primary" type="button" onClick={() => openNewGuardiaModal()}>
+            {/* <button className="hdBtn primary" type="button" onClick={() => openNewGuardiaModal()}>
               <span className="material-icons-outlined">add</span>
               <span className="hideOnMobile">Nueva Guardia</span>
               <span className="showOnMobile">Crear</span>
-            </button>
+            </button> */}
           </div>
         </div>
 
-        {/* ✅ Estado de carga/errores */}
+        {/*  Estado de carga/errores */}
         {(eventsLoading || eventsError) && (
           <div style={{ padding: "10px 16px" }}>
             {eventsLoading && <span style={{ fontWeight: 700 }}>Cargando guardias...</span>}
@@ -560,7 +534,7 @@ export default function HomeDashboard() {
               ref={calendarRef}
               plugins={[dayGridPlugin, interactionPlugin]}
               initialView="dayGridMonth"
-              initialDate="2024-04-01"
+              initialDate={new Date()}
               firstDay={1}
               height="auto"
               locale="es"
@@ -635,14 +609,17 @@ export default function HomeDashboard() {
 
               <label className="hdField">
                 <span>Especialidad</span>
-                <select value={newSpecialty} onChange={(e) => setNewSpecialty(e.target.value)} className="hdControl">
-                  <option value="Anestesia">Anestesia</option>
-                  <option value="Cirugía">Cirugía</option>
-                  <option value="Radiologia">Radiología</option>
-                  <option value="Medicina Intensiva">Medicina Intensiva</option>
-                  <option value="Medicina Interna">Medicina Interna</option>
-                  <option value="Cirugia General">Cirugía General</option>
-                  <option value="Pediatria">Pediatría</option>
+                <select
+                  className="hdControl"
+                  value={newIdSpeciality}
+                  onChange={(e) => setNewIdSpeciality(e.target.value)}
+                >
+                  <option value="">Selecciona una especialidad</option>
+                  {specialities.map((s) => (
+                    <option key={s.id} value={String(s.id)}>
+                      {s.name} (id: {s.id})
+                    </option>
+                  ))}
                 </select>
               </label>
 
@@ -717,12 +694,21 @@ export default function HomeDashboard() {
                 ) : specialitiesError ? (
                   <div className="hdControl">{specialitiesError}</div>
                 ) : (
-                  // ✅ Aquí vuelve a poner tu select real de especialidades cuando lo tengas
-                  <select className="hdControl" value={idSpeciality} onChange={(e) => setIdSpeciality(e.target.value)}>
+
+
+                  <select
+                    className="hdControl"
+                    value={idSpeciality}
+                    onChange={(e) => setIdSpeciality(e.target.value)}
+                  >
                     <option value="">-- Selecciona una especialidad --</option>
-                    <option value="1">Anestesia (id: 1)</option>
-                    <option value="2">Cirugía (id: 2)</option>
+                    {specialities.map((s) => (
+                      <option key={s.id} value={String(s.id)}>
+                        {s.name} (id: {s.id})
+                      </option>
+                    ))}
                   </select>
+
                 )}
               </label>
 

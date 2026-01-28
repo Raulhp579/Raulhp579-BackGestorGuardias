@@ -3,12 +3,13 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\DutyController;
 use App\Http\Controllers\SpecialityController;
 use App\Http\Controllers\WorkerController;
 use App\Http\Controllers\ImportExcelsController;
 
-// ✅ Preflight CORS para /api/*
+// Preflight CORS para /api/*
 Route::options('/{any}', function (Request $request) {
     $origin = $request->header('Origin');
     $allowed = ['https://proyecto4.arenadaw.com.es', 'http://localhost:5173'];
@@ -21,13 +22,23 @@ Route::options('/{any}', function (Request $request) {
         ->header('Access-Control-Max-Age', '86400');
 })->where('any', '.*');
 
-Route::get('/userInfo', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-
 Route::post('/register', [AuthController::class, "register"]);
 Route::post('/login', [AuthController::class, "login"]);
 Route::get('/logout', [AuthController::class, "logout"])->middleware('auth:sanctum');
+
+//---------------------User routes-----------------------------
+//Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/profile', [UserController::class, 'profile']);
+    Route::put('/profile', [UserController::class, 'update']);
+    Route::post('/change-password', [UserController::class, 'changePassword']);
+    Route::delete('/profile', [UserController::class, 'destroy']);
+//});
+
+// Admin routes (requiere autenticación y rol de admin)
+//Route::middleware(['auth:sanctum', 'isAdmin'])->group(function () {
+    Route::get('/users', [UserController::class, 'index']);
+    Route::get('/users/{id}', [UserController::class, 'show']);
+//});
 
 Route::post('/importUsers', [ImportExcelsController::class, "importWorkers"])->name('import.users');
 Route::post('/importDuties', [ImportExcelsController::class, "importDuties"])->name('import.duties');
