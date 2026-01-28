@@ -48,7 +48,7 @@ export default function Login() {
                             />
                         </svg>
                     </div>
-                    <h1 className="brandTitle">Junta de Andalucía</h1>
+                    <h1 className="brandTitle">GuardiApp</h1>
                 </header>
 
                 <section
@@ -121,7 +121,7 @@ export default function Login() {
 
                 <footer className="loginFooter">
                     <p>
-                        © 2026 Junta de Andalucía. Todos los derechos
+                        © 2026  En colaboración con la Junta de Andalucía. Todos los derechos
                         reservados.
                     </p>
                     <div className="footerLinks">

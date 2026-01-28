@@ -2,11 +2,17 @@
     position: sticky;
     top: 0;
     z-index: 50;
-    background: var(--primary);
-    /* usa tu verde */
+    background: var(--appPrimary);
     color: #fff;
     box-shadow: 0 6px 14px rgba(0, 0, 0, .12);
+
+    /* NECESARIO para que el ::before se pegue al header */
+    position: sticky;
+    position: relative;
+
+   
 }
+
 
 .cdHeaderInner {
     padding: 16px 16px;

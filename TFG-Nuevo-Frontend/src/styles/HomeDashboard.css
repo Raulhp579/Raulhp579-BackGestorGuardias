@@ -428,6 +428,7 @@ body {
     border-radius: var(--r);
     box-shadow: var(--shadow-soft);
     overflow: hidden;
+    margin-top: 2vh;
 }
 
 .hdCalendarTop {
@@ -472,10 +473,12 @@ body {
     padding: 0 6px;
 }
 
+/* Alineación y mismo tamaño para los 3 botones del header del calendario */
 .hdActions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    align-items: stretch;
 }
 
 .hdBtn {
@@ -488,6 +491,7 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    padding: 5vh;
 }
 
 .hdBtn.light {
@@ -520,6 +524,42 @@ body {
 
 .showOnMobile {
     display: inline;
+}
+
+/* Tamaño “más pequeño” para los 3 botones */
+.hdBtnSm {
+    height: 54px;
+    /* antes 86px */
+    padding: 12px 14px;
+    border-radius: 16px;
+    gap: 10px;
+    font-weight: 700;
+    justify-content: center;
+}
+
+/* Variante secundaria (para Importar Excel) */
+.hdBtn.secondary {
+    background: #2f4a40;
+    /* secundario oscuro */
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, .10);
+}
+
+.hdBtn.secondary:hover {
+    filter: brightness(1.05);
+}
+
+.hdBtn.secondary .material-icons-outlined,
+.hdBtn.secondary .material-icons {
+    color: inherit;
+}
+
+/* Si en móvil quieres aún más bajito */
+@media (max-width: 700px) {
+    .hdBtnSm {
+        height: 48px;
+        border-radius: 14px;
+    }
 }
 
 /* Calendar */
@@ -1018,21 +1058,19 @@ body {
 
 /* ===== Modal Nueva Guardia ===== */
 
-.cdActions{
+.cdActions {
     margin-top: 2vh;
 }
-
 
 
 .hdModalOverlay {
     position: fixed;
     inset: 0;
-    background: rgba(17, 24, 39, 0.45);
+    background: rgba(0, 0, 0, .55);
+    z-index: 9999;
+    /* mayor que el header */
     display: grid;
     place-items: center;
-    z-index: 80;
-    padding: 16px;
-    margin-top: 5%;
 }
 
 .hdModalCard {

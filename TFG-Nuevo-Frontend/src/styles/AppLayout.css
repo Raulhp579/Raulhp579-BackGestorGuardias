@@ -1,11 +1,15 @@
 :root {
-    --appPrimary: #2F5D4E;
+    --appPrimary: #007041;
     --appPrimaryHover: #244a3e;
     --appBg: #F3F4F6;
     --appSurface: #FFFFFF;
     --appBorder: #E5E7EB;
     --appText: #111827;
     --appMuted: #6B7280;
+
+    --sidebarBg: #2f4f46;
+    /* el verde del sidebar */
+
 
     /* Para tu cdHeader */
     --primary: var(--appPrimary);
@@ -77,6 +81,7 @@ body {
     gap: 12px;
     border-bottom: 1px solid rgba(255, 255, 255, .10);
     position: relative;
+    background: var(--appPrimary);
 }
 
 .appSidebarLogo {

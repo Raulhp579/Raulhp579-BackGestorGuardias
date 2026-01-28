@@ -29,14 +29,7 @@ function getInitials(name) {
 }
 
 export default function HomeDashboard() {
-  /* const stats = useMemo(
-    () => [
-      { title: "Sustituciones", value: "3", note: "Pendientes de validar", icon: "people", accent: "blue" },
-      { title: "Total Guardias", value: "150", note: "+12% vs mes anterior", icon: "bar_chart", accent: "green" },
-      { title: "Alertas", value: "5", note: "Errores de importación", icon: "warning", accent: "red" },
-    ],
-    []
-  ); */
+ 
 
   const { addNotification } = useNotifications();
 
@@ -61,7 +54,7 @@ export default function HomeDashboard() {
     return hasValidExtension || hasValidMimeType;
   }
 
-  
+
   async function importDutysExcel({ file, year, month, idSpeciality }) {
     if (!file) return setImportMsg("No se ha seleccionado ningún archivo");
     if (!year || !month || !idSpeciality) return setImportMsg("Por favor, seleccione año, mes y especialidad");
@@ -111,6 +104,25 @@ export default function HomeDashboard() {
   const [eventsLoading, setEventsLoading] = useState(false);
   const [eventsError, setEventsError] = useState("");
 
+
+  const stats = useMemo(() => {
+    const total = events.length;
+
+    const byType = (t) => events.filter((e) => e.extendedProps?.type === t).length;
+
+    // Si quieres "Sustituciones" como ejemplo real:
+    // yo lo he interpretado como LOC (puedes cambiarlo a PF/CA o a otro campo si tu backend lo trae)
+    const sustituciones = byType("CA");
+
+    const alertas = events.filter((e) => !e.start).length; // ejemplo: eventos “mal formados” sin fecha
+
+    return [
+      { title: "Continuidad Asistida", value: String(sustituciones), note: "Según calendario", icon: "people", accent: "blue" },
+      { title: "Total Guardias", value: String(total), note: "En el mes visible", icon: "bar_chart", accent: "green" },
+      { title: "Alertas", value: String(alertas), note: "Eventos sin fecha", icon: "warning", accent: "red" },
+    ];
+  }, [events]);
+
   /**
    *  IMPORTANTE (por tu JSON ejemplo):
    * El backend solo manda "date" y NO manda "hora".
@@ -122,33 +134,33 @@ export default function HomeDashboard() {
    * - si el backend manda speciality_name / worker_name / chief_worker_name => se usan
    * - si NO manda => fallback a "Especialidad #ID" / "Trabajador #ID" / etc
    */
-function mapDutyToEvent(d) {
-  const id = String(d.id ?? d.uuid ?? (crypto?.randomUUID ? crypto.randomUUID() : Date.now()));
+  function mapDutyToEvent(d) {
+    const id = String(d.id ?? d.uuid ?? (crypto?.randomUUID ? crypto.randomUUID() : Date.now()));
 
-  const date = String(d.date ?? "");
-  const typeUpper = String(d.duty_type ?? "").toUpperCase();
+    const date = String(d.date ?? "");
+    const typeUpper = String(d.duty_type ?? "").toUpperCase();
 
-  const workerName = String(d.worker ?? "").trim();
-  const specialityName = String(d.speciality ?? "").trim();
+    const workerName = String(d.worker ?? "").trim();
+    const specialityName = String(d.speciality ?? "").trim();
 
-  // ✅ AHORA ES ESTO
-  const jefe = Boolean(d.is_chief);
+    // AHORA ES ESTO
+    const jefe = Boolean(d.is_chief);
 
-  // ✅ Título como quieres: trabajador + tipo (+ especialidad opcional)
-  const title = `${workerName} · ${typeUpper}${specialityName ? ` · ${specialityName}` : ""}`;
+    // Título como quieres: trabajador + tipo (+ especialidad opcional)
+    const title = `${workerName} · ${typeUpper}${specialityName ? ` · ${specialityName}` : ""}`;
 
-  return {
-    id,
-    title,
-    start: date,     // allDay
-    allDay: true,    // porque no hay hora
-    extendedProps: {
-      type: typeUpper,
-      jefe,
-      raw: d,
-    },
-  };
-}
+    return {
+      id,
+      title,
+      start: date,     // allDay
+      allDay: true,    // porque no hay hora
+      extendedProps: {
+        type: typeUpper,
+        jefe,
+        raw: d,
+      },
+    };
+  }
 
 
 
@@ -423,8 +435,9 @@ function mapDutyToEvent(d) {
         </div>
       </div>
 
+
       {/* Cards stats */}
-      {/* <section className="hdStats">
+      <section className="hdStats">
         {stats.map((s) => (
           <div className="hdStatCard" key={s.title}>
             <div>
@@ -437,7 +450,7 @@ function mapDutyToEvent(d) {
             </div>
           </div>
         ))}
-      </section> */}
+      </section>
 
       {/* Calendar card */}
       <section className="hdCalendarCard">
@@ -454,10 +467,140 @@ function mapDutyToEvent(d) {
             </button>
           </div>
 
+
+
           <div className="hdActions" style={{ position: "relative" }}>
+
+
+            {/* IMPORTAR EXCEL */}
+            <button className="hdBtn primary hdBtnSm" type="button" onClick={openImportModal}>
+              <span className="material-icons-outlined">table_view</span>
+              <span className="hideOnMobile">Importar Excel</span>
+              <span className="showOnMobile">Excel</span>
+            </button>
+            {/* MODAL IMPORTAR EXCEL */}
+            {importOpen && (
+              <div className="hdModalOverlay" role="dialog" aria-modal="true">
+                <div className="hdModalCard">
+                  <div className="hdModalHead">
+                    <div className="hdModalTitle">Importar guardias desde Excel</div>
+                    <button className="hdModalClose" type="button" onClick={closeImportModal} aria-label="Cerrar">
+                      <span className="material-icons-outlined">close</span>
+                    </button>
+                  </div>
+
+                  <div className="hdModalBody">
+                    <label className="hdField">
+                      <span>Especialidad</span>
+
+                      {specialitiesLoading ? (
+                        <div className="hdControl">Cargando especialidades...</div>
+                      ) : specialitiesError ? (
+                        <div className="hdControl">{specialitiesError}</div>
+                      ) : (
+
+
+                        <select
+                          className="hdControl"
+                          value={idSpeciality}
+                          onChange={(e) => setIdSpeciality(e.target.value)}
+                        >
+                          <option value="">-- Selecciona una especialidad --</option>
+                          {specialities.map((s) => (
+                            <option key={s.id} value={String(s.id)}>
+                              {s.name} (id: {s.id})
+                            </option>
+                          ))}
+                        </select>
+
+                      )}
+                    </label>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                      <label className="hdField">
+                        <span>Mes</span>
+                        <select className="hdControl" value={importMonth} onChange={(e) => setImportMonth(e.target.value)}>
+                          {months.map((m) => (
+                            <option key={m.value} value={m.value}>
+                              {m.label} ({m.value})
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+
+                      <label className="hdField">
+                        <span>Año</span>
+                        <select className="hdControl" value={importYear} onChange={(e) => setImportYear(e.target.value)}>
+                          {years.map((y) => (
+                            <option key={y} value={y}>
+                              {y}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    </div>
+
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                      style={{ display: "none" }}
+                      onChange={onPickExcelFile}
+                    />
+
+                    <div
+                      onDragOver={onDragOver}
+                      onDragLeave={onDragLeave}
+                      onDrop={onDrop}
+                      onClick={() => fileInputRef.current?.click()}
+                      style={{
+                        marginTop: 12,
+                        border: `2px dashed ${isDragging ? "#888" : "#ccc"}`,
+                        borderRadius: 12,
+                        padding: 16,
+                        cursor: "pointer",
+                        textAlign: "center",
+                        userSelect: "none",
+                      }}
+                      title="Arrastra Excel o haz clic para seleccionarlo"
+                    >
+                      <div style={{ fontWeight: 600 }}>Arrastra aquí tu Excel (.xls / .xlsx)</div>
+                      <div style={{ marginTop: 6, opacity: 0.8 }}>o haz clic para seleccionarlo</div>
+
+                      {excelFile && (
+                        <div style={{ marginTop: 10 }}>
+                          Archivo: <b>{excelFile.name}</b>
+                        </div>
+                      )}
+                    </div>
+
+                    {importMsg && <p style={{ marginTop: 12 }}>{importMsg}</p>}
+                  </div>
+
+                  <div className="hdModalFooter">
+                    <button className="hdBtn light hdBtnSm" type="button" onClick={closeImportModal}>
+                      Cancelar
+                    </button>
+
+                    <button className="hdBtn primary hdBtnSm" type="button" disabled={importUploading} onClick={submitImport}>
+                      {importUploading ? "Subiendo..." : "Importar"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+
+
+            {/* NUEVA GUARDIA */}
+            <button className="hdBtn primary hdBtnSm" type="button" onClick={() => openNewGuardiaModal()}>
+              <span className="material-icons-outlined">add</span>
+              <span className="hideOnMobile">Nueva Guardia</span>
+              <span className="showOnMobile">Crear</span>
+            </button>
             {/* FILTROS */}
             <button
-              className="hdBtn light"
+              className="hdBtn light hdBtnSm"
               type="button"
               onClick={() => setFilterOpen((v) => !v)}
               aria-expanded={filterOpen}
@@ -510,15 +653,12 @@ function mapDutyToEvent(d) {
                 </button>
               </div>
             )}
-
-            {/* NUEVA GUARDIA */}
-            {/* <button className="hdBtn primary" type="button" onClick={() => openNewGuardiaModal()}>
-              <span className="material-icons-outlined">add</span>
-              <span className="hideOnMobile">Nueva Guardia</span>
-              <span className="showOnMobile">Crear</span>
-            </button> */}
           </div>
         </div>
+
+
+
+
 
         {/*  Estado de carga/errores */}
         {(eventsLoading || eventsError) && (
@@ -630,10 +770,10 @@ function mapDutyToEvent(d) {
             </div>
 
             <div className="hdModalFooter">
-              <button className="hdBtn light" type="button" onClick={() => setNewOpen(false)}>
+              <button className="hdBtn light hdBtnSm" type="button" onClick={() => setNewOpen(false)}>
                 Cancelar
               </button>
-              <button className="hdBtn primary" type="button" onClick={addGuardia}>
+              <button className="hdBtn primary hdBtnSm" type="button" onClick={addGuardia}>
                 Guardar
               </button>
             </div>
@@ -664,127 +804,6 @@ function mapDutyToEvent(d) {
         </div>
       </section>
 
-      {/* IMPORTAR EXCEL */}
-      <section>
-        <div className="cdActions">
-          <button className="cdBtnSecondary" type="button" onClick={openImportModal}>
-            <span className="material-icons excel">table_view</span>
-            Importar Excel
-          </button>
-        </div>
-      </section>
-
-      {/* MODAL IMPORTAR EXCEL */}
-      {importOpen && (
-        <div className="hdModalOverlay" role="dialog" aria-modal="true">
-          <div className="hdModalCard">
-            <div className="hdModalHead">
-              <div className="hdModalTitle">Importar guardias desde Excel</div>
-              <button className="hdModalClose" type="button" onClick={closeImportModal} aria-label="Cerrar">
-                <span className="material-icons-outlined">close</span>
-              </button>
-            </div>
-
-            <div className="hdModalBody">
-              <label className="hdField">
-                <span>Especialidad</span>
-
-                {specialitiesLoading ? (
-                  <div className="hdControl">Cargando especialidades...</div>
-                ) : specialitiesError ? (
-                  <div className="hdControl">{specialitiesError}</div>
-                ) : (
-
-
-                  <select
-                    className="hdControl"
-                    value={idSpeciality}
-                    onChange={(e) => setIdSpeciality(e.target.value)}
-                  >
-                    <option value="">-- Selecciona una especialidad --</option>
-                    {specialities.map((s) => (
-                      <option key={s.id} value={String(s.id)}>
-                        {s.name} (id: {s.id})
-                      </option>
-                    ))}
-                  </select>
-
-                )}
-              </label>
-
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                <label className="hdField">
-                  <span>Mes</span>
-                  <select className="hdControl" value={importMonth} onChange={(e) => setImportMonth(e.target.value)}>
-                    {months.map((m) => (
-                      <option key={m.value} value={m.value}>
-                        {m.label} ({m.value})
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="hdField">
-                  <span>Año</span>
-                  <select className="hdControl" value={importYear} onChange={(e) => setImportYear(e.target.value)}>
-                    {years.map((y) => (
-                      <option key={y} value={y}>
-                        {y}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                style={{ display: "none" }}
-                onChange={onPickExcelFile}
-              />
-
-              <div
-                onDragOver={onDragOver}
-                onDragLeave={onDragLeave}
-                onDrop={onDrop}
-                onClick={() => fileInputRef.current?.click()}
-                style={{
-                  marginTop: 12,
-                  border: `2px dashed ${isDragging ? "#888" : "#ccc"}`,
-                  borderRadius: 12,
-                  padding: 16,
-                  cursor: "pointer",
-                  textAlign: "center",
-                  userSelect: "none",
-                }}
-                title="Arrastra Excel o haz clic para seleccionarlo"
-              >
-                <div style={{ fontWeight: 600 }}>Arrastra aquí tu Excel (.xls / .xlsx)</div>
-                <div style={{ marginTop: 6, opacity: 0.8 }}>o haz clic para seleccionarlo</div>
-
-                {excelFile && (
-                  <div style={{ marginTop: 10 }}>
-                    Archivo: <b>{excelFile.name}</b>
-                  </div>
-                )}
-              </div>
-
-              {importMsg && <p style={{ marginTop: 12 }}>{importMsg}</p>}
-            </div>
-
-            <div className="hdModalFooter">
-              <button className="hdBtn light" type="button" onClick={closeImportModal}>
-                Cancelar
-              </button>
-
-              <button className="hdBtn primary" type="button" disabled={importUploading} onClick={submitImport}>
-                {importUploading ? "Subiendo..." : "Importar"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
