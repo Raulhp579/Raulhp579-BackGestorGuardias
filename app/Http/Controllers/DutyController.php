@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 
 class DutyController extends Controller
 {
@@ -48,10 +49,38 @@ class DutyController extends Controller
     /**
      * Return all duties
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $allDuties = Duty::all();
+            //duties by name user and date
+            if(isset($request->name)){
+                if(isset($request->date)){
+                    $users = Worker::where("name",'LIKE',"%{$request->name}%")->get();
+                    $allDuties = [];
+
+                    foreach($users as $user){
+                        $allDutiesUser = Duty::where("id_worker",$user->id)->where("date",$request->date)->get();   
+                        foreach($allDutiesUser as $duty){
+                            $allDuties[]=$duty;
+                        }
+                    }
+                }else{
+                    $users = Worker::where("name",'LIKE',"%{$request->name}%")->get();
+                    $allDuties = [];
+
+                    foreach($users as $user){
+                        $allDutiesUser = Duty::where("id_worker",$user->id)->get();   
+                        foreach($allDutiesUser as $duty){
+                            $allDuties[]=$duty;
+                        }
+                    }
+                }
+            }else if(isset($request->date)){
+                $allDuties = Duty::where("date",$request->date)->get();             
+            }else{
+                $allDuties = Duty::all();
+            }
+     
             $duties = [];
             foreach($allDuties as $duty){
                 $duties[] = [

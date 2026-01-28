@@ -24,11 +24,36 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);  */
         Role::create(["name"=>"admin"]);
+        Role::create(["name"=>"empleado"]);
         User::factory()->create([
             'name' => 'Santo Tomás',
-            'email' => 'santotomas@gmail.com',
+            'email' => 'santotomas@alu.medac.es',
             'password'=>Hash::make('12345')
         ])->assignRole('admin');
+
+        User::factory()->create([
+            'name' => 'Javier Ruiz',
+            'email' => 'javier.ruiz@doc.medac.es',
+            'password'=>Hash::make('password')
+        ])->assignRole('admin');
+
+        User::factory()->create([
+            'name' => 'Usuario1',
+            'email' => 'usuario1@alu.medac.es',
+            'password'=>Hash::make('password')
+        ])->assignRole('empleado');
+
+        User::factory()->create([
+            'name' => 'Usuario2',
+            'email' => 'usuario2@alu.medac.es',
+            'password'=>Hash::make('password')
+        ])->assignRole('empleado');
+
+        User::factory()->create([
+            'name' => 'Usuario3',
+            'email' => 'usuario3@alu.medac.es',
+            'password'=>Hash::make('password')
+        ])->assignRole('empleado');
         
         $this->call(SpecialitySeeder::class); 
         
