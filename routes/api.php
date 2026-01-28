@@ -24,7 +24,7 @@ Route::options('/{any}', function (Request $request) {
 })->where('any', '.*');
 
 /* Route::post('/register', [AuthController::class, "register"]); */
-Route::post('/login', [AuthController::class, 'login']);
+
 Route::get('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
 // ---------------------User routes-----------------------------
@@ -62,3 +62,4 @@ Route::middleware(['auth:sanctum', isAdmin::class])->group(function () {
 Route::get('/duties', [DutyController::class, 'index']);
 Route::get('/duties/{id}', [DutyController::class, 'show']);
 Route::get('/duties/day/{date}', [DutyController::class, 'day']);
+Route::post('/login', [AuthController::class, 'login']);

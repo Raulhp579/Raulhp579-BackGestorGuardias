@@ -1,6 +1,10 @@
-
 //import.users
 const API_BASE = "/api";
+
+// Helper para obtener el token
+function getToken() {
+    return localStorage.getItem("token");
+}
 
 export async function importWorkersExcel(file) {
     const formData = new FormData();
@@ -8,8 +12,11 @@ export async function importWorkersExcel(file) {
 
     const res = await fetch(`${API_BASE}/importUsers`, {
         method: "POST",
+        headers: {
+            Authorization: `Bearer ${getToken()}`,
+            // NO pongas Content-Type aquí, FormData lo añade automáticamente
+        },
         body: formData,
-        // NO pongas headers aquí
     });
 
     const contentType = res.headers.get("content-type") || "";
@@ -21,15 +28,14 @@ export async function importWorkersExcel(file) {
         const msg =
             typeof data === "string"
                 ? data
-                : (data?.error || data?.mistake || data?.message || "Error al importar");
+                : data?.error ||
+                  data?.mistake ||
+                  data?.message ||
+                  "Error al importar";
         throw new Error(msg);
     }
 
     return data;
-
-
-
-
 }
 
 export async function importExcel({ file, year, month, idSpeciality }) {
@@ -43,16 +49,19 @@ export async function importExcel({ file, year, month, idSpeciality }) {
 
         const response = await fetch(`${API_BASE}/importDuties`, {
             method: "POST",
+            headers: {
+                Authorization: `Bearer ${getToken()}`,
+                // OJO: NO pongas Content-Type aquí. El navegador lo pone con el boundary.
+            },
             body: formData,
-            // OJO: NO pongas Content-Type aquí. El navegador lo pone con el boundary.
-
         });
 
         // intenta leer json aunque haya error (para message)
         const data = await response.json().catch(() => null);
 
         if (!response.ok) {
-            const msg = data?.message || `HTTP error! status: ${response.status}`;
+            const msg =
+                data?.message || `HTTP error! status: ${response.status}`;
             throw new Error(msg);
         }
         return data;
@@ -60,5 +69,4 @@ export async function importExcel({ file, year, month, idSpeciality }) {
         console.error("Error al importar guardias:", error);
         throw error;
     }
-
 }
