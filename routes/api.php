@@ -41,6 +41,7 @@ Route::middleware(['auth:sanctum', isAdmin::class])->group(function () {
     Route::get('/users/{id}', [UserController::class, 'show']);
     //para javi en el frontend esta es la ruta del boton de editar
     Route::put('/users/{id}', [UserController::class, 'edit']);
+    Route::delete('/users/{id}', [UserController::class, 'destroyAdmin']);
     Route::post('/importUsers', [ImportExcelsController::class, 'importWorkers'])->name('import.users');
     Route::post('/importDuties', [ImportExcelsController::class, 'importDuties'])->name('import.duties');
     Route::apiResource('/speciality', SpecialityController::class);

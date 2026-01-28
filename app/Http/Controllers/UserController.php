@@ -227,4 +227,37 @@ class UserController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Eliminar un usuario específico (solo para administradores)
+     */
+    public function destroyAdmin($id)
+    {
+        try {
+            $user = User::findOrFail($id);
+
+            // Evitar que se elimine a un admin
+            if ($user->hasRole('admin')) {
+                return response()->json([
+                    'error' => 'No se puede eliminar a un administrador',
+                ], 403);
+            }
+
+            $user->delete();
+
+            return response()->json([
+                'message' => 'Usuario eliminado correctamente',
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'Usuario no encontrado',
+            ], 404);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => 'Error al eliminar el usuario',
+                'fail' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }
