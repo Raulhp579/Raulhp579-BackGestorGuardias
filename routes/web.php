@@ -11,6 +11,11 @@ Route::get('/app/{any?}', function () {
 
 Route::get('/', fn() => redirect('/app/'));
 
+// Catch-all para rutas del frontend SPA (login, dashboard, etc.)
+Route::get('/{any}', function () {
+    return File::get(public_path('app/index.html'));
+})->where('any', '^(?!api).*$');
+
 
 
 /* Route::get('/importUsers', [ImportExcelsController::class, "importWorkers"])->name('import.users');
