@@ -135,19 +135,32 @@ export default function CalculosDocumentos() {
         ));
     }
 
-    function downloadMock(name) {
-        const blob = new Blob([`Mock file: ${name}`], { type: "text/plain" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = name;
-        a.click();
-        URL.revokeObjectURL(url);
-    }
 
     return (
         <div className="cdPage">
             <main className="cdMain">
+
+                <div className="cdActions">
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".xls,.xlsx"
+                        style={{ display: "none" }}
+                        onChange={onPickExcel}
+                    />
+                    <button
+                        className="cdBtnSecondary"
+                        type="button"
+                        disabled={importing}
+                        onClick={() => fileInputRef.current?.click()}
+                    >
+                        <span className="material-icons excel">table_view</span>
+                        {importing ? "Importando..." : "Importar usuarios"}
+                    </button>
+                    {importMsg && <p className="cdInfo">{importMsg}</p>}
+
+                </div>
+
                 <div className="cdToggle">
                     <button
                         className={workersBtnClass}
@@ -194,26 +207,6 @@ export default function CalculosDocumentos() {
                     </tbody>
                 </table>
 
-                <div className="cdActions">
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept=".xls,.xlsx"
-                        style={{ display: "none" }}
-                        onChange={onPickExcel}
-                    />
-                    <button
-                        className="cdBtnSecondary"
-                        type="button"
-                        disabled={importing}
-                        onClick={() => fileInputRef.current?.click()}
-                    >
-                        <span className="material-icons excel">table_view</span>
-                        {importing ? "Importando..." : "Importar usuarios"}
-                    </button>
-                    {importMsg && <p className="cdInfo">{importMsg}</p>}
-
-                </div>
             </main>
         </div>
     );
