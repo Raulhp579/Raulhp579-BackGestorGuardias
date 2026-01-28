@@ -22,17 +22,17 @@ Route::options('/{any}', function (Request $request) {
         ->header('Access-Control-Max-Age', '86400');
 })->where('any', '.*');
 
-Route::post('/register', [AuthController::class, "register"]);
+/* Route::post('/register', [AuthController::class, "register"]); */
 Route::post('/login', [AuthController::class, "login"]);
 Route::get('/logout', [AuthController::class, "logout"])->middleware('auth:sanctum');
 
 //---------------------User routes-----------------------------
-//Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [UserController::class, 'profile']);
     Route::put('/profile', [UserController::class, 'update']);
     Route::post('/change-password', [UserController::class, 'changePassword']);
     Route::delete('/profile', [UserController::class, 'destroy']);
-//});
+});
 
 // Admin routes (requiere autenticación y rol de admin)
 //Route::middleware(['auth:sanctum', 'isAdmin'])->group(function () {
