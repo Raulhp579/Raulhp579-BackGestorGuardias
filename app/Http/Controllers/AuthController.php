@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -34,31 +35,40 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $request->validate([
+        try{
+            $request->validate([
             'email' => 'required|email',
             'password' => 'required',
-        ]);
+            ]);
 
-        $user = User::where('email', $request->email)->first();
+            $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) 
-        {
-            throw ValidationException::withMessages([
-                'email' => ['Las credenciales proporcionadas son incorrectas.'],
+            if (!$user || !Hash::check($request->password, $user->password)) 
+            {
+                throw ValidationException::withMessages([
+                    'email' => ['Las credenciales proporcionadas son incorrectas.'],
+                ]);
+            }
+
+            // Revocar tokens anteriores si se desea
+            $user->tokens()->delete();
+
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return response()->json([
+                "auth" => [
+                    "access_token" => $token,
+                    "roles"=>$user->getRoleNames(),
+                    "token_type" => "Bearer"
+                ],
+            ], 201);
+        }catch(Exception $e){
+            return response()->json([
+                "error"=>"there is a problem with the login of the user",
+                "fail"=>$e->getMessage()
             ]);
         }
-
-        // Revocar tokens anteriores si se desea
-        $user->tokens()->delete();
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            "auth" => [
-                "access_token" => $token,
-                "token_type" => "Bearer"
-            ],
-        ], 201);
+        
     }
 
     public function logout(Request $request)

@@ -1,13 +1,14 @@
 <?php
 
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DutyController;
+use App\Http\Controllers\ImportExcelsController;
+use App\Http\Controllers\SpecialityController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\WorkerController;
+use App\Http\Middleware\isAdmin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\DutyController;
-use App\Http\Controllers\SpecialityController;
-use App\Http\Controllers\WorkerController;
-use App\Http\Controllers\ImportExcelsController;
 
 // Preflight CORS para /api/*
 Route::options('/{any}', function (Request $request) {
@@ -23,10 +24,10 @@ Route::options('/{any}', function (Request $request) {
 })->where('any', '.*');
 
 /* Route::post('/register', [AuthController::class, "register"]); */
-Route::post('/login', [AuthController::class, "login"]);
-Route::get('/logout', [AuthController::class, "logout"])->middleware('auth:sanctum');
+Route::post('/login', [AuthController::class, 'login']);
+Route::get('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
-//---------------------User routes-----------------------------
+// ---------------------User routes-----------------------------
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [UserController::class, 'profile']);
     Route::put('/profile', [UserController::class, 'update']);
@@ -35,34 +36,29 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 // Admin routes (requiere autenticación y rol de admin)
-//Route::middleware(['auth:sanctum', 'isAdmin'])->group(function () {
+Route::middleware(['auth:sanctum', isAdmin::class])->group(function () {
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/users/{id}', [UserController::class, 'show']);
-//});
+    Route::post('/importUsers', [ImportExcelsController::class, 'importWorkers'])->name('import.users');
+    Route::post('/importDuties', [ImportExcelsController::class, 'importDuties'])->name('import.duties');
+    Route::apiResource('/speciality', SpecialityController::class);
+    // CRUD Routes for workers
+    Route::apiResource('/workers', WorkerController::class);
 
-Route::post('/importUsers', [ImportExcelsController::class, "importWorkers"])->name('import.users');
-Route::post('/importDuties', [ImportExcelsController::class, "importDuties"])->name('import.duties');
+    // Additional filter routes for workers
+    Route::get('/workers/active/list', [WorkerController::class, 'getActive']);
+    Route::get('/workers/speciality/{idSpeciality}', [WorkerController::class, 'getBySpeciality']);
 
-Route::apiResource('/speciality', SpecialityController::class);
-Route::get('/assingChiefs', [DutyController::class, "assignChief"]);
+    Route::post('/duties', [DutyController::class, 'store']);
+    Route::put('/duties/{id}', [DutyController::class, 'update']);
+    Route::delete('/duties/{id}', [DutyController::class, 'destroy']);
 
-//---------------------Workers routes-----------------------------
+    Route::get('/assingChiefs', [DutyController::class, 'assignChief']);
+});
 
-// CRUD Routes for workers
-Route::apiResource("/workers", WorkerController::class);
-
-// Additional filter routes for workers
-Route::get('/workers/active/list', [WorkerController::class, 'getActive']);
-Route::get('/workers/speciality/{idSpeciality}', [WorkerController::class, 'getBySpeciality']);
-
- 
-//---------------------Duties routes-----------------------------
-
+// ---------------------Duties routes-----------------------------
 
 // List all duties
 Route::get('/duties', [DutyController::class, 'index']);
-Route::post('/duties', [DutyController::class, 'store']);
 Route::get('/duties/{id}', [DutyController::class, 'show']);
-Route::put('/duties/{id}', [DutyController::class, 'update']);
-Route::delete('/duties/{id}', [DutyController::class, 'destroy']);
 Route::get('/duties/day/{date}', [DutyController::class, 'day']);

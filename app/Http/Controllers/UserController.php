@@ -15,9 +15,17 @@ class UserController extends Controller
      */
     public function profile()
     {
-        $user = Auth::user();
+        try{
+            $user = Auth::user();
 
-        return response()->json($user, 200);
+            return response()->json($user, 200);
+        }catch(Exception $e){
+            return response()->json([
+                "error"=>"there is a problem showing your profile",
+                "fail"=>$e->getMessage()
+            ]);
+        }
+        
     }
 
     /**
@@ -25,20 +33,28 @@ class UserController extends Controller
      */
     public function update(Request $request)
     {
-        $user = Auth::user();
+        try{
+            $user = Auth::user();
 
-        $validated = $request->validate([
-            // SI está presente en la solicitud, debe cumplir con todas las demás validaciones
-            'name' => 'sometimes|required|string|max:255',
-            'email' => 'sometimes|required|email|unique:users,email,'.$user->id,
-        ]);
+            $validated = $request->validate([
+                // SI está presente en la solicitud, debe cumplir con todas las demás validaciones
+                'name' => 'sometimes|required|string|max:255',
+                'email' => 'sometimes|required|email|unique:users,email,'.$user->id,
+            ]);
 
-        $user->update($validated);
+            $user->update($validated);
 
-        return response()->json([
-            'message' => 'Perfil actualizado correctamente',
-            'user' => $user,
-        ], 200);
+            return response()->json([
+                'message' => 'Perfil actualizado correctamente',
+                'user' => $user,
+            ], 200);
+        }catch(Exception $e){
+            return response()->json([
+                "error"=>"there is a problem updating your profile",
+                "fail"=>$e->getMessage()
+            ]);
+        }
+        
     }
 
     /**
@@ -135,11 +151,19 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        if (isset($request->name)) {
+        try{
+            if (isset($request->name)) {
             return response()->json(User::where('name', 'LIKE', "%{$request->name}%")->first());
         }
 
-        return response()->json(User::all(), 200);
+            return response()->json(User::all(), 200);
+        }catch(Exception $e){
+            return response()->json([
+                "error"=>"there is a problem getting the users",
+                "fail"=>$e->getMessage()
+            ]);
+        }
+        
     }
 
     /**
@@ -147,8 +171,18 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        $user = User::findOrFail($id);
+        try{
+            $user = User::findOrFail($id);
 
-        return response()->json($user, 200);
+            return response()->json($user, 200);
+        }catch(Exception $e){
+            return response()->json([
+                "error"=>"there is a problem showing the user",
+                "fail"=>$e->getMessage()
+            ]);
+        }
+        
     }
+
+    //falta edit user (admin)
 }
