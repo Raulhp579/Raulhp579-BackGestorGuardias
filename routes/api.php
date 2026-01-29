@@ -9,6 +9,7 @@ use App\Http\Controllers\WorkerController;
 use App\Http\Middleware\isAdmin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PdfController;
 
 // Preflight CORS para /api/*
 Route::options('/{any}', function (Request $request) {
@@ -56,6 +57,8 @@ Route::middleware(['auth:sanctum', isAdmin::class])->group(function () {
     Route::delete('/duties/{id}', [DutyController::class, 'destroy']);
 
     Route::get('/assingChiefs', [DutyController::class, 'assignChief']);
+
+    Route::get('/plantilla-dia-pdf', [PdfController::class,'generarPdfDia']); 
 });
 
 // ---------------------Duties routes-----------------------------
