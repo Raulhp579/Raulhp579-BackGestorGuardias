@@ -10,6 +10,20 @@ function getAuthHeaders() {
     };
 }
 
+// Helper para verificar si el usuario es admin
+export function isUserAdmin() {
+    try {
+        const rolesStr = sessionStorage.getItem("roles");
+        if (!rolesStr) return false;
+        
+        const roles = JSON.parse(rolesStr);
+        // roles es un array de strings como ["admin"]
+        return Array.isArray(roles) && roles.includes("admin");
+    } catch {
+        return false;
+    }
+}
+
 export async function getWorkers() {
     const response = await fetch(`${API_BASE_URL}/workers`, {
         headers: getAuthHeaders(),

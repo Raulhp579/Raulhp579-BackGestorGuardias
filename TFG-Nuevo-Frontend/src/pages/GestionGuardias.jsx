@@ -1,9 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import "../styles/GestionGuardias.css";
-import { getDuties } from "../services/DutyService";
-import { assignChiefs } from "../services/userService";
+import { getDuties, updateDuty, deleteDuty } from "../services/DutyService";
+import { assignChiefs, getWorkers, isUserAdmin } from "../services/userService";
+import { getSpecialities } from "../services/SpecialitiesService";
 
 export default function GestionGuardias() {
+  // Verificar si el usuario es admin
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    setIsAdmin(isUserAdmin());
+  }, []);
+
   // Modal "Asignar jefe automáticamente"
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -47,6 +55,10 @@ export default function GestionGuardias() {
     return arr;
   }, []);
 
+  // Estados para especialidades y trabajadores
+  const [specialities, setSpecialities] = useState([]);
+  const [workers, setWorkers] = useState([]);
+
   // ✅ recargar guardias (reutilizable)
   async function reloadDuties() {
     setLoading(true);
@@ -68,6 +80,22 @@ export default function GestionGuardias() {
   // cargar guardias al montar
   useEffect(() => {
     reloadDuties();
+    
+    // Cargar especialidades
+    getSpecialities()
+      .then((data) => {
+        const arr = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+        setSpecialities(arr);
+      })
+      .catch((e) => console.error("Error cargando especialidades:", e));
+    
+    // Cargar trabajadores
+    getWorkers()
+      .then((data) => {
+        const arr = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+        setWorkers(arr);
+      })
+      .catch((e) => console.error("Error cargando trabajadores:", e));
   }, []);
 
   // ✅ abrir modal: pre-rellena mes/año con el primer registro si existe
@@ -134,10 +162,21 @@ export default function GestionGuardias() {
     id_worker: "",
     id_chief_worker: "",
   });
+  const [editSpecialityName, setEditSpecialityName] = useState("");
 
-  // Modal borrar
-  const [deleteOpen, setDeleteOpen] = useState(false);
+  // Filtrar trabajadores por especialidad seleccionada
+  const filteredWorkers = useMemo(() => {
+    if (!editForm.id_speciality || workers.length === 0) return workers;
+    const specialityId = Number(editForm.id_speciality);
+    return workers.filter((w) => {
+      const workerSpeciality = Number(w.id_speciality);
+      return workerSpeciality === specialityId;
+    });
+  }, [editForm.id_speciality, workers]);
+
+
   const [deleteRow, setDeleteRow] = useState(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   // Paginación
   const PAGE_SIZE = 8;
@@ -174,6 +213,7 @@ export default function GestionGuardias() {
       id_worker: String(row.id_worker ?? ""),
       id_chief_worker: row.id_chief_worker == null ? "" : String(row.id_chief_worker),
     });
+    setEditSpecialityName(row.speciality ?? "");
     setEditOpen(true);
   }
 
@@ -191,9 +231,24 @@ export default function GestionGuardias() {
       id_chief_worker: editForm.id_chief_worker === "" ? null : Number(editForm.id_chief_worker),
     };
 
-    setGuardias((prev) => prev.map((g) => (g.id === editRowId ? { ...g, ...updated } : g)));
-    setEditOpen(false);
-    setEditRowId(null);
+    // Hacer la llamada a la API
+    setLoading(true);
+    updateDuty(editRowId, updated)
+      .then(() => {
+        // Recargar guardias desde el servidor después de actualizar
+        return reloadDuties();
+      })
+      .then(() => {
+        setEditOpen(false);
+        setEditRowId(null);
+      })
+      .catch((error) => {
+        console.error("Error al guardar guardia:", error);
+        alert("Error al guardar la guardia: " + (error.message || "Error desconocido"));
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }
 
   // Borrar
@@ -204,9 +259,25 @@ export default function GestionGuardias() {
 
   function confirmDelete() {
     if (!deleteRow) return;
-    setGuardias((prev) => prev.filter((g) => g.id !== deleteRow.id));
-    setDeleteOpen(false);
-    setDeleteRow(null);
+    
+    // Hacer la llamada a la API
+    setLoading(true);
+    deleteDuty(deleteRow.id)
+      .then(() => {
+        // Recargar guardias desde el servidor después de eliminar
+        return reloadDuties();
+      })
+      .then(() => {
+        setDeleteOpen(false);
+        setDeleteRow(null);
+      })
+      .catch((error) => {
+        console.error("Error al eliminar guardia:", error);
+        alert("Error al eliminar la guardia: " + (error.message || "Error desconocido"));
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }
 
   function cancelDelete() {
@@ -274,20 +345,20 @@ export default function GestionGuardias() {
                   <th className="ggColCenter">ESPECIALIDAD</th>
                   <th className="ggColCenter">TRABAJADOR</th>
                   <th className="ggColCenter">JEFE</th>
-                  <th className="ggColActions">ACCIONES</th>
+                  {isAdmin && <th className="ggColActions">ACCIONES</th>}
                 </tr>
               </thead>
 
               <tbody>
                 {loading ? (
                   <tr>
-                    <td className="ggEmpty" colSpan={6}>
+                    <td className="ggEmpty" colSpan={isAdmin ? 6 : 5}>
                       Cargando guardias...
                     </td>
                   </tr>
                 ) : pagedGuardias.length === 0 ? (
                   <tr>
-                    <td className="ggEmpty" colSpan={6}>
+                    <td className="ggEmpty" colSpan={isAdmin ? 6 : 5}>
                       No hay guardias registradas.
                     </td>
                   </tr>
@@ -305,15 +376,17 @@ export default function GestionGuardias() {
                       <td className="ggColCenter ggMono">{g.chief_worker ?? "—"}</td>
 
                       <td className="ggColActions">
-                        <div className="ggActionsCenter">
-                          <button className="ggIconBtn" type="button" onClick={() => handleEdit(g)} title="Editar">
-                            <span className="material-icons-outlined">edit</span>
-                          </button>
+                        {isAdmin && (
+                          <div className="ggActionsCenter">
+                            <button className="ggIconBtn" type="button" onClick={() => handleEdit(g)} title="Editar">
+                              <span className="material-icons-outlined">edit</span>
+                            </button>
 
-                          <button className="ggIconBtn danger" type="button" onClick={() => handleDelete(g)} title="Borrar">
-                            <span className="material-icons-outlined">delete</span>
-                          </button>
-                        </div>
+                            <button className="ggIconBtn danger" type="button" onClick={() => handleDelete(g)} title="Borrar">
+                              <span className="material-icons-outlined">delete</span>
+                            </button>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))
@@ -357,10 +430,12 @@ export default function GestionGuardias() {
 
         <div className="ctaWrap">
           {/* ✅ abre modal con mes/año */}
-          <button className="ctaBtn" type="button" onClick={openAssignModal} disabled={loading}>
-            <span className="material-icons">add_circle_outline</span>
-            <span>Asignar jefe automaticamente</span>
-          </button>
+          {isAdmin && (
+            <button className="ctaBtn" type="button" onClick={openAssignModal} disabled={loading}>
+              <span className="material-icons">add_circle_outline</span>
+              <span>Asignar jefe automaticamente</span>
+            </button>
+          )}
         </div>
       </main>
 
@@ -426,37 +501,47 @@ export default function GestionGuardias() {
                   </label>
 
                   <label className="label">
-                    ID Especialidad
+                    Especialidad
                     <input
                       className="control"
-                      type="number"
-                      min="0"
-                      value={editForm.id_speciality}
-                      onChange={(e) => setEditForm((p) => ({ ...p, id_speciality: e.target.value }))}
+                      type="text"
+                      value={editSpecialityName}
+                      disabled
+                      title="La especialidad no se puede cambiar"
                     />
                   </label>
 
                   <label className="label">
-                    ID Trabajador
-                    <input
+                    Trabajador
+                    <select
                       className="control"
-                      type="number"
-                      min="0"
                       value={editForm.id_worker}
                       onChange={(e) => setEditForm((p) => ({ ...p, id_worker: e.target.value }))}
-                    />
+                      required
+                    >
+                      <option value="">Selecciona un trabajador</option>
+                      {filteredWorkers.map((worker) => (
+                        <option key={worker.id} value={worker.id}>
+                          {worker.name}
+                        </option>
+                      ))}
+                    </select>
                   </label>
 
                   <label className="label">
-                    ID Jefe (opcional)
-                    <input
+                    Jefe (opcional)
+                    <select
                       className="control"
-                      type="number"
-                      min="0"
                       value={editForm.id_chief_worker}
                       onChange={(e) => setEditForm((p) => ({ ...p, id_chief_worker: e.target.value }))}
-                      placeholder="Vacío = sin jefe"
-                    />
+                    >
+                      <option value="">Sin jefe</option>
+                      {workers.map((worker) => (
+                        <option key={worker.id} value={worker.id}>
+                          {worker.name}
+                        </option>
+                      ))}
+                    </select>
                   </label>
                 </div>
               </div>
