@@ -4,6 +4,12 @@ import { getDuties } from "../services/DutyService";
 import { assignChiefs } from "../services/userService";
 
 export default function GestionGuardias() {
+  const SKELETON_ROWS = 8;
+
+  // ✅ micro-animaciones filas (EDIT + DELETE)
+  const [updatedRowId, setUpdatedRowId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
+
   // Modal "Asignar jefe automáticamente"
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -14,7 +20,7 @@ export default function GestionGuardias() {
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState("");
 
-  // ✅ estado modal asignar
+  // estado modal asignar
   const [assignMonth, setAssignMonth] = useState(() => String(new Date().getMonth() + 1).padStart(2, "0")); // "01".."12"
   const [assignYear, setAssignYear] = useState(() => String(new Date().getFullYear()));
   const [assignLoading, setAssignLoading] = useState(false);
@@ -47,7 +53,7 @@ export default function GestionGuardias() {
     return arr;
   }, []);
 
-  // ✅ recargar guardias (reutilizable)
+  // recargar guardias (reutilizable)
   async function reloadDuties() {
     setLoading(true);
     setLoadError("");
@@ -70,7 +76,7 @@ export default function GestionGuardias() {
     reloadDuties();
   }, []);
 
-  // ✅ abrir modal: pre-rellena mes/año con el primer registro si existe
+  // abrir modal: pre-rellena mes/año con el primer registro si existe
   function openAssignModal() {
     setAssignMsg("");
 
@@ -89,7 +95,7 @@ export default function GestionGuardias() {
     setIsModalOpen(true);
   }
 
-  // ✅ confirmar asignación
+  // confirmar asignación
   async function handleAssignChiefs() {
     setAssignLoading(true);
     setAssignMsg("");
@@ -108,10 +114,10 @@ export default function GestionGuardias() {
         return;
       }
 
-      // ✅ llama a tu endpoint /assingChiefs?month=&year=
+      // llama a tu endpoint /assingChiefs?month=&year=
       await assignChiefs(monthNum, yearNum);
 
-      // ✅ recargar tabla
+      // recargar tabla
       await reloadDuties();
 
       setAssignMsg("Jefes asignados correctamente.");
@@ -192,6 +198,11 @@ export default function GestionGuardias() {
     };
 
     setGuardias((prev) => prev.map((g) => (g.id === editRowId ? { ...g, ...updated } : g)));
+
+    // ✅ animación "updated"
+    setUpdatedRowId(editRowId);
+    setTimeout(() => setUpdatedRowId(null), 1200); // ajusta si tu CSS dura otra cosa
+
     setEditOpen(false);
     setEditRowId(null);
   }
@@ -204,7 +215,18 @@ export default function GestionGuardias() {
 
   function confirmDelete() {
     if (!deleteRow) return;
-    setGuardias((prev) => prev.filter((g) => g.id !== deleteRow.id));
+
+    const id = deleteRow.id;
+
+    // ✅ animación "exit"
+    setDeletingId(id);
+
+    // ✅ espera a que termine la animación antes de quitarlo del estado
+    setTimeout(() => {
+      setGuardias((prev) => prev.filter((g) => g.id !== id));
+      setDeletingId(null);
+    }, 180); // pon aquí la duración EXACTA de tu CSS ggRowExit
+
     setDeleteOpen(false);
     setDeleteRow(null);
   }
@@ -280,11 +302,30 @@ export default function GestionGuardias() {
 
               <tbody>
                 {loading ? (
-                  <tr>
-                    <td className="ggEmpty" colSpan={6}>
-                      Cargando guardias...
-                    </td>
-                  </tr>
+                  Array.from({ length: SKELETON_ROWS }).map((_, i) => (
+                    <tr key={`sk-${i}`} className="ggSkRow">
+                      <td className="ggColDate">
+                        <div className="ggSk skMd" />
+                      </td>
+                      <td className="ggColCenter">
+                        <div className="ggSk skXs" />
+                      </td>
+                      <td className="ggColCenter">
+                        <div className="ggSk skLg" />
+                      </td>
+                      <td className="ggColCenter">
+                        <div className="ggSk skLg" />
+                      </td>
+                      <td className="ggColCenter">
+                        <div className="ggSk skSm" />
+                      </td>
+                      <td className="ggColActions">
+                        <div className="ggActionsCenter">
+                          <div className="ggSk skBtn" />
+                        </div>
+                      </td>
+                    </tr>
+                  ))
                 ) : pagedGuardias.length === 0 ? (
                   <tr>
                     <td className="ggEmpty" colSpan={6}>
@@ -293,7 +334,14 @@ export default function GestionGuardias() {
                   </tr>
                 ) : (
                   pagedGuardias.map((g) => (
-                    <tr key={g.id}>
+                    <tr
+                      key={g.id}
+                      className={[
+                        "ggRowEnter",
+                        g.id === updatedRowId ? "ggRowUpdated" : "",
+                        g.id === deletingId ? "ggRowExit" : "",
+                      ].join(" ")}
+                    >
                       <td className="ggColDate ggMono">{g.date}</td>
 
                       <td className="ggColCenter">
@@ -310,7 +358,13 @@ export default function GestionGuardias() {
                             <span className="material-icons-outlined">edit</span>
                           </button>
 
-                          <button className="ggIconBtn danger" type="button" onClick={() => handleDelete(g)} title="Borrar">
+                          <button
+                            className="ggIconBtn danger"
+                            type="button"
+                            onClick={() => handleDelete(g)}
+                            title="Borrar"
+                            disabled={deletingId === g.id}
+                          >
                             <span className="material-icons-outlined">delete</span>
                           </button>
                         </div>
@@ -356,7 +410,7 @@ export default function GestionGuardias() {
         </section>
 
         <div className="ctaWrap">
-          {/* ✅ abre modal con mes/año */}
+          {/* abre modal con mes/año */}
           <button className="ctaBtn" type="button" onClick={openAssignModal} disabled={loading}>
             <span className="material-icons">add_circle_outline</span>
             <span>Asignar jefe automaticamente</span>
@@ -524,7 +578,7 @@ export default function GestionGuardias() {
         </div>
       )}
 
-      {/* ✅ MODAL ASIGNAR JEFE AUTOMÁTICO (funcional) */}
+      {/* MODAL ASIGNAR JEFE AUTOMÁTICO (funcional) */}
       {isModalOpen && (
         <div className="modalOverlay" role="dialog" aria-modal="true" aria-label="Asignar Jefe de Guardia">
           <div className="modalSheet">
@@ -542,7 +596,12 @@ export default function GestionGuardias() {
               <div className="formGrid">
                 <label className="label">
                   Mes
-                  <select className="control" value={assignMonth} onChange={(e) => setAssignMonth(e.target.value)} disabled={assignLoading}>
+                  <select
+                    className="control"
+                    value={assignMonth}
+                    onChange={(e) => setAssignMonth(e.target.value)}
+                    disabled={assignLoading}
+                  >
                     {months.map((m) => (
                       <option key={m.value} value={m.value}>
                         {m.label} ({m.value})
@@ -553,7 +612,12 @@ export default function GestionGuardias() {
 
                 <label className="label">
                   Año
-                  <select className="control" value={assignYear} onChange={(e) => setAssignYear(e.target.value)} disabled={assignLoading}>
+                  <select
+                    className="control"
+                    value={assignYear}
+                    onChange={(e) => setAssignYear(e.target.value)}
+                    disabled={assignLoading}
+                  >
                     {years.map((y) => (
                       <option key={y} value={y}>
                         {y}
@@ -576,7 +640,12 @@ export default function GestionGuardias() {
               <button className="btnPrimary" onClick={handleAssignChiefs} type="button" disabled={assignLoading}>
                 {assignLoading ? "Asignando..." : "Asignar automáticamente"}
               </button>
-              <button className="btnSecondary" onClick={() => setIsModalOpen(false)} type="button" disabled={assignLoading}>
+              <button
+                className="btnSecondary"
+                onClick={() => setIsModalOpen(false)}
+                type="button"
+                disabled={assignLoading}
+              >
                 Cancelar
               </button>
             </div>

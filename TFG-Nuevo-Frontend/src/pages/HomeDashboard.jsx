@@ -5,9 +5,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { useNotifications } from "../context/NotificationsContext";
 
-// IMPORTA tu función ya hecha (ajusta la ruta si hace falta)
 import { getDuties } from "../services/DutyService";
-
 import { getSpecialities } from "../services/SpecialitiesService";
 import { importExcel } from "../services/importExcelService";
 
@@ -29,14 +27,30 @@ function getInitials(name) {
 }
 
 export default function HomeDashboard() {
- 
-
   const { addNotification } = useNotifications();
 
   const [specialities, setSpecialities] = useState([]);
 
-  // Helpers Excel 
+  useEffect(() => {
+    let alive = true;
 
+    (async () => {
+      try {
+        const data = await getSpecialities();
+        const arr = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+        if (alive) setSpecialities(arr);
+      } catch (e) {
+        console.error(e);
+        if (alive) setSpecialities([]);
+      }
+    })();
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  // Helpers Excel
   function isExcelFile(file) {
     if (!file) return false;
 
@@ -53,7 +67,6 @@ export default function HomeDashboard() {
 
     return hasValidExtension || hasValidMimeType;
   }
-
 
   async function importDutysExcel({ file, year, month, idSpeciality }) {
     if (!file) return setImportMsg("No se ha seleccionado ningún archivo");
@@ -77,7 +90,6 @@ export default function HomeDashboard() {
   }
 
   // FullCalendar control
-
   const calendarRef = useRef(null);
   const [monthLabel, setMonthLabel] = useState("");
 
@@ -97,43 +109,24 @@ export default function HomeDashboard() {
     api?.next();
   }
 
-
   // BD: cargar guardias reales
-
   const [events, setEvents] = useState([]);
   const [eventsLoading, setEventsLoading] = useState(false);
   const [eventsError, setEventsError] = useState("");
 
-
   const stats = useMemo(() => {
     const total = events.length;
-
     const byType = (t) => events.filter((e) => e.extendedProps?.type === t).length;
-
-    // Si quieres "Sustituciones" como ejemplo real:
-    // yo lo he interpretado como LOC (puedes cambiarlo a PF/CA o a otro campo si tu backend lo trae)
-    const sustituciones = byType("CA");
-
-    const alertas = events.filter((e) => !e.start).length; // ejemplo: eventos “mal formados” sin fecha
+    const continuidad = byType("CA");
+    const alertas = events.filter((e) => !e.start).length;
 
     return [
-      { title: "Continuidad Asistida", value: String(sustituciones), note: "Según calendario", icon: "people", accent: "blue" },
+      { title: "Continuidad Asistida", value: String(continuidad), note: "Según calendario", icon: "people", accent: "blue" },
       { title: "Total Guardias", value: String(total), note: "En el mes visible", icon: "bar_chart", accent: "green" },
       { title: "Alertas", value: String(alertas), note: "Eventos sin fecha", icon: "warning", accent: "red" },
     ];
   }, [events]);
 
-  /**
-   *  IMPORTANTE (por tu JSON ejemplo):
-   * El backend solo manda "date" y NO manda "hora".
-   * - Si NO hay hora => lo pintamos allDay (solo día).
-   * - Si añades "time" o "start_time" en el JSON, automáticamente se mostrará hora.
-   *
-   *  NOMBRES:
-   * Tu JSON ejemplo NO trae nombres (solo ids). Así que:
-   * - si el backend manda speciality_name / worker_name / chief_worker_name => se usan
-   * - si NO manda => fallback a "Especialidad #ID" / "Trabajador #ID" / etc
-   */
   function mapDutyToEvent(d) {
     const id = String(d.id ?? d.uuid ?? (crypto?.randomUUID ? crypto.randomUUID() : Date.now()));
 
@@ -143,17 +136,15 @@ export default function HomeDashboard() {
     const workerName = String(d.worker ?? "").trim();
     const specialityName = String(d.speciality ?? "").trim();
 
-    // AHORA ES ESTO
     const jefe = Boolean(d.is_chief);
 
-    // Título como quieres: trabajador + tipo (+ especialidad opcional)
     const title = `${workerName} · ${typeUpper}${specialityName ? ` · ${specialityName}` : ""}`;
 
     return {
       id,
       title,
-      start: date,     // allDay
-      allDay: true,    // porque no hay hora
+      start: date,
+      allDay: true,
       extendedProps: {
         type: typeUpper,
         jefe,
@@ -162,15 +153,10 @@ export default function HomeDashboard() {
     };
   }
 
-
-
-  // llamamos a tu getDuties sin romperte aunque lo tengas con firma distinta
   async function callGetDuties(start, end) {
-    // 1) getDuties({start,end})
     try {
       return await getDuties({ start, end });
     } catch (_) {
-      // 2) getDuties(start,end)
       return await getDuties(start, end);
     }
   }
@@ -205,9 +191,7 @@ export default function HomeDashboard() {
     }, 0);
   }, [loadDutiesForCurrentView]);
 
-
   // Filtros
-
   const [filterOpen, setFilterOpen] = useState(false);
   const [filterType, setFilterType] = useState("ALL");
 
@@ -216,9 +200,7 @@ export default function HomeDashboard() {
     return events.filter((e) => e.extendedProps?.type === filterType);
   }, [events, filterType]);
 
-
   // Modal Nueva Guardia (local)
-
   const [newOpen, setNewOpen] = useState(false);
   const [newType, setNewType] = useState("CA");
   const [newDate, setNewDate] = useState(() => new Date().toISOString().slice(0, 10));
@@ -233,42 +215,48 @@ export default function HomeDashboard() {
     setNewOpen(true);
   }
 
-  // IMPORTANTE:
-  // Si todavía no tienes endpoint POST, esto añade en UI.
-  // Cuando tengas POST, aquí haces fetch POST y luego loadDutiesForCurrentView()
+  // ✅ FIX: estaba usando newSpecialty (no existe) y por eso “no se añadía” (crasheaba o no pintaba)
   function addGuardia() {
-    const start = `${newDate}T${newTime}:00`;
+    if (!newDate) return;
+
+    const api = calendarRef.current?.getApi();
+
+    const timeClean = normalizeTime(newTime) || "00:00";
+    const start = timeClean ? `${newDate}T${timeClean}:00` : newDate;
 
     const nameClean = newName.trim();
-    const title = `${newSpecialty} · ${newType} ${newTime}${nameClean ? ` — ${nameClean}` : ""}`;
+    const specialityObj = specialities.find((s) => String(s.id) === String(newIdSpeciality));
+    const specialityLabel = specialityObj?.name || (newIdSpeciality ? `Especialidad #${newIdSpeciality}` : "");
+
+    const title = `${nameClean || "Sin nombre"} · ${newType}${specialityLabel ? ` · ${specialityLabel}` : ""}`;
 
     const id = crypto?.randomUUID ? crypto.randomUUID() : String(Date.now());
 
-    setEvents((prev) => [
-      ...prev,
-      {
-        id,
-        title,
-        start,
-        allDay: false,
-        extendedProps: {
-          type: newType,
-          jefe: false,
-          specialityLabel: newIdSpeciality,
-          workerLabel: nameClean || `Trabajador ${getInitials(nameClean)}`,
-          raw: null,
-        },
+    const newEvent = {
+      id,
+      title,
+      start,
+      allDay: false,
+      extendedProps: {
+        type: newType,
+        jefe: false,
+        specialityLabel,
+        workerLabel: nameClean || `Trabajador ${getInitials(nameClean)}`,
+        raw: null,
       },
-    ]);
+    };
 
-    // NOTIFICACIÓN con hora actual
+    // añade al estado (para que se vea aunque no haya backend)
+    setEvents((prev) => [newEvent, ...prev]);
+
+    // (opcional pero ayuda) fuerza al calendario a renderizarlo al instante
+    api?.addEvent(newEvent);
+
     addNotification(`Se ha agregado una nueva guardia a las ${new Date().toLocaleTimeString()}.`);
-
     setNewOpen(false);
   }
 
   // Import Excel modal (estado)
-
   const [importOpen, setImportOpen] = useState(false);
 
   const [specialitiesLoading, setSpecialitiesLoading] = useState(false);
@@ -435,7 +423,6 @@ export default function HomeDashboard() {
         </div>
       </div>
 
-
       {/* Cards stats */}
       <section className="hdStats">
         {stats.map((s) => (
@@ -467,17 +454,14 @@ export default function HomeDashboard() {
             </button>
           </div>
 
-
-
           <div className="hdActions" style={{ position: "relative" }}>
-
-
             {/* IMPORTAR EXCEL */}
             <button className="hdBtn primary hdBtnSm" type="button" onClick={openImportModal}>
               <span className="material-icons-outlined">table_view</span>
               <span className="hideOnMobile">Importar Excel</span>
               <span className="showOnMobile">Excel</span>
             </button>
+
             {/* MODAL IMPORTAR EXCEL */}
             {importOpen && (
               <div className="hdModalOverlay" role="dialog" aria-modal="true">
@@ -498,13 +482,7 @@ export default function HomeDashboard() {
                       ) : specialitiesError ? (
                         <div className="hdControl">{specialitiesError}</div>
                       ) : (
-
-
-                        <select
-                          className="hdControl"
-                          value={idSpeciality}
-                          onChange={(e) => setIdSpeciality(e.target.value)}
-                        >
+                        <select className="hdControl" value={idSpeciality} onChange={(e) => setIdSpeciality(e.target.value)}>
                           <option value="">-- Selecciona una especialidad --</option>
                           {specialities.map((s) => (
                             <option key={s.id} value={String(s.id)}>
@@ -512,7 +490,6 @@ export default function HomeDashboard() {
                             </option>
                           ))}
                         </select>
-
                       )}
                     </label>
 
@@ -590,14 +567,13 @@ export default function HomeDashboard() {
               </div>
             )}
 
-
-
             {/* NUEVA GUARDIA */}
             <button className="hdBtn primary hdBtnSm" type="button" onClick={() => openNewGuardiaModal()}>
               <span className="material-icons-outlined">add</span>
               <span className="hideOnMobile">Nueva Guardia</span>
               <span className="showOnMobile">Crear</span>
             </button>
+
             {/* FILTROS */}
             <button
               className="hdBtn light hdBtnSm"
@@ -656,11 +632,7 @@ export default function HomeDashboard() {
           </div>
         </div>
 
-
-
-
-
-        {/*  Estado de carga/errores */}
+        {/* Estado de carga/errores */}
         {(eventsLoading || eventsError) && (
           <div style={{ padding: "10px 16px" }}>
             {eventsLoading && <span style={{ fontWeight: 700 }}>Cargando guardias...</span>}
@@ -669,7 +641,7 @@ export default function HomeDashboard() {
         )}
 
         <div className="hdCalendar">
-          <div className="hdFullCalendarWrap">
+          <div className={`hdFullCalendarWrap ${eventsLoading ? "" : "hdEnter"}`}>
             <FullCalendar
               ref={calendarRef}
               plugins={[dayGridPlugin, interactionPlugin]}
@@ -685,6 +657,8 @@ export default function HomeDashboard() {
               }}
               dayHeaderFormat={{ weekday: "short" }}
               events={filteredEvents}
+              // ✅ marca el día de hoy con una clase (CSS)
+              dayCellClassNames={(arg) => (arg.isToday ? ["hdTodayCell"] : [])}
               eventContent={(arg) => {
                 const type = arg.event.extendedProps?.type;
                 const jefe = arg.event.extendedProps?.jefe;
@@ -749,11 +723,7 @@ export default function HomeDashboard() {
 
               <label className="hdField">
                 <span>Especialidad</span>
-                <select
-                  className="hdControl"
-                  value={newIdSpeciality}
-                  onChange={(e) => setNewIdSpeciality(e.target.value)}
-                >
+                <select className="hdControl" value={newIdSpeciality} onChange={(e) => setNewIdSpeciality(e.target.value)}>
                   <option value="">Selecciona una especialidad</option>
                   {specialities.map((s) => (
                     <option key={s.id} value={String(s.id)}>
@@ -803,7 +773,6 @@ export default function HomeDashboard() {
           </div>
         </div>
       </section>
-
     </div>
   );
 }
