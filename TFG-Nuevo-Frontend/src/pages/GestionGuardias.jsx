@@ -1,10 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import "../styles/GestionGuardias.css";
 import { getDuties, updateDuty, deleteDuty } from "../services/DutyService";
-import { assignChiefs, getWorkers } from "../services/userService";
+import { assignChiefs, getWorkers, isUserAdmin } from "../services/userService";
 import { getSpecialities } from "../services/SpecialitiesService";
 
 export default function GestionGuardias() {
+  // Verificar si el usuario es admin
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    setIsAdmin(isUserAdmin());
+  }, []);
+
   // Modal "Asignar jefe automáticamente"
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -338,20 +345,20 @@ export default function GestionGuardias() {
                   <th className="ggColCenter">ESPECIALIDAD</th>
                   <th className="ggColCenter">TRABAJADOR</th>
                   <th className="ggColCenter">JEFE</th>
-                  <th className="ggColActions">ACCIONES</th>
+                  {isAdmin && <th className="ggColActions">ACCIONES</th>}
                 </tr>
               </thead>
 
               <tbody>
                 {loading ? (
                   <tr>
-                    <td className="ggEmpty" colSpan={6}>
+                    <td className="ggEmpty" colSpan={isAdmin ? 6 : 5}>
                       Cargando guardias...
                     </td>
                   </tr>
                 ) : pagedGuardias.length === 0 ? (
                   <tr>
-                    <td className="ggEmpty" colSpan={6}>
+                    <td className="ggEmpty" colSpan={isAdmin ? 6 : 5}>
                       No hay guardias registradas.
                     </td>
                   </tr>
@@ -369,15 +376,17 @@ export default function GestionGuardias() {
                       <td className="ggColCenter ggMono">{g.chief_worker ?? "—"}</td>
 
                       <td className="ggColActions">
-                        <div className="ggActionsCenter">
-                          <button className="ggIconBtn" type="button" onClick={() => handleEdit(g)} title="Editar">
-                            <span className="material-icons-outlined">edit</span>
-                          </button>
+                        {isAdmin && (
+                          <div className="ggActionsCenter">
+                            <button className="ggIconBtn" type="button" onClick={() => handleEdit(g)} title="Editar">
+                              <span className="material-icons-outlined">edit</span>
+                            </button>
 
-                          <button className="ggIconBtn danger" type="button" onClick={() => handleDelete(g)} title="Borrar">
-                            <span className="material-icons-outlined">delete</span>
-                          </button>
-                        </div>
+                            <button className="ggIconBtn danger" type="button" onClick={() => handleDelete(g)} title="Borrar">
+                              <span className="material-icons-outlined">delete</span>
+                            </button>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))
@@ -421,10 +430,12 @@ export default function GestionGuardias() {
 
         <div className="ctaWrap">
           {/* ✅ abre modal con mes/año */}
-          <button className="ctaBtn" type="button" onClick={openAssignModal} disabled={loading}>
-            <span className="material-icons">add_circle_outline</span>
-            <span>Asignar jefe automaticamente</span>
-          </button>
+          {isAdmin && (
+            <button className="ctaBtn" type="button" onClick={openAssignModal} disabled={loading}>
+              <span className="material-icons">add_circle_outline</span>
+              <span>Asignar jefe automaticamente</span>
+            </button>
+          )}
         </div>
       </main>
 
