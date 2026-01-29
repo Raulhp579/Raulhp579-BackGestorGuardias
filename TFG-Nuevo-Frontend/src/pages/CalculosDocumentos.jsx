@@ -405,67 +405,99 @@ export default function CalculosDocumentos() {
                     </button>
                 </div>
 
-                <h3 className="cdSectionTitle">{title}</h3>
-
-                {view === "workers" && loading && <p>Cargando trabajadores...</p>}
-                {view === "workers" && error && <p className="cdError">{error}</p>}
-
-                {view === "admins" && adminsLoading && <p>Cargando administradores...</p>}
-                {view === "admins" && adminsError && <p className="cdError">{adminsError}</p>}
-
-                <table className="cdTable">
-                    <thead>
-                        <tr>
-                            {headers.map((header) => (
-                                <th key={header}>{header}</th>
-                            ))}
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {rows.length === 0 && (
-                            <tr>
-                                <td colSpan={colSpan}>No hay datos</td>
-                            </tr>
-                        )}
-
-                        {tableRows}
-                    </tbody>
-                </table>
-
-                {totalPages > 1 && (
-                    <div className="cdPager">
-                        <button className="cdPagerBtn" type="button" onClick={goPrevPage} disabled={currentPage === 1 || loading}>
-                            <span className="material-icons-outlined">chevron_left</span>
-                            Anterior
-                        </button>
-
-                        <div className="cdPagerNums" aria-label="Páginas">
-                            {pageButtons.map((p, idx) =>
-                                p === "..." ? (
-                                    <span className="cdPagerEllipsis" key={`e-${idx}`}>
-                                        …
-                                    </span>
-                                ) : (
-                                    <button
-                                        key={p}
-                                        type="button"
-                                        className={`cdPagerNum ${p === currentPage ? "active" : ""}`}
-                                        onClick={() => setCurrentPage(p)}
-                                        disabled={loading}
-                                    >
-                                        {p}
-                                    </button>
-                                )
-                            )}
+                {/* Tabla Card */}
+                <div className="cdTableCard">
+                    <div className="cdTableCardTop">
+                        <div>
+                            <div className="cdTableCardTitle">{title}</div>
                         </div>
-
-                        <button className="cdPagerBtn" type="button" onClick={goNextPage} disabled={currentPage === totalPages || loading}>
-                            Siguiente
-                            <span className="material-icons-outlined">chevron_right</span>
-                        </button>
+                        <span className="cdTableCount">{rows.length} {rows.length === 1 ? "registro" : "registros"}</span>
                     </div>
-                )}
+
+                    {view === "workers" && loading && (
+                        <div className="cdTableLoading">
+                            Cargando trabajadores...
+                        </div>
+                    )}
+                    {view === "workers" && error && (
+                        <div className="cdTableError">
+                            {error}
+                        </div>
+                    )}
+
+                    {view === "admins" && adminsLoading && (
+                        <div className="cdTableLoading">
+                            Cargando administradores...
+                        </div>
+                    )}
+                    {view === "admins" && adminsError && (
+                        <div className="cdTableError">
+                            {adminsError}
+                        </div>
+                    )}
+
+                    {!loading && !adminsLoading && (
+                        <>
+                            <div className="cdTableWrap">
+                                <table className="cdTable">
+                                    <thead>
+                                        <tr>
+                                            {headers.map((header) => (
+                                                <th key={header}>{header}</th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        {rows.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={colSpan} className="cdTableEmpty">
+                                                    No hay {view === "workers" ? "trabajadores" : "administradores"}
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            tableRows
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {totalPages > 1 && (
+                                <div className="cdPager">
+                                    <button className="cdPagerBtn" type="button" onClick={goPrevPage} disabled={currentPage === 1 || loading}>
+                                        <span className="material-icons-outlined">chevron_left</span>
+                                        Anterior
+                                    </button>
+
+                                    <div className="cdPagerNums" aria-label="Páginas">
+                                        {pageButtons.map((p, idx) =>
+                                            p === "..." ? (
+                                                <span className="cdPagerEllipsis" key={`e-${idx}`}>
+                                                    …
+                                                </span>
+                                            ) : (
+                                                <button
+                                                    key={p}
+                                                    type="button"
+                                                    className={`cdPagerNum ${p === currentPage ? "active" : ""}`}
+                                                    onClick={() => setCurrentPage(p)}
+                                                    disabled={loading}
+                                                >
+                                                    {p}
+                                                </button>
+                                            )
+                                        )}
+                                    </div>
+
+                                    <button className="cdPagerBtn" type="button" onClick={goNextPage} disabled={currentPage === totalPages || loading}>
+                                        Siguiente
+                                        <span className="material-icons-outlined">chevron_right</span>
+                                    </button>
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
 
                 {/* Edit modal */}
                 {editOpen && (

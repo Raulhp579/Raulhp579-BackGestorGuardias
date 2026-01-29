@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import AppLayout from "../layout/AppLayout";
+import ProtectedRoute from "../components/ProtectedRoute/ProtectedRoute";
 
 import Login from "../pages/Login";
 import HomeDashboard from "../pages/HomeDashboard";
@@ -22,7 +23,14 @@ export default function AppRouter() {
       <Route element={<AppLayout />}>
         <Route path="/home" element={<HomeDashboard />} />
         <Route path="/guardias" element={<Guardias />} />
-        <Route path="/calculos" element={<Calculos />} />
+        <Route
+          path="/calculos"
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <Calculos />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Legales (también dentro del layout para mantener header/sidebar) */}
         <Route path="/aviso-legal" element={<AvisoLegal />} />
