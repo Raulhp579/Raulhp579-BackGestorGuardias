@@ -1,15 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import "../styles/CalculosDocumentos.css";
 import "../styles/AppLayout.css";
-import { importWorkersExcel } from "../services/importExcelService"
+import { importWorkersExcel } from "../services/importExcelService";
 import { getWorkers, getAdmins } from "../services/userService";
 
 export default function CalculosDocumentos() {
     // ver trabajadores y admins
     const [view, setView] = useState("workers");
 
-
-    //para gettear los trabalhadores y users 
+    //para gettear los trabalhadores y users
 
     const [workers, setWorkers] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -23,25 +22,32 @@ export default function CalculosDocumentos() {
     const fileInputRef = useRef(null);
     const [importMsg, setImportMsg] = useState("");
     const [importing, setImporting] = useState(false);
+    const [importSuccess, setImportSuccess] = useState(false);
 
     async function onPickExcel(e) {
         // coge el archivo elegido
         const file = e.target.files[0];
-        e.target.value = "";// resetea el input para poder elegir el mismo archivo otra vez
-        if (!file) return;
+        e.target.value = ""; // resetea el input para poder elegir el mismo archivo otra vez
+        if (!file) {
+            setImportMsg("Debes seleccionar un archivo");
+            setImportSuccess(false);
+            return;
+        }
 
         // limpìa mensaje pa cuando importando
         setImportMsg("");
         setImporting(true);
+        setImportSuccess(false);
 
         try {
             await importWorkersExcel(file);
             setImportMsg("Usuarios importados correctamente");
+            setImportSuccess(true);
             setView("workers");
             await loadWorkers();
-
         } catch (err) {
             setImportMsg("Error al importar: " + err.message);
+            setImportSuccess(false);
         } finally {
             setImporting(false);
         }
@@ -67,7 +73,6 @@ export default function CalculosDocumentos() {
         }
     }, [view]);
 
-
     async function loadAdmins() {
         setAdminsLoading(true);
         setAdminsError("");
@@ -81,8 +86,7 @@ export default function CalculosDocumentos() {
         }
     }
 
-
-    // clases botones 
+    // clases botones
     let workersBtnClass = "cdToggleBtn";
     let adminsBtnClass = "cdToggleBtn";
 
@@ -92,7 +96,7 @@ export default function CalculosDocumentos() {
         adminsBtnClass += " isActive";
     }
 
-    // tabla 
+    // tabla
     let title = "";
     let headers = [];
     let colSpan = 0;
@@ -168,11 +172,19 @@ export default function CalculosDocumentos() {
 
                 <h3 className="cdSectionTitle">{title}</h3>
 
-                {view === "workers" && loading && <p>Cargando trabajadores...</p>}
-                {view === "workers" && error && <p className="cdError">{error}</p>}
+                {view === "workers" && loading && (
+                    <p>Cargando trabajadores...</p>
+                )}
+                {view === "workers" && error && (
+                    <p className="cdError">{error}</p>
+                )}
 
-                {view === "admins" && adminsLoading && <p>Cargando administradores...</p>}
-                {view === "admins" && adminsError && <p className="cdError">{adminsError}</p>}
+                {view === "admins" && adminsLoading && (
+                    <p>Cargando administradores...</p>
+                )}
+                {view === "admins" && adminsError && (
+                    <p className="cdError">{adminsError}</p>
+                )}
 
                 <table className="cdTable">
                     <thead>
@@ -211,8 +223,27 @@ export default function CalculosDocumentos() {
                         <span className="material-icons excel">table_view</span>
                         {importing ? "Importando..." : "Importar usuarios"}
                     </button>
-                    {importMsg && <p className="cdInfo">{importMsg}</p>}
-
+                    {importMsg && (
+                        <div
+                            role="alert"
+                            style={{
+                                marginTop: 12,
+                                padding: "10px 14px",
+                                borderRadius: "8px",
+                                fontSize: "14px",
+                                fontWeight: 500,
+                                background: importSuccess
+                                    ? "#f0fdf4"
+                                    : "#fef2f2",
+                                border: importSuccess
+                                    ? "1px solid #bbf7d0"
+                                    : "1px solid #fecaca",
+                                color: importSuccess ? "#166534" : "#b91c1c",
+                            }}
+                        >
+                            {importMsg}
+                        </div>
+                    )}
                 </div>
             </main>
         </div>

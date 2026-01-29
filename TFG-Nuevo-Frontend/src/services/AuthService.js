@@ -1,23 +1,25 @@
-const MAIN_URL = "/api"
+const MAIN_URL = "/api";
 
-export async function login(user){
-    try {
-    let response = await fetch(`${MAIN_URL}/login`,{
-        method: 'POST',
+export async function login(user) {
+    let response = await fetch(`${MAIN_URL}/login`, {
+        method: "POST",
         headers: {
-            'Content-Type':'application/json',
-            "Accept": "application/json",
+            "Content-Type": "application/json",
+            Accept: "application/json",
         },
-        body: JSON.stringify(user)
-    })
+        body: JSON.stringify(user),
+    });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-}
+    const data = await response.json().catch(() => null);
 
-        return await response.json();
-    } catch (error) {
-        console.error("Login error:", error);
-        throw error;
+    if (!response.ok) {
+        // Get error message from backend response
+        const errorMsg =
+            data?.message ||
+            data?.error ||
+            `Error de autenticación (${response.status})`;
+        throw new Error(errorMsg);
     }
+
+    return data;
 }

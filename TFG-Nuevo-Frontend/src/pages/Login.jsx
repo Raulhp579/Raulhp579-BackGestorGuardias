@@ -6,33 +6,57 @@ import { login } from "../services/AuthService";
 export default function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
 
     async function onSubmit(e) {
         e.preventDefault();
+        setError("");
 
-        // Guardamos un objeto JSON (lo que AppLayout/Header esperan)
-        const authPayload = {
-            name: username.trim() || "Usuario",
-            email: `${username.trim()}`,
-            avatarUrl: "", // si algún día tienes URL real, la pones aquí
-        };
+        // Validar campos vacíos
+        if (!username.trim()) {
+            setError("El usuario es obligatorio");
+            return;
+        }
+        if (!password) {
+            setError("La contraseña es obligatoria");
+            return;
+        }
 
-        const user = {
-            email: username,
-            password: password,
-        };
+        setLoading(true);
 
-        const response = await login(user);
-        localStorage.setItem("token", response.auth.access_token);
+        try {
+            // Guardamos un objeto JSON (lo que AppLayout/Header esperan)
+            const authPayload = {
+                name: username.trim() || "Usuario",
+                email: `${username.trim()}`,
+                avatarUrl: "", // si algún día tienes URL real, la pones aquí
+            };
 
-        // Guardar rol en sessionStorage
-        sessionStorage.setItem("roles", JSON.stringify(response.auth.roles));
+            const user = {
+                email: username,
+                password: password,
+            };
 
-        localStorage.setItem("auth", JSON.stringify(authPayload));
+            const response = await login(user);
+            localStorage.setItem("token", response.auth.access_token);
 
-        navigate("/home");
+            // Guardar rol en sessionStorage
+            sessionStorage.setItem(
+                "roles",
+                JSON.stringify(response.auth.roles),
+            );
+
+            localStorage.setItem("auth", JSON.stringify(authPayload));
+
+            navigate("/home");
+        } catch (err) {
+            setError(err.message || "Error al iniciar sesión");
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (
@@ -57,6 +81,25 @@ export default function Login() {
                 >
                     <h2 className="loginTitle">Iniciar Sesión</h2>
 
+                    {error && (
+                        <div
+                            className="loginError"
+                            role="alert"
+                            style={{
+                                background: "#fef2f2",
+                                border: "1px solid #fecaca",
+                                color: "#b91c1c",
+                                padding: "10px 14px",
+                                borderRadius: "8px",
+                                marginBottom: "16px",
+                                fontSize: "14px",
+                                fontWeight: 500,
+                            }}
+                        >
+                            {error}
+                        </div>
+                    )}
+
                     <form className="loginForm" onSubmit={onSubmit}>
                         <div className="field">
                             <span
@@ -71,9 +114,12 @@ export default function Login() {
                                 type="text"
                                 placeholder="Usuario"
                                 autoComplete="username"
-                                required
                                 value={username}
-                                onChange={(e) => setUsername(e.target.value)}
+                                onChange={(e) => {
+                                    setUsername(e.target.value);
+                                    setError("");
+                                }}
+                                disabled={loading}
                             />
                         </div>
 
@@ -90,9 +136,12 @@ export default function Login() {
                                 type="password"
                                 placeholder="Contraseña"
                                 autoComplete="current-password"
-                                required
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                onChange={(e) => {
+                                    setPassword(e.target.value);
+                                    setError("");
+                                }}
+                                disabled={loading}
                             />
                             <button
                                 type="button"
@@ -113,8 +162,12 @@ export default function Login() {
                             </a>
                         </div>
 
-                        <button className="submitBtn" type="submit">
-                            Acceder
+                        <button
+                            className="submitBtn"
+                            type="submit"
+                            disabled={loading}
+                        >
+                            {loading ? "Accediendo..." : "Acceder"}
                         </button>
                     </form>
                 </section>
