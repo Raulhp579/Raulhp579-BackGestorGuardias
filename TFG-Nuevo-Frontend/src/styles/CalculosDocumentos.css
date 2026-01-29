@@ -786,3 +786,81 @@ body {
         font-size: 16px;
     }
 }
+
+/* ===== Paginación ===== */
+.cdPager {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border-top: 1px solid rgba(0, 0, 0, .06);
+    background: #fff;
+}
+
+.cdPagerBtn {
+    border: 1px solid rgba(0, 0, 0, .10);
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 800;
+    color: rgba(17, 24, 39, .80);
+    font-family: inherit;
+}
+
+.cdPagerBtn:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+.cdPagerBtn:hover:not(:disabled) {
+    background: rgba(0, 112, 65, .06);
+    border-color: rgba(0, 112, 65, .25);
+}
+
+.cdPagerBtn .material-icons-outlined {
+    font-size: 18px;
+}
+
+.cdPagerNums {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.cdPagerNum {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, .10);
+    background: #fff;
+    font-weight: 900;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    color: rgba(17, 24, 39, .80);
+    font-family: inherit;
+}
+
+.cdPagerNum:hover {
+    background: rgba(0, 112, 65, .06);
+    border-color: rgba(0, 112, 65, .25);
+}
+
+.cdPagerNum.active {
+    background: rgba(0, 112, 65, .14);
+    border-color: rgba(0, 112, 65, .35);
+    color: #1f3d37;
+}
+
+.cdPagerEllipsis {
+    padding: 0 4px;
+    color: rgba(17, 24, 39, .45);
+    font-weight: 900;
+}

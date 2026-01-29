@@ -47,3 +47,30 @@ export async function assignChiefs(month, year) {
     }
     return await response.json();
 }
+
+export async function updateAdmin(userId, payload) {
+    const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+        throw new Error("Error al actualizar el administrador");
+    }
+
+    return await response.json();
+}
+
+export async function deleteAdmin(userId) {
+    const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+        throw new Error("Error al eliminar el administrador");
+    }
+
+    return await response.json();
+}

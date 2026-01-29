@@ -407,34 +407,7 @@ body {
     background: #F9FAFB;
     border-top: 1px solid var(--border);
 }
-
-.btnPrimary {
-    border: none;
-    background: var(--primary);
-    color: #fff;
-    font-weight: 900;
-    padding: 10px 14px;
-    border-radius: 12px;
-    cursor: pointer;
-}
-
-.btnPrimary:hover {
-    background: #256D2B;
-}
-
-.btnSecondary {
-    border: 1px solid var(--border);
-    background: #fff;
-    color: #374151;
-    font-weight: 900;
-    padding: 10px 14px;
-    border-radius: 12px;
-    cursor: pointer;
-}
-
-.btnSecondary:hover {
-    background: #F3F4F6;
-}
+/* Button styles moved to globalButtons.css */
 
 /* Centrar algunos modales (editar/borrar) */
 .modalOverlay.centered {
