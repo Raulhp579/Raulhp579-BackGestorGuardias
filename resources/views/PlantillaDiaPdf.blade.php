@@ -228,12 +228,12 @@
                     <div class="hospital-name">HOSPITAL COMARCAL "VALLE DE LOS PEDROCHES"</div>
                     <div class="supervisor-line">
                         <span>SUPERVISOR DE GUARDIA:</span>
-                        <span class="supervisor-name">JUAN ANTONIO SÁNCHEZ LECHADO</span>
+                        <span class="supervisor-name">{{$chiefWorker}}</span>
                     </div>
                     <div class="facultativos-line">FACULTATIVOS QUE PRESTAN SERVICIO FUERA DE JORNADA ORDINARIA</div>
                     <div class="fecha-line">
                         <span style="font-weight: bold;">FECHA:</span>
-                        <span class="fecha-value">VIERNES 12 DE DICIEMBRE DE 2025</span>
+                        <span class="fecha-value">{{$date}}</span>
                     </div>
                 </td>
             </tr>

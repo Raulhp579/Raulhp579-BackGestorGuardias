@@ -19,7 +19,8 @@ class PdfController extends Controller
 
         $workers = Worker::all();
         $chiefWorker = $duties[0]->chiefWorker->name;
-        $pdf = FacadePdf::loadView('PlantillaDiaPdf', ['specialities' => $specialities, 'duties' => $duties, 'workers' => $workers, 'chiefWorker' => $chiefWorker]);
+        $date = $duties[0]->date;
+        $pdf = FacadePdf::loadView('PlantillaDiaPdf', ['specialities' => $specialities, 'duties' => $duties, 'workers' => $workers, 'chiefWorker' => $chiefWorker, 'date' => $date]);
 
         return $pdf->download('PlantillaDiaPdf.pdf');
     }

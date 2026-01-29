@@ -39,10 +39,10 @@ class UserController extends Controller
             $validated = $request->validate([
                 // SI está presente en la solicitud, debe cumplir con todas las demás validaciones
                 'name' => 'sometimes|required|string|max:255',
-                'email' => 'sometimes|required|email|unique:users,email,'.$user->id,
             ]);
 
-            $user->update($validated);
+            $user->name = $validated['name'];
+            $user->save();
 
             return response()->json([
                 'message' => 'Perfil actualizado correctamente',
