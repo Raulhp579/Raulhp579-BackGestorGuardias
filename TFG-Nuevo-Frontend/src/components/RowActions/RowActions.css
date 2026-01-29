@@ -1,0 +1,33 @@
+.raWrap {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.raIconBtn {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.raIconBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.raDanger {
+    color: #b91c1c;
+}
+
+.raIconBtn:hover:not(:disabled) {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+.raIconBtn.raDanger:hover:not(:disabled) {
+    background: rgba(185, 28, 28, 0.12);
+}

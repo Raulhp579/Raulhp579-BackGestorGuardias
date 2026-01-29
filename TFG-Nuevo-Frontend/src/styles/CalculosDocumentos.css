@@ -570,6 +570,14 @@ body {
     text-align: center;
 }
 
+.cdActionsCol {
+    width: 180px;
+    white-space: normal;
+    overflow: visible;
+    text-align: center;
+}
+
+
 /* Responsive */
 @media (max-width: 1024px) {
     .cdMain {

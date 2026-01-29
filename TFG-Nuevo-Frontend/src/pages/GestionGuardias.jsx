@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import "../styles/GestionGuardias.css";
 import { getDuties } from "../services/DutyService";
 import { assignChiefs } from "../services/userService";
+import RowActions from "../components/RowActions/RowActions";
 
 export default function GestionGuardias() {
   // Modal "Asignar jefe automáticamente"
@@ -14,7 +15,7 @@ export default function GestionGuardias() {
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState("");
 
-  // ✅ estado modal asignar
+  // estado modal asignar
   const [assignMonth, setAssignMonth] = useState(() => String(new Date().getMonth() + 1).padStart(2, "0")); // "01".."12"
   const [assignYear, setAssignYear] = useState(() => String(new Date().getFullYear()));
   const [assignLoading, setAssignLoading] = useState(false);
@@ -47,7 +48,7 @@ export default function GestionGuardias() {
     return arr;
   }, []);
 
-  // ✅ recargar guardias (reutilizable)
+  // recargar guardias (reutilizable)
   async function reloadDuties() {
     setLoading(true);
     setLoadError("");
@@ -70,7 +71,7 @@ export default function GestionGuardias() {
     reloadDuties();
   }, []);
 
-  // ✅ abrir modal: pre-rellena mes/año con el primer registro si existe
+  //  abrir modal: pre-rellena mes/año con el primer registro si existe
   function openAssignModal() {
     setAssignMsg("");
 
@@ -89,7 +90,7 @@ export default function GestionGuardias() {
     setIsModalOpen(true);
   }
 
-  // ✅ confirmar asignación
+  //  confirmar asignación
   async function handleAssignChiefs() {
     setAssignLoading(true);
     setAssignMsg("");
@@ -108,10 +109,10 @@ export default function GestionGuardias() {
         return;
       }
 
-      // ✅ llama a tu endpoint /assingChiefs?month=&year=
+      //  llama al endpoint /assingChiefs?month=&year=
       await assignChiefs(monthNum, yearNum);
 
-      // ✅ recargar tabla
+      //  recargar tabla
       await reloadDuties();
 
       setAssignMsg("Jefes asignados correctamente.");
@@ -356,7 +357,7 @@ export default function GestionGuardias() {
         </section>
 
         <div className="ctaWrap">
-          {/* ✅ abre modal con mes/año */}
+          {/* abre modal con mes/año */}
           <button className="ctaBtn" type="button" onClick={openAssignModal} disabled={loading}>
             <span className="material-icons">add_circle_outline</span>
             <span>Asignar jefe automaticamente</span>
@@ -524,7 +525,7 @@ export default function GestionGuardias() {
         </div>
       )}
 
-      {/* ✅ MODAL ASIGNAR JEFE AUTOMÁTICO (funcional) */}
+      {/* MODAL ASIGNAR JEFE AUTOMÁTICO*/}
       {isModalOpen && (
         <div className="modalOverlay" role="dialog" aria-modal="true" aria-label="Asignar Jefe de Guardia">
           <div className="modalSheet">

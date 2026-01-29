@@ -3,6 +3,8 @@ import "../styles/CalculosDocumentos.css";
 import "../styles/AppLayout.css";
 import { importWorkersExcel } from "../services/importExcelService"
 import { getWorkers, getAdmins } from "../services/userService";
+import RowActions from "../components/RowActions/RowActions";
+import { deleteWorker as deleteWorkerApi } from "../services/workerService";
 
 export default function CalculosDocumentos() {
     // ver trabajadores y admins
@@ -92,6 +94,11 @@ export default function CalculosDocumentos() {
         adminsBtnClass += " isActive";
     }
 
+    function editWorker(row) { console.log("Editar worker", row); }
+    function deleteWorker(row) { console.log("Eliminar worker", row); }
+    function editAdmin(row) { console.log("Editar admin", row); }
+    function deleteAdmin(row) { console.log("Eliminar admin", row); }
+
     // tabla 
     let title = "";
     let headers = [];
@@ -100,13 +107,13 @@ export default function CalculosDocumentos() {
 
     if (view === "workers") {
         title = "Trabajadores";
-        headers = ["ID", "Nombre", "Rango", "Alta", "Baja", "Especialidad"];
-        colSpan = 6;
+        headers = ["ID", "Nombre", "Rango", "Alta", "Baja", "Especialidad", "Acciones"];
+        colSpan = 7;
         rows = workers;
     } else {
         title = "Administradores";
-        headers = ["ID", "Nombre", "Email", "Creado"];
-        colSpan = 4;
+        headers = ["ID", "Nombre", "Email", "Creado", "Acciones"];
+        colSpan = 5;
         rows = admins;
     }
 
@@ -122,6 +129,9 @@ export default function CalculosDocumentos() {
                 <td>{w.registration_date}</td>
                 <td>{w.discharge_date ?? "-"}</td>
                 <td>{w.speciality}</td>
+                <td>
+                    <RowActions row={w} onEdit={editWorker} onDelete={deleteWorker} disabled={loading} />
+                </td>
             </tr>
         ));
     } else {
@@ -131,9 +141,54 @@ export default function CalculosDocumentos() {
                 <td>{a.name}</td>
                 <td>{a.email}</td>
                 <td>{a.created_at}</td>
+                <td >
+                    <RowActions row={a} onEdit={editAdmin} onDelete={deleteAdmin} disabled={adminsLoading} />
+                </td>
             </tr>
         ));
     }
+
+    //funciones delete y update el front
+    async function deleteWorker(row) {
+        const ok = window.confirm(
+            `¿Seguro que quieres eliminar a ${row.name}?`
+        );
+        if (!ok) return;
+
+        try {
+            await deleteWorkerApi(row.id);
+
+            // quitarlo del estado SIN recargar
+            setWorkers((prev) => prev.filter((w) => w.id !== row.id));
+        } catch (e) {
+            alert(
+                e.response?.data?.error ||
+                "No se pudo eliminar el trabajador"
+            );
+        }
+    }
+
+    async function editWorker(row) {
+        try {
+            const payload = {
+                name: row.name,
+                rank: row.rank,
+                registration_date: row.registration_date,
+                discharge_date: row.discharge_date,
+                id_speciality: row.id_speciality,
+            };
+
+            await updateWorker(row.id, payload);
+            alert("Trabajador actualizado (prueba)");
+        } catch (e) {
+            alert(
+                e.response?.data?.error ||
+                "Error al actualizar trabajador"
+            );
+        }
+    }
+
+
 
 
     return (

@@ -29,9 +29,9 @@ export async function importWorkersExcel(file) {
             typeof data === "string"
                 ? data
                 : data?.error ||
-                  data?.mistake ||
-                  data?.message ||
-                  "Error al importar";
+                data?.mistake ||
+                data?.message ||
+                "Error al importar";
         throw new Error(msg);
     }
 
