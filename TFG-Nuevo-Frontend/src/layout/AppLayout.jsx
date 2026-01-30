@@ -105,7 +105,7 @@ export default function AppLayout() {
                     </NavLink>
 
                     <NavLink
-                        to="/calculos"
+                        to="/usuarios"
                         onClick={closeMenu}
                         className={({ isActive }) =>
                             `appNavItem ${isActive ? "active" : ""}`
