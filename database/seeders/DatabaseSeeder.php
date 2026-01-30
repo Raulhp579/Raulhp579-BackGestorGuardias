@@ -52,7 +52,7 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'name' => 'Beatriz Ortega Ortega',
             'email' => 'beatriz.ortega@alu.medac.es',
-            'worker_id'=>1,
+            'worker_id'=>null,
             'avatarUrl'=>'assets/imgs/150.jpg',
             'password'=>Hash::make('password')
         ])->assignRole('empleado');
