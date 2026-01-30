@@ -1,18 +1,24 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import "../styles/CalculosDocumentos.css";
 import "../styles/AppLayout.css";
+import "../styles/CalculosDocumentos.extra.css";
 import { importWorkersExcel } from "../services/importExcelService";
-import { getWorkers, getAdmins } from "../services/userService";
-import { importWorkersExcel } from "../services/importExcelService"
 import { getWorkers, getAdmins, updateAdmin, deleteAdmin as deleteAdminApi } from "../services/userService";
 import { getSpecialities } from "../services/SpecialitiesService";
 import RowActions from "../components/RowActions/RowActions";
 import { deleteWorker as deleteWorkerApi, updateWorker } from "../services/workerService";
 
 export default function CalculosDocumentos() {
+    const SKELETON_ROWS = 8;
+    
     // ver trabajadores y admins
     const [view, setView] = useState("workers");
     const [currentPage, setCurrentPage] = useState(1);
+    const [searchTerm, setSearchTerm] = useState("");
+
+    // micro-animaciones filas (EDIT + DELETE)
+    const [updatedRowId, setUpdatedRowId] = useState(null);
+    const [deletingId, setDeletingId] = useState(null);
 
     //para gettear los trabalhadores y users
 
@@ -79,6 +85,7 @@ export default function CalculosDocumentos() {
         } else {
             loadAdmins();
         }
+        setSearchTerm(""); // Resetear búsqueda al cambiar de vista
     }, [view]);
 
     async function loadAdmins() {
@@ -127,6 +134,8 @@ export default function CalculosDocumentos() {
     const [editOpen, setEditOpen] = useState(false);
     const [editRow, setEditRow] = useState(null);
     const [editType, setEditType] = useState(null); // 'worker' | 'admin'
+    const [editSaving, setEditSaving] = useState(false);
+    const [editError, setEditError] = useState("");
     const [editForm, setEditForm] = useState({
         name: "",
         email: "",
@@ -134,6 +143,7 @@ export default function CalculosDocumentos() {
         registration_date: "",
         discharge_date: "",
         id_speciality: "",
+        password: "",
     });
 
     function openEdit(row, type) {
@@ -147,6 +157,7 @@ export default function CalculosDocumentos() {
                 discharge_date: row.discharge_date ? (row.discharge_date.slice(0, 10)) : "",
                 id_speciality: row.id_speciality ? String(row.id_speciality) : "",
                 email: "",
+                password: "",
             });
         } else {
             setEditForm({
@@ -156,6 +167,7 @@ export default function CalculosDocumentos() {
                 registration_date: "",
                 discharge_date: "",
                 id_speciality: "",
+                password: "",
             });
         }
         setEditOpen(true);
@@ -165,20 +177,21 @@ export default function CalculosDocumentos() {
         setEditOpen(false);
         setEditRow(null);
         setEditType(null);
+        setEditSaving(false);
+        setEditError("");
     }
 
-    async function deleteWorkerHandler(row) {
-        const ok = window.confirm(
-            `¿Seguro que quieres eliminar a ${row.name}?`
-        );
-        if (!ok) return;
+    const [deleteOpen, setDeleteOpen] = useState(false);
+    const [deleteRow, setDeleteRow] = useState(null);
+    const [deleteType, setDeleteType] = useState(null); // 'worker' | 'admin'
+    const [deleteLoading, setDeleteLoading] = useState(false);
+    const [deleteError, setDeleteError] = useState("");
 
-        try {
-            await deleteWorkerApi(row.id);
-            setWorkers((prev) => prev.filter((w) => w.id !== row.id));
-        } catch (e) {
-            alert(e.message || "No se pudo eliminar el trabajador");
-        }
+    function deleteWorkerHandler(row) {
+        setDeleteError("");
+        setDeleteRow(row);
+        setDeleteType("worker");
+        setDeleteOpen(true);
     }
 
     async function editWorkerHandler(row) {
@@ -191,24 +204,17 @@ export default function CalculosDocumentos() {
                 id_speciality: row.id_speciality,
             };
             await updateWorker(row.id, payload);
-            alert("Trabajador actualizado correctamente");
         } catch (e) {
-            alert(e.message || "Error al actualizar trabajador");
+            console.error(e);
+            throw e;
         }
     }
 
-    async function deleteAdminHandler(row) {
-        const ok = window.confirm(
-            `¿Seguro que quieres eliminar a ${row.name}?`
-        );
-        if (!ok) return;
-
-        try {
-            await deleteAdminApi(row.id);
-            setAdmins((prev) => prev.filter((a) => a.id !== row.id));
-        } catch (e) {
-            alert(e.message || "No se pudo eliminar el administrador");
-        }
+    function deleteAdminHandler(row) {
+        setDeleteError("");
+        setDeleteRow(row);
+        setDeleteType("admin");
+        setDeleteOpen(true);
     }
 
     async function editAdminHandler(row) {
@@ -218,9 +224,9 @@ export default function CalculosDocumentos() {
                 email: row.email,
             };
             await updateAdmin(row.id, payload);
-            alert("Administrador actualizado correctamente");
         } catch (e) {
-            alert(e.message || "Error al actualizar administrador");
+            console.error(e);
+            throw e;
         }
     }
 
@@ -234,7 +240,8 @@ export default function CalculosDocumentos() {
     async function submitEdit(e) {
         e.preventDefault();
         if (!editRow) return;
-
+        setEditError("");
+        setEditSaving(true);
         try {
             if (editType === "worker") {
                 const payload = {
@@ -244,6 +251,11 @@ export default function CalculosDocumentos() {
                     discharge_date: editForm.discharge_date || null,
                     id_speciality: editForm.id_speciality ? Number(editForm.id_speciality) : null,
                 };
+                
+                // Añadir contraseña solo si se proporcionó
+                if (editForm.password && editForm.password.trim()) {
+                    payload.password = editForm.password;
+                }
 
                 await updateWorker(editRow.id, payload);
                 setWorkers((prev) => prev.map((w) => {
@@ -262,10 +274,69 @@ export default function CalculosDocumentos() {
                 setAdmins((prev) => prev.map((a) => (a.id === editRow.id ? { ...a, ...payload } : a)));
             }
 
+            if (editType === "worker") {
+                handleSuccessEdit(editRow.id);
+                showToast("Trabajador actualizado correctamente", "success");
+            } else {
+                handleSuccessEdit(editRow.id);
+                showToast("Administrador actualizado correctamente", "success");
+            }
             closeEdit();
         } catch (err) {
-            alert(err.response?.data?.error || err.message || "Error al guardar cambios");
+            const msg = err?.response?.data?.error || err?.message || "Error al guardar cambios";
+            setEditError(msg);
+        } finally {
+            setEditSaving(false);
         }
+    }
+
+    async function confirmDelete() {
+        if (!deleteRow || !deleteType) return;
+        
+        const id = deleteRow.id;
+        setDeleteLoading(true);
+        setDeleteError("");
+        // animación salida
+        handleSuccessDelete(id);
+        
+        try {
+            if (deleteType === "worker") {
+                await deleteWorkerApi(id);
+                setTimeout(() => {
+                    setWorkers((prev) => prev.filter((w) => w.id !== id));
+                }, 180);
+                showToast('Trabajador eliminado correctamente', 'success');
+            } else {
+                await deleteAdminApi(id);
+                setTimeout(() => {
+                    setAdmins((prev) => prev.filter((a) => a.id !== id));
+                }, 180);
+                showToast('Administrador eliminado correctamente', 'success');
+            }
+            setDeleteOpen(false);
+            setDeleteRow(null);
+            setDeleteType(null);
+        } catch (err) {
+            console.error(err);
+            handleSuccessDelete(null);
+            setDeleteError(err?.response?.data?.error || err?.message || "No se pudo eliminar");
+        } finally {
+            setDeleteLoading(false);
+        }
+    }
+
+    function cancelDelete() {
+        setDeleteOpen(false);
+        setDeleteRow(null);
+        setDeleteType(null);
+        setDeleteError("");
+    }
+
+    // Toast notifications
+    const [toast, setToast] = useState({ visible: false, message: "", type: "success" });
+    function showToast(message, type = "success", ms = 3000) {
+        setToast({ visible: true, message, type });
+        setTimeout(() => setToast((t) => ({ ...t, visible: false })), ms);
     }
 
     function onEditFieldChange(e) {
@@ -291,11 +362,25 @@ export default function CalculosDocumentos() {
         rows = admins;
     }
 
+    // Filtrado por búsqueda
+    const filteredRows = useMemo(() => {
+        if (!searchTerm.trim()) return rows;
+        const term = searchTerm.toLowerCase();
+        return rows.filter(row => 
+            row.name.toLowerCase().includes(term)
+        );
+    }, [rows, searchTerm]);
+
+    // Resetear página cuando cambia la búsqueda
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm]);
+
     // Paginación
     const PAGE_SIZE = 10;
     const totalPages = useMemo(() => {
-        return Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
-    }, [rows.length]);
+        return Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE));
+    }, [filteredRows.length]);
 
     useEffect(() => {
         if (currentPage > totalPages) setCurrentPage(totalPages);
@@ -303,8 +388,20 @@ export default function CalculosDocumentos() {
 
     const pagedRows = useMemo(() => {
         const start = (currentPage - 1) * PAGE_SIZE;
-        return rows.slice(start, start + PAGE_SIZE);
-    }, [rows, currentPage]);
+        return filteredRows.slice(start, start + PAGE_SIZE);
+    }, [filteredRows, currentPage]);
+
+    // Micro-animación para edición exitosa
+    const handleSuccessEdit = (id) => {
+        setUpdatedRowId(id);
+        setTimeout(() => setUpdatedRowId(null), 1200);
+    };
+
+    // Micro-animación para eliminación
+    const handleSuccessDelete = (id) => {
+        setDeletingId(id);
+        setTimeout(() => setDeletingId(null), 180);
+    };
 
     const pageButtons = useMemo(() => {
         const maxButtons = 7;
@@ -374,27 +471,6 @@ export default function CalculosDocumentos() {
         <div className="cdPage">
             <main className="cdMain">
 
-                <div className="cdActions">
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept=".xls,.xlsx"
-                        style={{ display: "none" }}
-                        onChange={onPickExcel}
-                    />
-                    <button
-                        className="cdBtnSecondary"
-                        type="button"
-                        disabled={importing}
-                        onClick={() => fileInputRef.current?.click()}
-                    >
-                        <span className="material-icons excel">table_view</span>
-                        {importing ? "Importando..." : "Importar usuarios"}
-                    </button>
-                    {importMsg && <p className="cdInfo">{importMsg}</p>}
-
-                </div>
-
                 <div className="cdToggle">
                     <button
                         className={workersBtnClass}
@@ -417,94 +493,177 @@ export default function CalculosDocumentos() {
                 <div className="cdTableCard">
                     <div className="cdTableCardTop">
                         <div>
-                            <div className="cdTableCardTitle">{title}</div>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept=".xls,.xlsx"
+                                style={{ display: "none" }}
+                                onChange={onPickExcel}
+                            />
+                            <button
+                                className="cdBtnSecondary"
+                                type="button"
+                                disabled={importing}
+                                onClick={() => fileInputRef.current?.click()}
+                            >
+                                <span className="material-icons excel">table_view</span>
+                                {importing ? "Importando..." : "Importar usuarios"}
+                            </button>
+                            {importMsg && <p className="cdInfo" style={{ margin: 0 }}>{importMsg}</p>}
                         </div>
-                        <span className="cdTableCount">{rows.length} {rows.length === 1 ? "registro" : "registros"}</span>
+                        {/* Search Input */}
+                        <div className="cdSearchContainer">
+                            <span className="material-icons">search</span>
+                            <input
+                                type="text"
+                                className="cdSearchInput"
+                                placeholder="Buscar por nombre..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                            {searchTerm && (
+                                <button
+                                    className="cdSearchClear"
+                                    onClick={() => setSearchTerm("")}
+                                    title="Limpiar búsqueda"
+                                >
+                                    <span className="material-icons">close</span>
+                                </button>
+                            )}
+                        </div>
                     </div>
 
-                    {view === "workers" && loading && (
-                        <div className="cdTableLoading">
-                            Cargando trabajadores...
-                        </div>
-                    )}
                     {view === "workers" && error && (
                         <div className="cdTableError">
                             {error}
                         </div>
                     )}
 
-                    {view === "admins" && adminsLoading && (
-                        <div className="cdTableLoading">
-                            Cargando administradores...
-                        </div>
-                    )}
                     {view === "admins" && adminsError && (
                         <div className="cdTableError">
                             {adminsError}
                         </div>
                     )}
 
-                    {!loading && !adminsLoading && (
-                        <>
-                            <div className="cdTableWrap">
-                                <table className="cdTable">
-                                    <thead>
-                                        <tr>
-                                            {headers.map((header) => (
-                                                <th key={header}>{header}</th>
-                                            ))}
-                                        </tr>
-                                    </thead>
+                    <div className="cdTableWrap">
+                        <table className="cdTable">
+                            <thead>
+                                <tr>
+                                    {headers.map((header) => (
+                                        <th key={header}>{header}</th>
+                                    ))}
+                                </tr>
+                            </thead>
 
-                                    <tbody>
-                                        {rows.length === 0 ? (
-                                            <tr>
-                                                <td colSpan={colSpan} className="cdTableEmpty">
-                                                    No hay {view === "workers" ? "trabajadores" : "administradores"}
-                                                </td>
-                                            </tr>
-                                        ) : (
-                                            tableRows
-                                        )}
-                                    </tbody>
-                                </table>
+                            <tbody>
+                                {loading || adminsLoading ? (
+                                    Array.from({ length: SKELETON_ROWS }).map((_, i) => (
+                                        <tr key={`sk-${i}`} className="cdSkRow">
+                                            {view === "workers" ? (
+                                                <>
+                                                    <td><div className="cdSk skMd" /></td>
+                                                    <td><div className="cdSk skMd" /></td>
+                                                    <td><div className="cdSk skSm" /></td>
+                                                    <td><div className="cdSk skSm" /></td>
+                                                    <td><div className="cdSk skLg" /></td>
+                                                    <td><div className="cdSk skBtn" /></td>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <td><div className="cdSk skMd" /></td>
+                                                    <td><div className="cdSk skLg" /></td>
+                                                    <td><div className="cdSk skSm" /></td>
+                                                    <td><div className="cdSk skBtn" /></td>
+                                                </>
+                                            )}
+                                        </tr>
+                                    ))
+                                ) : rows.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={colSpan} className="cdTableEmpty">
+                                            No hay {view === "workers" ? "trabajadores" : "administradores"}
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    pagedRows.map((row) => (
+                                        <tr
+                                            key={row.id}
+                                            className={[
+                                                "cdRowEnter",
+                                                row.id === updatedRowId ? "cdRowUpdated" : "",
+                                                row.id === deletingId ? "cdRowExit" : "",
+                                            ].join(" ")}
+                                        >
+                                            {view === "workers" ? (
+                                                <>
+                                                    <td>{row.name}</td>
+                                                    <td>{row.rank}</td>
+                                                    <td>{row.registration_date ? new Date(row.registration_date).toLocaleDateString('es-ES') : "-"}</td>
+                                                    <td>{row.discharge_date ? new Date(row.discharge_date).toLocaleDateString('es-ES') : "-"}</td>
+                                                    <td>{row.speciality}</td>
+                                                    <td>
+                                                        <div className="cdActionsCenter">
+                                                            <RowActions row={row} onEdit={editWorker} onDelete={deleteWorker} disabled={loading} />
+                                                        </div>
+                                                    </td>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <td>{row.name}</td>
+                                                    <td>{row.email}</td>
+                                                    <td>{new Date(row.created_at).toLocaleDateString('es-ES')}</td>
+                                                    <td>
+                                                        <div className="cdActionsCenter">
+                                                            <RowActions row={row} onEdit={editAdmin} onDelete={deleteAdmin} disabled={adminsLoading} />
+                                                        </div>
+                                                    </td>
+                                                </>
+                                            )}
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {!loading && !adminsLoading && totalPages > 1 && (
+                        <div className="cdPager">
+                            <button className="cdPagerBtn" type="button" onClick={goPrevPage} disabled={currentPage === 1 || loading}>
+                                <span className="material-icons-outlined">chevron_left</span>
+                                Anterior
+                            </button>
+
+                            <div className="cdPagerNums" aria-label="Páginas">
+                                {pageButtons.map((p, idx) =>
+                                    p === "..." ? (
+                                        <span className="cdPagerEllipsis" key={`e-${idx}`}>
+                                            …
+                                        </span>
+                                    ) : (
+                                        <button
+                                            key={p}
+                                            type="button"
+                                            className={`cdPagerNum ${p === currentPage ? "active" : ""}`}
+                                            onClick={() => setCurrentPage(p)}
+                                            disabled={loading || adminsLoading}
+                                        >
+                                            {p}
+                                        </button>
+                                    )
+                                )}
                             </div>
 
-                            {totalPages > 1 && (
-                                <div className="cdPager">
-                                    <button className="cdPagerBtn" type="button" onClick={goPrevPage} disabled={currentPage === 1 || loading}>
-                                        <span className="material-icons-outlined">chevron_left</span>
-                                        Anterior
-                                    </button>
-
-                                    <div className="cdPagerNums" aria-label="Páginas">
-                                        {pageButtons.map((p, idx) =>
-                                            p === "..." ? (
-                                                <span className="cdPagerEllipsis" key={`e-${idx}`}>
-                                                    …
-                                                </span>
-                                            ) : (
-                                                <button
-                                                    key={p}
-                                                    type="button"
-                                                    className={`cdPagerNum ${p === currentPage ? "active" : ""}`}
-                                                    onClick={() => setCurrentPage(p)}
-                                                    disabled={loading}
-                                                >
-                                                    {p}
-                                                </button>
-                                            )
-                                        )}
-                                    </div>
-
-                                    <button className="cdPagerBtn" type="button" onClick={goNextPage} disabled={currentPage === totalPages || loading}>
-                                        Siguiente
-                                        <span className="material-icons-outlined">chevron_right</span>
-                                    </button>
-                                </div>
-                            )}
-                        </>
+                            <button className="cdPagerBtn" type="button" onClick={goNextPage} disabled={currentPage === totalPages || loading || adminsLoading}>
+                                Siguiente
+                                <span className="material-icons-outlined">chevron_right</span>
+                            </button>
+                        </div>
                     )}
+
+                    {/* Contador de registros al fondo */}
+                    <div className="cdTableCardBottom">
+                        <span className="cdTableCount">{filteredRows.length} {filteredRows.length === 1 ? "registro" : "registros"}</span>
+                    </div>
                 </div>
 
                 {/* Edit modal */}
@@ -561,17 +720,56 @@ export default function CalculosDocumentos() {
                                                         ))}
                                                     </select>
                                                 </label>
+
+                                                <label className="label">
+                                                    Contraseña (dejar vacío si no deseas cambiarla)
+                                                    <input name="password" type="password" className="control" value={editForm.password} onChange={onEditFieldChange} placeholder="Nueva contraseña" />
+                                                </label>
                                             </>
                                         )}
                                     </div>
                                 </div>
 
                                 <div className="modalFooter">
-                                    <button className="btnPrimary" type="submit">Guardar</button>
-                                    <button className="btnSecondary btnSecondary--destructive" type="button" onClick={(e) => { e.preventDefault(); closeEdit(); }}>Cancelar</button>
+                                    <div style={{ display: 'flex', gap: 10 }}>
+                                        <button className="btnPrimary" type="submit" disabled={editSaving}>{editSaving ? 'Guardando...' : 'Guardar'}</button>
+                                        <button className="btnSecondary btnSecondary--destructive" type="button" onClick={(e) => { e.preventDefault(); closeEdit(); }} disabled={editSaving}>Cancelar</button>
+                                    </div>
                                 </div>
                             </form>
                         </div>
+                    </div>
+                )}
+
+                {/* Delete modal */}
+                {deleteOpen && (
+                    <div className="modalOverlay centered" role="dialog" aria-modal="true" aria-label="Confirmar eliminación">
+                        <div className="modalSheet">
+                            <div className="modalBody">
+                                <div className="modalHeader">
+                                    <div className="modalIcon">
+                                        <span className="material-icons">delete</span>
+                                    </div>
+                                    <div>
+                                        <div className="modalTitle">Eliminar {deleteType === 'worker' ? 'Trabajador' : 'Administrador'}</div>
+                                        <div className="modalSubtitle">¿Seguro que quieres eliminar a <strong>{deleteRow?.name}</strong>? Esta acción no se puede deshacer.</div>
+                                        {deleteError && <div style={{ marginTop: 8, color: '#b91c1c', fontWeight: 700 }}>{deleteError}</div>}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="modalFooter">
+                                <div style={{ display: 'flex', gap: 10 }}>
+                                    <button className="btnPrimary btnPrimary--destructive" onClick={confirmDelete} disabled={deleteLoading}>{deleteLoading ? 'Eliminando...' : 'Eliminar'}</button>
+                                    <button className="btnSecondary" onClick={cancelDelete} disabled={deleteLoading}>Cancelar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {toast.visible && (
+                    <div className={`toast ${toast.type === 'success' ? 'toast--success' : 'toast--error'}`} role="status" aria-live="polite">
+                        {toast.message}
                     </div>
                 )}
 
