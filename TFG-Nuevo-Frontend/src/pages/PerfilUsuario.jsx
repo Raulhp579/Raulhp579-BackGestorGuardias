@@ -211,11 +211,23 @@ export default function PerfilUsuario() {
         }
     }
 
-    function getRoleLabel(roles) {
-        if (!roles || roles.length === 0) return "Usuario";
+    function getRoleLabel(rolesData) {
+        // Parsear si es string JSON
+        let roles = rolesData;
+        if (typeof rolesData === "string") {
+            try {
+                roles = JSON.parse(rolesData);
+            } catch {
+                return "Usuario";
+            }
+        }
+
+        if (!roles || !Array.isArray(roles) || roles.length === 0)
+            return "Usuario";
         const roleNames = roles.map((r) => r.name || r);
+        console.log(roleNames);
         if (roleNames.includes("admin")) return "Administrador";
-        if (roleNames.includes("user")) return "Usuario";
+        if (roleNames.includes("empleado")) return "Empleado";
         return roleNames[0] || "Usuario";
     }
 
@@ -323,7 +335,7 @@ export default function PerfilUsuario() {
                                 </h3>
                             )}
                             <span className="puUserRole">
-                                {getRoleLabel(user?.roles)}
+                                {getRoleLabel(sessionStorage.getItem("roles"))}
                             </span>
                         </div>
 
