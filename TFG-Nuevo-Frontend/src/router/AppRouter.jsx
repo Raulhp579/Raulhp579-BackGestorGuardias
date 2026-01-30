@@ -5,6 +5,7 @@ import Login from "../pages/Login";
 import HomeDashboard from "../pages/HomeDashboard";
 import Guardias from "../pages/GestionGuardias";
 import Calculos from "../pages/CalculosDocumentos";
+import PerfilUsuario from "../pages/PerfilUsuario";
 
 // Nuevas páginas legales
 import AvisoLegal from "../pages/AvisoLegal";
@@ -21,8 +22,9 @@ export default function AppRouter() {
       {/* Privadas con layout (Header + Sidebar + Footer si lo metes en AppLayout) */}
       <Route element={<AppLayout />}>
         <Route path="/home" element={<HomeDashboard />} />
+        <Route path="/perfil" element={<PerfilUsuario />} />
         <Route path="/guardias" element={<Guardias />} />
-        <Route path="/calculos" element={<Calculos />} />
+        <Route path="/usuarios" element={<Calculos />} /> {/*deberiamos cambiar el nombre de la ruta*/}
 
         {/* Legales (también dentro del layout para mantener header/sidebar) */}
         <Route path="/aviso-legal" element={<AvisoLegal />} />

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import "../components/style/Header.css";
 import { useNotifications } from "../context/NotificationsContext";
+import { NavLink } from "react-router-dom";
 
 function getInitials(name = "") {
     const clean = name.trim();
@@ -37,7 +38,11 @@ export default function Header({ onMenuClick, user, onLogout, onProfile }) {
 
                 {/* CENTRO */}
                 <div className="cdBrand cdBrandCenter">
-                    <svg className="cdLogo" viewBox="0 0 24 24" aria-hidden="true">
+                    <svg
+                        className="cdLogo"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                    >
                         <path d="M12 2L2 22h20L12 2zm0 3.8L18.4 20H5.6L12 5.8z" />
                     </svg>
                     <span>GuardiApp</span>
@@ -58,10 +63,15 @@ export default function Header({ onMenuClick, user, onLogout, onProfile }) {
                                 if (!notifOpen) markAllRead();
                             }}
                         >
-                            <span className="material-icons-outlined">notifications</span>
+                            <span className="material-icons-outlined">
+                                notifications
+                            </span>
 
                             {unreadCount > 0 && (
-                                <span className="cdNotifBadge" aria-label={`${unreadCount} notificaciones sin leer`}>
+                                <span
+                                    className="cdNotifBadge"
+                                    aria-label={`${unreadCount} notificaciones sin leer`}
+                                >
                                     {unreadCount > 9 ? "9+" : unreadCount}
                                 </span>
                             )}
@@ -69,24 +79,46 @@ export default function Header({ onMenuClick, user, onLogout, onProfile }) {
 
                         {notifOpen && (
                             <>
-                                <div className="cdMenuOverlay" onClick={() => setNotifOpen(false)} />
+                                <div
+                                    className="cdMenuOverlay"
+                                    onClick={() => setNotifOpen(false)}
+                                />
 
-                                <div className="cdNotifMenu" role="menu" aria-label="Lista de notificaciones">
+                                <div
+                                    className="cdNotifMenu"
+                                    role="menu"
+                                    aria-label="Lista de notificaciones"
+                                >
                                     <div className="cdNotifHeader">
-                                        <div className="cdNotifTitle">Notificaciones</div>
-                                        <button className="cdNotifClear" type="button" onClick={clearAll}>
+                                        <div className="cdNotifTitle">
+                                            Notificaciones
+                                        </div>
+                                        <button
+                                            className="cdNotifClear"
+                                            type="button"
+                                            onClick={clearAll}
+                                        >
                                             Limpiar
                                         </button>
                                     </div>
 
                                     {items.length === 0 ? (
-                                        <div className="cdNotifEmpty">No hay notificaciones.</div>
+                                        <div className="cdNotifEmpty">
+                                            No hay notificaciones.
+                                        </div>
                                     ) : (
                                         <div className="cdNotifList">
                                             {items.slice(0, 6).map((n) => (
-                                                <div className="cdNotifItem" key={n.id}>
-                                                    <div className="cdNotifText">{n.text}</div>
-                                                    <div className="cdNotifTime">a las {n.time}</div>
+                                                <div
+                                                    className="cdNotifItem"
+                                                    key={n.id}
+                                                >
+                                                    <div className="cdNotifText">
+                                                        {n.text}
+                                                    </div>
+                                                    <div className="cdNotifTime">
+                                                        a las {n.time}
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
@@ -106,24 +138,81 @@ export default function Header({ onMenuClick, user, onLogout, onProfile }) {
                             onClick={() => setMenuOpen((v) => !v)}
                         >
                             {avatarUrl ? (
-                                <img className="cdAvatarImg" src={avatarUrl} alt={`Foto de ${displayName}`} />
+                                <img
+                                    className="cdAvatarImg"
+                                    src={
+                                        avatarUrl.startsWith("http") ||
+                                        avatarUrl.startsWith("/")
+                                            ? avatarUrl
+                                            : `/${avatarUrl}`
+                                    }
+                                    alt={`Foto de ${displayName}`}
+                                />
                             ) : initials ? (
-                                <span className="cdAvatarInitials">{initials}</span>
+                                <span className="cdAvatarInitials">
+                                    {initials}
+                                </span>
                             ) : (
-                                <span className="material-icons-outlined cdAvatarPersonIcon">person</span>
+                                <span className="material-icons-outlined cdAvatarPersonIcon">
+                                    person
+                                </span>
                             )}
                         </button>
 
                         {menuOpen && (
                             <>
-                                <div className="cdMenuOverlay" onClick={() => setMenuOpen(false)} />
+                                <div
+                                    className="cdMenuOverlay"
+                                    onClick={() => setMenuOpen(false)}
+                                />
                                 <div className="cdMenu" role="menu">
                                     <div className="cdMenuHeader">
-                                        <div className="cdMenuName">{displayName}</div>
-                                        {user?.email && <div className="cdMenuEmail">{user.email}</div>}
+                                        <div className="cdMenuAvatarRow">
+                                            {avatarUrl ? (
+                                                <img
+                                                    className="cdMenuAvatar"
+                                                    src={
+                                                        avatarUrl.startsWith(
+                                                            "http",
+                                                        ) ||
+                                                        avatarUrl.startsWith(
+                                                            "/",
+                                                        )
+                                                            ? avatarUrl
+                                                            : `/${avatarUrl}`
+                                                    }
+                                                    alt={`Foto de ${displayName}`}
+                                                />
+                                            ) : (
+                                                <div className="cdMenuAvatarInitials">
+                                                    {initials || "U"}
+                                                </div>
+                                            )}
+                                            <div className="cdMenuUserInfo">
+                                                <div className="cdMenuName">
+                                                    {displayName}
+                                                </div>
+                                                {user?.email && (
+                                                    <div className="cdMenuEmail">
+                                                        {user.email}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
 
-                            {/* en algun momento lo metemos
+                                    <NavLink
+                                        to="/perfil"
+                                        className="cdMenuItem"
+                                        onClick={() => setMenuOpen(false)}
+                                    >
+                                        <span className="material-icons-outlined">
+                                            account_circle
+                                        </span>
+                                        Mi Perfil
+                                    </NavLink>
+
+                                    {/* en algun momento lo metemos
                                     <button
                                         className="cdMenuItem"
                                         type="button"
@@ -158,7 +247,9 @@ export default function Header({ onMenuClick, user, onLogout, onProfile }) {
                                             onLogout?.();
                                         }}
                                     >
-                                        <span className="material-icons-outlined">logout</span>
+                                        <span className="material-icons-outlined">
+                                            logout
+                                        </span>
                                         Cerrar sesión
                                     </button>
                                 </div>

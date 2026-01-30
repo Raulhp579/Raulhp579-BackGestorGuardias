@@ -32,6 +32,7 @@ Route::get('/logout', [AuthController::class, 'logout'])->middleware('auth:sanct
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [UserController::class, 'profile']);
     Route::put('/profile', [UserController::class, 'update']);
+    Route::post('/profile', [UserController::class, 'update']); // POST para FormData con archivos importante
     Route::post('/change-password', [UserController::class, 'changePassword']);
     Route::delete('/profile', [UserController::class, 'destroy']);
 });
