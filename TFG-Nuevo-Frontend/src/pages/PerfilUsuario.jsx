@@ -225,7 +225,6 @@ export default function PerfilUsuario() {
         if (!roles || !Array.isArray(roles) || roles.length === 0)
             return "Usuario";
         const roleNames = roles.map((r) => r.name || r);
-        console.log(roleNames);
         if (roleNames.includes("admin")) return "Administrador";
         if (roleNames.includes("empleado")) return "Empleado";
         return roleNames[0] || "Usuario";
