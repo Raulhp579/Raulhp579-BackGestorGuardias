@@ -4,6 +4,8 @@ const NotificationsContext = createContext(null);
 
 export function NotificationsProvider({ children }) {
     const [items, setItems] = useState([]); // {id, text, time, read}
+    const [openNotifTick, setOpenNotifTick] = useState(0);
+
     const unreadCount = useMemo(() => items.filter((n) => !n.read).length, [items]);
 
     function addNotification(text) {
@@ -18,6 +20,9 @@ export function NotificationsProvider({ children }) {
         };
 
         setItems((prev) => [newItem, ...prev]);
+
+        // abre el popup automáticamente
+        setOpenNotifTick((n) => n + 1);
     }
 
     function markAllRead() {
@@ -29,8 +34,8 @@ export function NotificationsProvider({ children }) {
     }
 
     const value = useMemo(
-        () => ({ items, unreadCount, addNotification, markAllRead, clearAll }),
-        [items, unreadCount]
+        () => ({ items, unreadCount, addNotification, markAllRead, clearAll, openNotifTick }),
+        [items, unreadCount, openNotifTick]
     );
 
     return <NotificationsContext.Provider value={value}>{children}</NotificationsContext.Provider>;

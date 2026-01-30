@@ -5,9 +5,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { useNotifications } from "../context/NotificationsContext";
 
-// IMPORTA tu función ya hecha (ajusta la ruta si hace falta)
 import { getDuties } from "../services/DutyService";
-
 import { getSpecialities } from "../services/SpecialitiesService";
 import { importExcel } from "../services/importExcelService";
 
@@ -29,21 +27,30 @@ function getInitials(name) {
 }
 
 export default function HomeDashboard() {
-    /* const stats = useMemo(
-    () => [
-      { title: "Sustituciones", value: "3", note: "Pendientes de validar", icon: "people", accent: "blue" },
-      { title: "Total Guardias", value: "150", note: "+12% vs mes anterior", icon: "bar_chart", accent: "green" },
-      { title: "Alertas", value: "5", note: "Errores de importación", icon: "warning", accent: "red" },
-    ],
-    []
-  ); */
-
     const { addNotification } = useNotifications();
 
     const [specialities, setSpecialities] = useState([]);
 
-    // Helpers Excel
+    useEffect(() => {
+        let alive = true;
 
+        (async () => {
+            try {
+                const data = await getSpecialities();
+                const arr = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+                if (alive) setSpecialities(arr);
+            } catch (e) {
+                console.error(e);
+                if (alive) setSpecialities([]);
+            }
+        })();
+
+        return () => {
+            alive = false;
+        };
+    }, []);
+
+    // Helpers Excel
     function isExcelFile(file) {
         if (!file) return false;
 
@@ -65,47 +72,26 @@ export default function HomeDashboard() {
 
     async function importDutysExcel({ file, year, month, idSpeciality }) {
         if (!file) return setImportMsg("No se ha seleccionado ningún archivo");
-        if (!year || !month || !idSpeciality)
-            return setImportMsg(
-                "Por favor, seleccione año, mes y especialidad",
-            );
+        if (!year || !month || !idSpeciality) return setImportMsg("Por favor, seleccione año, mes y especialidad");
 
         try {
             setImportMsg("Procesando archivo...");
 
-            const result = await importExcel({
-                file,
-                year,
-                month,
-                idSpeciality,
-            });
+            await importExcel({ file, year, month, idSpeciality });
+
+            setImportMsg("Archivo importado correctamente");
+            setExcelFile(null);
 
             // refrescar eventos del calendario desde BD
             await loadDutiesForCurrentView();
 
-            // Verificar si hay guardias fallidas
-            const failed = result?.["Duties not exported"] || [];
-            if (failed.length > 0) {
-                setFailedDuties(failed);
-                setFailedModalOpen(true);
-                setImportMsg(
-                    `Importación completada con ${failed.length} error(es)`,
-                );
-            } else {
-                setImportMsg("Archivo importado correctamente");
-            }
-
-            setExcelFile(null);
-            addNotification(
-                `Se han importado guardias desde Excel (${new Date().toLocaleTimeString()}).`,
-            );
+            addNotification(`Se han importado guardias desde Excel (${new Date().toLocaleTimeString()}).`);
         } catch (error) {
             setImportMsg(error?.message || "Error al importar el archivo");
         }
     }
 
     // FullCalendar control
-
     const calendarRef = useRef(null);
     const [monthLabel, setMonthLabel] = useState("");
 
@@ -126,28 +112,25 @@ export default function HomeDashboard() {
     }
 
     // BD: cargar guardias reales
-
     const [events, setEvents] = useState([]);
     const [eventsLoading, setEventsLoading] = useState(false);
     const [eventsError, setEventsError] = useState("");
 
-    /**
-     *  IMPORTANTE (por tu JSON ejemplo):
-     * El backend solo manda "date" y NO manda "hora".
-     * - Si NO hay hora => lo pintamos allDay (solo día).
-     * - Si añades "time" o "start_time" en el JSON, automáticamente se mostrará hora.
-     *
-     *  NOMBRES:
-     * Tu JSON ejemplo NO trae nombres (solo ids). Así que:
-     * - si el backend manda speciality_name / worker_name / chief_worker_name => se usan
-     * - si NO manda => fallback a "Especialidad #ID" / "Trabajador #ID" / etc
-     */
+    const stats = useMemo(() => {
+        const total = events.length;
+        const byType = (t) => events.filter((e) => e.extendedProps?.type === t).length;
+        const continuidad = byType("CA");
+        const alertas = events.filter((e) => !e.start).length;
+
+        return [
+            { title: "Continuidad Asistida", value: String(continuidad), note: "Según calendario", icon: "people", accent: "blue" },
+            { title: "Total Guardias", value: String(total), note: "En el mes visible", icon: "bar_chart", accent: "green" },
+            { title: "Alertas", value: String(alertas), note: "Eventos sin fecha", icon: "warning", accent: "red" },
+        ];
+    }, [events]);
+
     function mapDutyToEvent(d) {
-        const id = String(
-            d.id ??
-                d.uuid ??
-                (crypto?.randomUUID ? crypto.randomUUID() : Date.now()),
-        );
+        const id = String(d.id ?? d.uuid ?? (crypto?.randomUUID ? crypto.randomUUID() : Date.now()));
 
         const date = String(d.date ?? "");
         const typeUpper = String(d.duty_type ?? "").toUpperCase();
@@ -155,17 +138,15 @@ export default function HomeDashboard() {
         const workerName = String(d.worker ?? "").trim();
         const specialityName = String(d.speciality ?? "").trim();
 
-        // ✅ AHORA ES ESTO
         const jefe = Boolean(d.is_chief);
 
-        // ✅ Título como quieres: trabajador + tipo (+ especialidad opcional)
         const title = `${workerName} · ${typeUpper}${specialityName ? ` · ${specialityName}` : ""}`;
 
         return {
             id,
             title,
-            start: date, // allDay
-            allDay: true, // porque no hay hora
+            start: date,
+            allDay: true,
             extendedProps: {
                 type: typeUpper,
                 jefe,
@@ -174,13 +155,10 @@ export default function HomeDashboard() {
         };
     }
 
-    // llamamos a tu getDuties sin romperte aunque lo tengas con firma distinta
     async function callGetDuties(start, end) {
-        // 1) getDuties({start,end})
         try {
             return await getDuties({ start, end });
         } catch (_) {
-            // 2) getDuties(start,end)
             return await getDuties(start, end);
         }
     }
@@ -197,17 +175,11 @@ export default function HomeDashboard() {
 
         try {
             const data = await callGetDuties(start, end);
-            const arr = Array.isArray(data)
-                ? data
-                : Array.isArray(data?.data)
-                  ? data.data
-                  : [];
+            const arr = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
             setEvents(arr.map(mapDutyToEvent));
         } catch (e) {
             console.error(e);
-            setEventsError(
-                "No se pudieron cargar las guardias desde la base de datos.",
-            );
+            setEventsError("No se pudieron cargar las guardias desde la base de datos.");
             setEvents([]);
         } finally {
             setEventsLoading(false);
@@ -222,22 +194,15 @@ export default function HomeDashboard() {
     }, [loadDutiesForCurrentView]);
 
     // Filtros
-
     const [filterOpen, setFilterOpen] = useState(false);
     const [filterType, setFilterType] = useState("ALL");
 
-    const filteredEvents = useMemo(() => {
-        if (filterType === "ALL") return events;
-        return events.filter((e) => e.extendedProps?.type === filterType);
-    }, [events, filterType]);
+    // FullCalendar control
 
     // Modal Nueva Guardia (local)
-
     const [newOpen, setNewOpen] = useState(false);
     const [newType, setNewType] = useState("CA");
-    const [newDate, setNewDate] = useState(() =>
-        new Date().toISOString().slice(0, 10),
-    );
+    const [newDate, setNewDate] = useState(() => new Date().toISOString().slice(0, 10));
     const [newTime, setNewTime] = useState("15:00");
     const [newName, setNewName] = useState("");
     const [newIdSpeciality, setNewIdSpeciality] = useState("");
@@ -249,100 +214,52 @@ export default function HomeDashboard() {
         setNewOpen(true);
     }
 
-    // IMPORTANTE:
-    // Si todavía no tienes endpoint POST, esto añade en UI.
-    // Cuando tengas POST, aquí haces fetch POST y luego loadDutiesForCurrentView()
+    // ✅ FIX: estaba usando newSpecialty (no existe) y por eso “no se añadía” (crasheaba o no pintaba)
     function addGuardia() {
-        const start = `${newDate}T${newTime}:00`;
+        if (!newDate) return;
+
+        const api = calendarRef.current?.getApi();
+
+        const timeClean = normalizeTime(newTime) || "00:00";
+        const start = timeClean ? `${newDate}T${timeClean}:00` : newDate;
 
         const nameClean = newName.trim();
-        const title = `${newSpecialty} · ${newType} ${newTime}${nameClean ? ` — ${nameClean}` : ""}`;
+        const specialityObj = specialities.find((s) => String(s.id) === String(newIdSpeciality));
+        const specialityLabel = specialityObj?.name || (newIdSpeciality ? `Especialidad #${newIdSpeciality}` : "");
 
-        const id = crypto?.randomUUID
-            ? crypto.randomUUID()
-            : String(Date.now());
+        const title = `${nameClean || "Sin nombre"} · ${newType}${specialityLabel ? ` · ${specialityLabel}` : ""}`;
 
-        setEvents((prev) => [
-            ...prev,
-            {
-                id,
-                title,
-                start,
-                allDay: false,
-                extendedProps: {
-                    type: newType,
-                    jefe: false,
-                    specialityLabel: newIdSpeciality,
-                    workerLabel:
-                        nameClean || `Trabajador ${getInitials(nameClean)}`,
-                    raw: null,
-                },
+        function goNext() {
+            const api = calendarRef.current?.getApi();
+            api?.next();
+        }
+
+        const newEvent = {
+            id,
+            title,
+            start,
+            allDay: false,
+            extendedProps: {
+                type: newType,
+                jefe: false,
+                specialityLabel,
+                workerLabel: nameClean || `Trabajador ${getInitials(nameClean)}`,
+                raw: null,
             },
-        ]);
+        };
 
-        // NOTIFICACIÓN con hora actual
-        addNotification(
-            `Se ha agregado una nueva guardia a las ${new Date().toLocaleTimeString()}.`,
-        );
+        // añade al estado (para que se vea aunque no haya backend)
+        setEvents((prev) => [newEvent, ...prev]);
 
+        // (opcional pero ayuda) fuerza al calendario a renderizarlo al instante
+        api?.addEvent(newEvent);
+
+        addNotification(`Se ha agregado una nueva guardia a las ${new Date().toLocaleTimeString()}.`);
         setNewOpen(false);
     }
 
     // Import Excel modal (estado)
-
     const [importOpen, setImportOpen] = useState(false);
-
-    const [specialitiesLoading, setSpecialitiesLoading] = useState(false);
-    const [specialitiesError, setSpecialitiesError] = useState("");
-
-    const [idSpeciality, setIdSpeciality] = useState("");
-    const [importMonth, setImportMonth] = useState("01");
-    const [importYear, setImportYear] = useState("2026");
-
-    const [excelFile, setExcelFile] = useState(null);
-    const fileInputRef = useRef(null);
-
-    const [isDragging, setIsDragging] = useState(false);
-    const [importUploading, setImportUploading] = useState(false);
-    const [importMsg, setImportMsg] = useState("");
-
-    // Estado para guardias fallidas
-    const [failedDuties, setFailedDuties] = useState([]);
-    const [failedModalOpen, setFailedModalOpen] = useState(false);
-
-    const months = useMemo(
-        () => [
-            { value: "01", label: "Enero" },
-            { value: "02", label: "Febrero" },
-            { value: "03", label: "Marzo" },
-            { value: "04", label: "Abril" },
-            { value: "05", label: "Mayo" },
-            { value: "06", label: "Junio" },
-            { value: "07", label: "Julio" },
-            { value: "08", label: "Agosto" },
-            { value: "09", label: "Septiembre" },
-            { value: "10", label: "Octubre" },
-            { value: "11", label: "Noviembre" },
-            { value: "12", label: "Diciembre" },
-        ],
-        [],
-    );
-
-    const years = useMemo(() => {
-        const start = 2020;
-        const end = 2030;
-        const arr = [];
-        for (let y = start; y <= end; y++) arr.push(String(y));
-        return arr;
-    }, []);
-
-    function getMonthYearFromCalendar() {
-        const api = calendarRef.current?.getApi();
-        const d = api?.getDate() ?? new Date();
-        const year = String(d.getFullYear());
-        const month = String(d.getMonth() + 1).padStart(2, "0");
-        return { year, month };
-    }
 
     async function openImportModal() {
         const { year, month } = getMonthYearFromCalendar();
@@ -362,8 +279,8 @@ export default function HomeDashboard() {
             const arr = Array.isArray(data)
                 ? data
                 : Array.isArray(data?.data)
-                  ? data.data
-                  : [];
+                    ? data.data
+                    : [];
             setSpecialities(arr);
         } catch (e) {
             console.error(e);
@@ -451,660 +368,358 @@ export default function HomeDashboard() {
         }
     }
 
-    return (
-        <div className="hdContent">
-            {/* Header móvil dentro del contenido */}
-            <div className="hdMobileHeader">
-                <div>
-                    <h2 className="hdTitle">Gestión de Guardias</h2>
-                    <p className="hdSubtitle">Planificación mensual</p>
-                </div>
-                <div className="hdStatus">
-                    <span className="hdStatusLabel">Estado</span>
-                    <span className="hdStatusPill">
-                        <span className="hdStatusDot" />
-                        Abierto
-                    </span>
-                </div>
-            </div>
-
-            {/* Cards stats */}
-            {/* <section className="hdStats">
+    {/* Cards stats */ }
+    <section className="hdStats">
         {stats.map((s) => (
-          <div className="hdStatCard" key={s.title}>
-            <div>
-              <div className="hdStatTitle">{s.title}</div>
-              <div className="hdStatValue">{s.value}</div>
-              <div className={`hdStatNote ${s.accent}`}>{s.note}</div>
+            <div className="hdStatCard" key={s.title}>
+                <div>
+                    <div className="hdStatTitle">{s.title}</div>
+                    <div className="hdStatValue">{s.value}</div>
+                    <div className={`hdStatNote ${s.accent}`}>{s.note}</div>
+                </div>
+                <div className={`hdStatIcon ${s.accent}`}>
+                    <span className="material-icons-outlined">{s.icon}</span>
+                </div>
             </div>
-            <div className={`hdStatIcon ${s.accent}`}>
-              <span className="material-icons-outlined">{s.icon}</span>
-            </div>
-          </div>
         ))}
-      </section> */}
+    </section>
 
-            {/* Calendar card */}
-            <section className="hdCalendarCard">
-                <div className="hdCalendarTop">
-                    <div className="hdMonthPicker">
-                        <button
-                            className="hdMiniBtn"
-                            aria-label="Mes anterior"
-                            type="button"
-                            onClick={goPrev}
-                        >
-                            <span className="material-icons-outlined">
-                                chevron_left
-                            </span>
-                        </button>
+    {/* Calendar card */ }
+    <section className="hdCalendarCard">
+        <div className="hdCalendarTop">
+            <div className="hdMonthPicker">
+                <button className="hdMiniBtn" aria-label="Mes anterior" type="button" onClick={goPrev}>
+                    <span className="material-icons-outlined">chevron_left</span>
+                </button>
 
-                        <span className="hdMonthLabel">
-                            {monthLabel || "..."}
-                        </span>
+                <span className="hdMonthLabel">{monthLabel || "..."}</span>
 
-                        <button
-                            className="hdMiniBtn"
-                            aria-label="Mes siguiente"
-                            type="button"
-                            onClick={goNext}
-                        >
-                            <span className="material-icons-outlined">
-                                chevron_right
-                            </span>
-                        </button>
-                    </div>
+                <button className="hdMiniBtn" aria-label="Mes siguiente" type="button" onClick={goNext}>
+                    <span className="material-icons-outlined">chevron_right</span>
+                </button>
+            </div>
 
-                    <div className="hdActions" style={{ position: "relative" }}>
-                        {/* FILTROS */}
-                        <button
-                            className="hdBtn light"
-                            type="button"
-                            onClick={() => setFilterOpen((v) => !v)}
-                            aria-expanded={filterOpen}
-                        >
-                            <span className="material-icons-outlined">
-                                filter_list
-                            </span>
-                            Filtros
-                        </button>
+            <div className="hdActions" style={{ position: "relative" }}>
+                {/* IMPORTAR EXCEL */}
+                <button className="hdBtn primary hdBtnSm" type="button" onClick={openImportModal}>
+                    <span className="material-icons-outlined">table_view</span>
+                    <span className="hideOnMobile">Importar Excel</span>
+                    <span className="showOnMobile">Excel</span>
+                </button>
 
-                        {filterOpen && (
-                            <div className="hdFilterMenu" role="menu">
-                                <button
-                                    type="button"
-                                    className={`hdFilterItem ${filterType === "ALL" ? "active" : ""}`}
-                                    onClick={() => {
-                                        setFilterType("ALL");
-                                        setFilterOpen(false);
-                                    }}
-                                >
-                                    Todos
-                                </button>
-                                <button
-                                    type="button"
-                                    className={`hdFilterItem ${filterType === "CA" ? "active" : ""}`}
-                                    onClick={() => {
-                                        setFilterType("CA");
-                                        setFilterOpen(false);
-                                    }}
-                                >
-                                    Continuidad (CA)
-                                </button>
-                                <button
-                                    type="button"
-                                    className={`hdFilterItem ${filterType === "PF" ? "active" : ""}`}
-                                    onClick={() => {
-                                        setFilterType("PF");
-                                        setFilterOpen(false);
-                                    }}
-                                >
-                                    Presencia Física (PF)
-                                </button>
-                                <button
-                                    type="button"
-                                    className={`hdFilterItem ${filterType === "LOC" ? "active" : ""}`}
-                                    onClick={() => {
-                                        setFilterType("LOC");
-                                        setFilterOpen(false);
-                                    }}
-                                >
-                                    Localizada (LOC)
+                {/* MODAL IMPORTAR EXCEL */}
+                {importOpen && (
+                    <div className="hdModalOverlay" role="dialog" aria-modal="true">
+                        <div className="hdModalCard">
+                            <div className="hdModalHead">
+                                <div className="hdModalTitle">Importar guardias desde Excel</div>
+                                <button className="hdModalClose" type="button" onClick={closeImportModal} aria-label="Cerrar">
+                                    <span className="material-icons-outlined">close</span>
                                 </button>
                             </div>
-                        )}
 
-                        {/* NUEVA GUARDIA */}
-                        {/* <button className="hdBtn primary" type="button" onClick={() => openNewGuardiaModal()}>
-              <span className="material-icons-outlined">add</span>
-              <span className="hideOnMobile">Nueva Guardia</span>
-              <span className="showOnMobile">Crear</span>
-            </button> */}
-                    </div>
-                </div>
+                            <div className="hdModalBody">
+                                <label className="hdField">
+                                    <span>Especialidad</span>
 
-                {/*  Estado de carga/errores */}
-                {(eventsLoading || eventsError) && (
-                    <div style={{ padding: "10px 16px" }}>
-                        {eventsLoading && (
-                            <span style={{ fontWeight: 700 }}>
-                                Cargando guardias...
-                            </span>
-                        )}
-                        {eventsError && (
-                            <span style={{ color: "#b91c1c", fontWeight: 700 }}>
-                                {eventsError}
-                            </span>
-                        )}
+                                    {specialitiesLoading ? (
+                                        <div className="hdControl">Cargando especialidades...</div>
+                                    ) : specialitiesError ? (
+                                        <div className="hdControl">{specialitiesError}</div>
+                                    ) : (
+                                        <select className="hdControl" value={idSpeciality} onChange={(e) => setIdSpeciality(e.target.value)}>
+                                            <option value="">-- Selecciona una especialidad --</option>
+                                            {specialities.map((s) => (
+                                                <option key={s.id} value={String(s.id)}>
+                                                    {s.name} (id: {s.id})
+                                                </option>
+                                            ))}
+                                        </select>
+                                    )}
+                                </label>
+
+                                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                                    <label className="hdField">
+                                        <span>Mes</span>
+                                        <select className="hdControl" value={importMonth} onChange={(e) => setImportMonth(e.target.value)}>
+                                            {months.map((m) => (
+                                                <option key={m.value} value={m.value}>
+                                                    {m.label} ({m.value})
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </label>
+
+                                    <label className="hdField">
+                                        <span>Año</span>
+                                        <select className="hdControl" value={importYear} onChange={(e) => setImportYear(e.target.value)}>
+                                            {years.map((y) => (
+                                                <option key={y} value={y}>
+                                                    {y}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </label>
+                                </div>
+
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                    style={{ display: "none" }}
+                                    onChange={onPickExcelFile}
+                                />
+
+                                <div
+                                    onDragOver={onDragOver}
+                                    onDragLeave={onDragLeave}
+                                    onDrop={onDrop}
+                                    onClick={() => fileInputRef.current?.click()}
+                                    style={{
+                                        marginTop: 12,
+                                        border: `2px dashed ${isDragging ? "#888" : "#ccc"}`,
+                                        borderRadius: 12,
+                                        padding: 16,
+                                        cursor: "pointer",
+                                        textAlign: "center",
+                                        userSelect: "none",
+                                    }}
+                                    title="Arrastra Excel o haz clic para seleccionarlo"
+                                >
+                                    <div style={{ fontWeight: 600 }}>Arrastra aquí tu Excel (.xls / .xlsx)</div>
+                                    <div style={{ marginTop: 6, opacity: 0.8 }}>o haz clic para seleccionarlo</div>
+
+                                    {excelFile && (
+                                        <div style={{ marginTop: 10 }}>
+                                            Archivo: <b>{excelFile.name}</b>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {importMsg && <p style={{ marginTop: 12 }}>{importMsg}</p>}
+                            </div>
+
+                            <div className="hdModalFooter">
+                                <button className="hdBtn light hdBtnSm" type="button" onClick={closeImportModal}>
+                                    Cancelar
+                                </button>
+
+                                <button className="hdBtn primary hdBtnSm" type="button" disabled={importUploading} onClick={submitImport}>
+                                    {importUploading ? "Subiendo..." : "Importar"}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
 
-                <div className="hdCalendar">
-                    <div className="hdFullCalendarWrap">
-                        <FullCalendar
-                            ref={calendarRef}
-                            plugins={[dayGridPlugin, interactionPlugin]}
-                            initialView="dayGridMonth"
-                            initialDate={new Date()}
-                            firstDay={1}
-                            height="auto"
-                            locale="es"
-                            headerToolbar={false}
-                            datesSet={() => {
-                                syncTitle();
-                                loadDutiesForCurrentView();
+                {/* NUEVA GUARDIA */}
+                <button className="hdBtn primary hdBtnSm" type="button" onClick={() => openNewGuardiaModal()}>
+                    <span className="material-icons-outlined">add</span>
+                    <span className="hideOnMobile">Nueva Guardia</span>
+                    <span className="showOnMobile">Crear</span>
+                </button>
+
+                {/* FILTROS */}
+                <button
+                    className="hdBtn light hdBtnSm"
+                    type="button"
+                    onClick={() => setFilterOpen((v) => !v)}
+                    aria-expanded={filterOpen}
+                >
+                    <span className="material-icons-outlined">filter_list</span>
+                    Filtros
+                </button>
+
+                {filterOpen && (
+                    <div className="hdFilterMenu" role="menu">
+                        <button
+                            type="button"
+                            className={`hdFilterItem ${filterType === "ALL" ? "active" : ""}`}
+                            onClick={() => {
+                                setFilterType("ALL");
+                                setFilterOpen(false);
                             }}
-                            dayHeaderFormat={{ weekday: "short" }}
-                            events={filteredEvents}
-                            eventContent={(arg) => {
-                                const type = arg.event.extendedProps?.type;
-                                const jefe = arg.event.extendedProps?.jefe;
-                                const text = arg.event.title;
-
-                                return (
-                                    <div className={`hdFcChip ${type || ""}`}>
-                                        <span className="hdFcChipText">
-                                            {text}
-                                        </span>
-                                        {jefe && (
-                                            <span
-                                                className="material-icons-outlined hdFcJefe"
-                                                title="Jefe de Guardia"
-                                            >
-                                                local_police
-                                            </span>
-                                        )}
-                                    </div>
-                                );
+                        >
+                            Todos
+                        </button>
+                        <button
+                            type="button"
+                            className={`hdFilterItem ${filterType === "CA" ? "active" : ""}`}
+                            onClick={() => {
+                                setFilterType("CA");
+                                setFilterOpen(false);
                             }}
-                            dateClick={(info) =>
-                                openNewGuardiaModal(info.dateStr)
-                            }
-                            eventClick={(info) => {
-                                console.log(
-                                    "eventClick raw:",
-                                    info.event.extendedProps?.raw,
-                                );
+                        >
+                            Continuidad (CA)
+                        </button>
+                        <button
+                            type="button"
+                            className={`hdFilterItem ${filterType === "PF" ? "active" : ""}`}
+                            onClick={() => {
+                                setFilterType("PF");
+                                setFilterOpen(false);
                             }}
-                        />
+                        >
+                            Presencia Física (PF)
+                        </button>
+                        <button
+                            type="button"
+                            className={`hdFilterItem ${filterType === "LOC" ? "active" : ""}`}
+                            onClick={() => {
+                                setFilterType("LOC");
+                                setFilterOpen(false);
+                            }}
+                        >
+                            Localizada (LOC)
+                        </button>
                     </div>
-                </div>
-            </section>
-
-            {/* MODAL NUEVA GUARDIA */}
-            {newOpen && (
-                <div className="hdModalOverlay" role="dialog" aria-modal="true">
-                    <div className="hdModalCard">
-                        <div className="hdModalHead">
-                            <div className="hdModalTitle">Nueva Guardia</div>
-                            <button
-                                className="hdModalClose"
-                                onClick={() => setNewOpen(false)}
-                                type="button"
-                                aria-label="Cerrar"
-                            >
-                                <span className="material-icons-outlined">
-                                    close
-                                </span>
-                            </button>
-                        </div>
-
-                        <div className="hdModalBody">
-                            <label className="hdField">
-                                <span>Tipo</span>
-                                <select
-                                    value={newType}
-                                    onChange={(e) => setNewType(e.target.value)}
-                                    className="hdControl"
-                                >
-                                    <option value="CA">CA (Continuidad)</option>
-                                    <option value="PF">
-                                        PF (Presencia Física)
-                                    </option>
-                                    <option value="LOC">
-                                        LOC (Localizada)
-                                    </option>
-                                </select>
-                            </label>
-
-                            <label className="hdField">
-                                <span>Fecha</span>
-                                <input
-                                    type="date"
-                                    value={newDate}
-                                    onChange={(e) => setNewDate(e.target.value)}
-                                    className="hdControl"
-                                />
-                            </label>
-
-                            <label className="hdField">
-                                <span>Nombre</span>
-                                <input
-                                    type="text"
-                                    value={newName}
-                                    onChange={(e) => setNewName(e.target.value)}
-                                    className="hdControl"
-                                    placeholder="Ej: María López"
-                                />
-                            </label>
-
-                            <label className="hdField">
-                                <span>Especialidad</span>
-                                <select
-                                    className="hdControl"
-                                    value={newIdSpeciality}
-                                    onChange={(e) =>
-                                        setNewIdSpeciality(e.target.value)
-                                    }
-                                >
-                                    <option value="">
-                                        Selecciona una especialidad
-                                    </option>
-                                    {specialities.map((s) => (
-                                        <option key={s.id} value={String(s.id)}>
-                                            {s.name} (id: {s.id})
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
-
-                            <label className="hdField">
-                                <span>Hora</span>
-                                <input
-                                    type="time"
-                                    value={newTime}
-                                    onChange={(e) => setNewTime(e.target.value)}
-                                    className="hdControl"
-                                />
-                            </label>
-                        </div>
-
-                        <div className="hdModalFooter">
-                            <button
-                                className="hdBtn light"
-                                type="button"
-                                onClick={() => setNewOpen(false)}
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                className="hdBtn primary"
-                                type="button"
-                                onClick={addGuardia}
-                            >
-                                Guardar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Legend */}
-            <section className="hdLegendCard">
-                <h4 className="hdLegendTitle">Leyenda</h4>
-                <div className="hdLegendGrid">
-                    <div className="hdLegendItem">
-                        <span className="dot ca" />
-                        <span>Continuidad (CA)</span>
-                    </div>
-                    <div className="hdLegendItem">
-                        <span className="dot pf" />
-                        <span>Presencia Física (PF)</span>
-                    </div>
-                    <div className="hdLegendItem">
-                        <span className="dot loc" />
-                        <span>Localizada (LOC)</span>
-                    </div>
-                    <div className="hdLegendItem">
-                        <span className="material-icons-outlined amber">
-                            local_police
-                        </span>
-                        <span>Jefe de Guardia</span>
-                    </div>
-                </div>
-            </section>
-
-            {/* IMPORTAR EXCEL */}
-            <section>
-                <div className="cdActions">
-                    <button
-                        className="cdBtnSecondary"
-                        type="button"
-                        onClick={openImportModal}
-                    >
-                        <span className="material-icons excel">table_view</span>
-                        Importar Excel
-                    </button>
-                </div>
-            </section>
-
-            {/* MODAL IMPORTAR EXCEL */}
-            {importOpen && (
-                <div className="hdModalOverlay" role="dialog" aria-modal="true">
-                    <div className="hdModalCard">
-                        <div className="hdModalHead">
-                            <div className="hdModalTitle">
-                                Importar guardias desde Excel
-                            </div>
-                            <button
-                                className="hdModalClose"
-                                type="button"
-                                onClick={closeImportModal}
-                                aria-label="Cerrar"
-                            >
-                                <span className="material-icons-outlined">
-                                    close
-                                </span>
-                            </button>
-                        </div>
-
-                        <div className="hdModalBody">
-                            <label className="hdField">
-                                <span>Especialidad</span>
-
-                                {specialitiesLoading ? (
-                                    <div className="hdControl">
-                                        Cargando especialidades...
-                                    </div>
-                                ) : specialitiesError ? (
-                                    <div className="hdControl">
-                                        {specialitiesError}
-                                    </div>
-                                ) : (
-                                    <select
-                                        className="hdControl"
-                                        value={idSpeciality}
-                                        onChange={(e) =>
-                                            setIdSpeciality(e.target.value)
-                                        }
-                                    >
-                                        <option value="">
-                                            -- Selecciona una especialidad --
-                                        </option>
-                                        {specialities.map((s) => (
-                                            <option
-                                                key={s.id}
-                                                value={String(s.id)}
-                                            >
-                                                {s.name} (id: {s.id})
-                                            </option>
-                                        ))}
-                                    </select>
-                                )}
-                            </label>
-
-                            <div
-                                style={{
-                                    display: "grid",
-                                    gridTemplateColumns: "1fr 1fr",
-                                    gap: 12,
-                                }}
-                            >
-                                <label className="hdField">
-                                    <span>Mes</span>
-                                    <select
-                                        className="hdControl"
-                                        value={importMonth}
-                                        onChange={(e) =>
-                                            setImportMonth(e.target.value)
-                                        }
-                                    >
-                                        {months.map((m) => (
-                                            <option
-                                                key={m.value}
-                                                value={m.value}
-                                            >
-                                                {m.label} ({m.value})
-                                            </option>
-                                        ))}
-                                    </select>
-                                </label>
-
-                                <label className="hdField">
-                                    <span>Año</span>
-                                    <select
-                                        className="hdControl"
-                                        value={importYear}
-                                        onChange={(e) =>
-                                            setImportYear(e.target.value)
-                                        }
-                                    >
-                                        {years.map((y) => (
-                                            <option key={y} value={y}>
-                                                {y}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </label>
-                            </div>
-
-                            <input
-                                ref={fileInputRef}
-                                type="file"
-                                accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                                style={{ display: "none" }}
-                                onChange={onPickExcelFile}
-                            />
-
-                            <div
-                                onDragOver={onDragOver}
-                                onDragLeave={onDragLeave}
-                                onDrop={onDrop}
-                                onClick={() => fileInputRef.current?.click()}
-                                style={{
-                                    marginTop: 12,
-                                    border: `2px dashed ${isDragging ? "#888" : "#ccc"}`,
-                                    borderRadius: 12,
-                                    padding: 16,
-                                    cursor: "pointer",
-                                    textAlign: "center",
-                                    userSelect: "none",
-                                }}
-                                title="Arrastra Excel o haz clic para seleccionarlo"
-                            >
-                                <div style={{ fontWeight: 600 }}>
-                                    Arrastra aquí tu Excel (.xls / .xlsx)
-                                </div>
-                                <div style={{ marginTop: 6, opacity: 0.8 }}>
-                                    o haz clic para seleccionarlo
-                                </div>
-
-                                {excelFile && (
-                                    <div style={{ marginTop: 10 }}>
-                                        Archivo: <b>{excelFile.name}</b>
-                                    </div>
-                                )}
-                            </div>
-
-                            {importMsg && (
-                                <p style={{ marginTop: 12 }}>{importMsg}</p>
-                            )}
-                        </div>
-
-                        <div className="hdModalFooter">
-                            <button
-                                className="hdBtn light"
-                                type="button"
-                                onClick={closeImportModal}
-                            >
-                                Cancelar
-                            </button>
-
-                            <button
-                                className="hdBtn primary"
-                                type="button"
-                                disabled={importUploading}
-                                onClick={submitImport}
-                            >
-                                {importUploading ? "Subiendo..." : "Importar"}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* MODAL GUARDIAS FALLIDAS */}
-            {failedModalOpen && (
-                <div className="hdModalOverlay" role="dialog" aria-modal="true">
-                    <div className="hdModalCard" style={{ maxWidth: 600 }}>
-                        <div className="hdModalHead">
-                            <div
-                                className="hdModalTitle"
-                                style={{ color: "#b91c1c" }}
-                            >
-                                Guardias no importadas
-                            </div>
-                            <button
-                                className="hdModalClose"
-                                type="button"
-                                onClick={() => setFailedModalOpen(false)}
-                                aria-label="Cerrar"
-                            >
-                                <span className="material-icons-outlined">
-                                    close
-                                </span>
-                            </button>
-                        </div>
-
-                        <div className="hdModalBody">
-                            <p style={{ marginBottom: 12, color: "#6b7280" }}>
-                                Las siguientes guardias no se pudieron importar:
-                            </p>
-                            <div style={{ maxHeight: 300, overflowY: "auto" }}>
-                                <table
-                                    style={{
-                                        width: "100%",
-                                        borderCollapse: "collapse",
-                                        fontSize: 14,
-                                    }}
-                                >
-                                    <thead>
-                                        <tr style={{ background: "#f9fafb" }}>
-                                            <th
-                                                style={{
-                                                    padding: "8px 10px",
-                                                    textAlign: "left",
-                                                    borderBottom:
-                                                        "1px solid #e5e7eb",
-                                                }}
-                                            >
-                                                Trabajador
-                                            </th>
-                                            <th
-                                                style={{
-                                                    padding: "8px 10px",
-                                                    textAlign: "center",
-                                                    borderBottom:
-                                                        "1px solid #e5e7eb",
-                                                }}
-                                            >
-                                                Tipo
-                                            </th>
-                                            <th
-                                                style={{
-                                                    padding: "8px 10px",
-                                                    textAlign: "center",
-                                                    borderBottom:
-                                                        "1px solid #e5e7eb",
-                                                }}
-                                            >
-                                                Fecha
-                                            </th>
-                                            <th
-                                                style={{
-                                                    padding: "8px 10px",
-                                                    textAlign: "left",
-                                                    borderBottom:
-                                                        "1px solid #e5e7eb",
-                                                }}
-                                            >
-                                                Error
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {failedDuties.map((duty, idx) => (
-                                            <tr
-                                                key={idx}
-                                                style={{
-                                                    borderBottom:
-                                                        "1px solid #e5e7eb",
-                                                }}
-                                            >
-                                                <td
-                                                    style={{
-                                                        padding: "8px 10px",
-                                                    }}
-                                                >
-                                                    {duty.Worker || "—"}
-                                                </td>
-                                                <td
-                                                    style={{
-                                                        padding: "8px 10px",
-                                                        textAlign: "center",
-                                                    }}
-                                                >
-                                                    {duty.type || "—"}
-                                                </td>
-                                                <td
-                                                    style={{
-                                                        padding: "8px 10px",
-                                                        textAlign: "center",
-                                                    }}
-                                                >
-                                                    {typeof duty.date ===
-                                                    "string"
-                                                        ? duty.date
-                                                        : "—"}
-                                                </td>
-                                                <td
-                                                    style={{
-                                                        padding: "8px 10px",
-                                                        color: "#b91c1c",
-                                                    }}
-                                                >
-                                                    {duty.error ||
-                                                        "Trabajador no encontrado"}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <div className="hdModalFooter">
-                            <button
-                                className="hdBtn primary"
-                                type="button"
-                                onClick={() => setFailedModalOpen(false)}
-                            >
-                                Cerrar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
-    );
+
+        {/* Estado de carga/errores */}
+        {(eventsLoading || eventsError) && (
+            <div style={{ padding: "10px 16px" }}>
+                {eventsLoading && <span style={{ fontWeight: 700 }}>Cargando guardias...</span>}
+                {eventsError && <span style={{ color: "#b91c1c", fontWeight: 700 }}>{eventsError}</span>}
+            </div>
+        )}
+
+        <div className="hdCalendar">
+            <div className={`hdFullCalendarWrap ${eventsLoading ? "" : "hdEnter"}`}>
+                <FullCalendar
+                    ref={calendarRef}
+                    plugins={[dayGridPlugin, interactionPlugin]}
+                    initialView="dayGridMonth"
+                    initialDate={new Date()}
+                    firstDay={1}
+                    height="auto"
+                    locale="es"
+                    headerToolbar={false}
+                    datesSet={() => {
+                        syncTitle();
+                        loadDutiesForCurrentView();
+                    }}
+                    dayHeaderFormat={{ weekday: "short" }}
+                    events={filteredEvents}
+                    // ✅ marca el día de hoy con una clase (CSS)
+                    dayCellClassNames={(arg) => (arg.isToday ? ["hdTodayCell"] : [])}
+                    eventContent={(arg) => {
+                        const type = arg.event.extendedProps?.type;
+                        const jefe = arg.event.extendedProps?.jefe;
+                        const text = arg.event.title;
+
+                        return (
+                            <div className={`hdFcChip ${type || ""}`}>
+                                <span className="hdFcChipText">{text}</span>
+                                {jefe && (
+                                    <span className="material-icons-outlined hdFcJefe" title="Jefe de Guardia">
+                                        local_police
+                                    </span>
+                                )}
+                            </div>
+                        );
+                    }}
+                    dateClick={(info) => openNewGuardiaModal(info.dateStr)}
+                    eventClick={(info) => {
+                        console.log("eventClick raw:", info.event.extendedProps?.raw);
+                    }}
+                />
+            </div>
+        </div>
+    </section>
+
+    {/* MODAL NUEVA GUARDIA */ }
+    {
+        newOpen && (
+            <div className="hdModalOverlay" role="dialog" aria-modal="true">
+                <div className="hdModalCard">
+                    <div className="hdModalHead">
+                        <div className="hdModalTitle">Nueva Guardia</div>
+                        <button className="hdModalClose" onClick={() => setNewOpen(false)} type="button" aria-label="Cerrar">
+                            <span className="material-icons-outlined">close</span>
+                        </button>
+                    </div>
+
+                    <div className="hdModalBody">
+                        <label className="hdField">
+                            <span>Tipo</span>
+                            <select value={newType} onChange={(e) => setNewType(e.target.value)} className="hdControl">
+                                <option value="CA">CA (Continuidad)</option>
+                                <option value="PF">PF (Presencia Física)</option>
+                                <option value="LOC">LOC (Localizada)</option>
+                            </select>
+                        </label>
+
+                        <label className="hdField">
+                            <span>Fecha</span>
+                            <input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} className="hdControl" />
+                        </label>
+
+                        <label className="hdField">
+                            <span>Nombre</span>
+                            <input
+                                type="text"
+                                value={newName}
+                                onChange={(e) => setNewName(e.target.value)}
+                                className="hdControl"
+                                placeholder="Ej: María López"
+                            />
+                        </label>
+
+                        <label className="hdField">
+                            <span>Especialidad</span>
+                            <select className="hdControl" value={newIdSpeciality} onChange={(e) => setNewIdSpeciality(e.target.value)}>
+                                <option value="">Selecciona una especialidad</option>
+                                {specialities.map((s) => (
+                                    <option key={s.id} value={String(s.id)}>
+                                        {s.name} (id: {s.id})
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+
+                        <label className="hdField">
+                            <span>Hora</span>
+                            <input type="time" value={newTime} onChange={(e) => setNewTime(e.target.value)} className="hdControl" />
+                        </label>
+                    </div>
+
+                    <div className="hdModalFooter">
+                        <button className="hdBtn light hdBtnSm" type="button" onClick={() => setNewOpen(false)}>
+                            Cancelar
+                        </button>
+                        <button className="hdBtn primary hdBtnSm" type="button" onClick={addGuardia}>
+                            Guardar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    {/* Legend */ }
+    <section className="hdLegendCard">
+        <h4 className="hdLegendTitle">Leyenda</h4>
+        <div className="hdLegendGrid">
+            <div className="hdLegendItem">
+                <span className="dot ca" />
+                <span>Continuidad (CA)</span>
+            </div>
+            <div className="hdLegendItem">
+                <span className="dot pf" />
+                <span>Presencia Física (PF)</span>
+            </div>
+            <div className="hdLegendItem">
+                <span className="dot loc" />
+                <span>Localizada (LOC)</span>
+            </div>
+            <div className="hdLegendItem">
+                <span className="material-icons-outlined amber">local_police</span>
+                <span>Jefe de Guardia</span>
+            </div>
+        </div>
+    </section>
+
+
 }
