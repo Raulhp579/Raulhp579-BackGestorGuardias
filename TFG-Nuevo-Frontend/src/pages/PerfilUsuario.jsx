@@ -388,12 +388,6 @@ export default function PerfilUsuario() {
                                 </span>
                             </div>
                             <div className="puInfoRow">
-                                <span className="puInfoLabel">ID Usuario:</span>
-                                <span className="puInfoValue">
-                                    {user?.id || "-"}
-                                </span>
-                            </div>
-                            <div className="puInfoRow">
                                 <span className="puInfoLabel">
                                     Cuenta creada:
                                 </span>
