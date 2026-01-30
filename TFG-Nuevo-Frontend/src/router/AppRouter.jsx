@@ -40,8 +40,8 @@ export default function AppRouter() {
       </Route>
 
       {/* Default */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route path="/" element={<Navigate to="/Home" replace />} />
+      <Route path="*" element={<Navigate to="/Home" replace />} />
     </Routes>
   );
 }

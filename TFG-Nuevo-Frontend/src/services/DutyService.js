@@ -27,3 +27,40 @@ export async function getDuties() {
         throw error;
     }
 }
+
+export async function updateDuty(id, data) {
+    try {
+        let response = await fetch(`${endpoint}/duties/${id}`, {
+            method: "PUT",
+            headers: getAuthHeaders(),
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error al actualizar guardia:", error);
+        throw error;
+    }
+}
+
+export async function deleteDuty(id) {
+    try {
+        let response = await fetch(`${endpoint}/duties/${id}`, {
+            method: "DELETE",
+            headers: getAuthHeaders(),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error al eliminar guardia:", error);
+        throw error;
+    }
+}

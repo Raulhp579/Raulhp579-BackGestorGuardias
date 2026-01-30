@@ -9,6 +9,7 @@ use App\Http\Controllers\WorkerController;
 use App\Http\Middleware\isAdmin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PdfController;
 
 // Preflight CORS para /api/*
 Route::options('/{any}', function (Request $request) {
@@ -39,6 +40,9 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware(['auth:sanctum', isAdmin::class])->group(function () {
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/users/{id}', [UserController::class, 'show']);
+    //para javi en el frontend esta es la ruta del boton de editar
+    Route::put('/users/{id}', [UserController::class, 'edit']);
+    Route::delete('/users/{id}', [UserController::class, 'destroyAdmin']);
     Route::post('/importUsers', [ImportExcelsController::class, 'importWorkers'])->name('import.users');
     Route::post('/importDuties', [ImportExcelsController::class, 'importDuties'])->name('import.duties');
     Route::apiResource('/speciality', SpecialityController::class);
@@ -54,6 +58,8 @@ Route::middleware(['auth:sanctum', isAdmin::class])->group(function () {
     Route::delete('/duties/{id}', [DutyController::class, 'destroy']);
 
     Route::get('/assingChiefs', [DutyController::class, 'assignChief']);
+
+    Route::get('/plantilla-dia-pdf', [PdfController::class,'generarPdfDia']); 
 });
 
 // ---------------------Duties routes-----------------------------

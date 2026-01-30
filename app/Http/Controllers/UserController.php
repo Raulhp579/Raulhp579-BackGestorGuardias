@@ -15,17 +15,17 @@ class UserController extends Controller
      */
     public function profile()
     {
-        try{
+        try {
             $user = Auth::user();
 
             return response()->json($user, 200);
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return response()->json([
-                "error"=>"there is a problem showing your profile",
-                "fail"=>$e->getMessage()
+                'error' => 'there is a problem showing your profile',
+                'fail' => $e->getMessage(),
             ]);
         }
-        
+
     }
 
     /**
@@ -33,28 +33,28 @@ class UserController extends Controller
      */
     public function update(Request $request)
     {
-        try{
+        try {
             $user = Auth::user();
 
             $validated = $request->validate([
                 // SI está presente en la solicitud, debe cumplir con todas las demás validaciones
                 'name' => 'sometimes|required|string|max:255',
-                'email' => 'sometimes|required|email|unique:users,email,'.$user->id,
             ]);
 
-            $user->update($validated);
+            $user->name = $validated['name'];
+            $user->save();
 
             return response()->json([
                 'message' => 'Perfil actualizado correctamente',
                 'user' => $user,
             ], 200);
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return response()->json([
-                "error"=>"there is a problem updating your profile",
-                "fail"=>$e->getMessage()
+                'error' => 'there is a problem updating your profile',
+                'fail' => $e->getMessage(),
             ]);
         }
-        
+
     }
 
     /**
@@ -111,14 +111,14 @@ class UserController extends Controller
     /**
      * Eliminar cuenta del usuario
      */
-    public function destroy(Request $request) //probar con usuario normal
+    public function destroy(Request $request) // probar con usuario normal
     {
-        try{
+        try {
             $user = Auth::user();
-            if($user->hasRole("admin")){
+            if ($user->hasRole('admin')) {
                 return response()->json([
-                    "error"=>"your account can't be deleted because you are an admin. 
-                    Please contact the administrator to delete your account in database."
+                    'error' => "your account can't be deleted because you are an admin. 
+                    Please contact the administrator to delete your account in database.",
                 ]);
             }
 
@@ -126,9 +126,9 @@ class UserController extends Controller
                 'password' => 'required|current_password',
             ]);
 
-            if (!Hash::check($validated['password'],$user->password)){
+            if (! Hash::check($validated['password'], $user->password)) {
                 return response()->json([
-                    "error"=>"the password is incorrect"
+                    'error' => 'the password is incorrect',
                 ]);
             }
 
@@ -137,13 +137,13 @@ class UserController extends Controller
             return response()->json([
                 'message' => 'Cuenta eliminada correctamente',
             ], 200);
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return response()->json([
-                "error"=>"there is a problem deleting the user",
-                "fail"=>$e->getMessage()
+                'error' => 'there is a problem deleting the user',
+                'fail' => $e->getMessage(),
             ]);
         }
-        
+
     }
 
     /**
@@ -151,19 +151,19 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        try{
+        try {
             if (isset($request->name)) {
-            return response()->json(User::where('name', 'LIKE', "%{$request->name}%")->first());
-        }
+                return response()->json(User::where('name', 'LIKE', "%{$request->name}%")->first());
+            }
 
             return response()->json(User::all(), 200);
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return response()->json([
-                "error"=>"there is a problem getting the users",
-                "fail"=>$e->getMessage()
+                'error' => 'there is a problem getting the users',
+                'fail' => $e->getMessage(),
             ]);
         }
-        
+
     }
 
     /**
@@ -171,18 +171,93 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        try{
+        try {
             $user = User::findOrFail($id);
 
             return response()->json($user, 200);
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return response()->json([
-                "error"=>"there is a problem showing the user",
-                "fail"=>$e->getMessage()
+                'error' => 'there is a problem showing the user',
+                'fail' => $e->getMessage(),
             ]);
         }
-        
+
     }
 
-    //falta edit user (admin)
+    /**
+     * Editar un usuario específico (solo para administradores)
+     * Permite cambiar name, email y/o password
+     */
+    public function edit(Request $request, $id)
+    {
+        try {
+            $user = User::findOrFail($id);
+
+            $validated = $request->validate([
+                'name' => 'sometimes|required|string|max:255',
+                'email' => 'sometimes|required|email|unique:users,email,'.$user->id,
+                'password' => 'sometimes|required|min:8',
+            ]);
+
+            // Si se envía una nueva contraseña, hashearla
+            if (isset($validated['password'])) {
+                $validated['password'] = Hash::make($validated['password']);
+            }
+
+            $user->update($validated);
+
+            return response()->json([
+                'message' => 'Usuario actualizado correctamente',
+                'user' => $user,
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'Usuario no encontrado',
+            ], 404);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'error' => 'Validación fallida',
+                'messages' => $e->errors(),
+            ], 422);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => 'Error al actualizar el usuario',
+                'fail' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Eliminar un usuario específico (solo para administradores)
+     */
+    public function destroyAdmin($id)
+    {
+        try {
+            $user = User::findOrFail($id);
+
+            // Evitar que se elimine a un admin
+            if ($user->hasRole('admin')) {
+                return response()->json([
+                    'error' => 'No se puede eliminar a un administrador',
+                ], 403);
+            }
+
+            $user->delete();
+
+            return response()->json([
+                'message' => 'Usuario eliminado correctamente',
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'error' => 'Usuario no encontrado',
+            ], 404);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => 'Error al eliminar el usuario',
+                'fail' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

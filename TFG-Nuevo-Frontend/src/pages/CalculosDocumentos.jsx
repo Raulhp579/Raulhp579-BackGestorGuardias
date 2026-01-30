@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import "../styles/CalculosDocumentos.css";
 import "../styles/AppLayout.css";
+import { importWorkersExcel } from "../services/importExcelService";
+import { getWorkers, getAdmins } from "../services/userService";
 import { importWorkersExcel } from "../services/importExcelService"
 import { getWorkers, getAdmins, updateAdmin, deleteAdmin as deleteAdminApi } from "../services/userService";
 import { getSpecialities } from "../services/SpecialitiesService";
@@ -12,7 +14,7 @@ export default function CalculosDocumentos() {
     const [view, setView] = useState("workers");
     const [currentPage, setCurrentPage] = useState(1);
 
-    //para gettear los trabalhadores y users 
+    //para gettear los trabalhadores y users
 
     const [workers, setWorkers] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -28,25 +30,32 @@ export default function CalculosDocumentos() {
     const fileInputRef = useRef(null);
     const [importMsg, setImportMsg] = useState("");
     const [importing, setImporting] = useState(false);
+    const [importSuccess, setImportSuccess] = useState(false);
 
     async function onPickExcel(e) {
         // coge el archivo elegido
         const file = e.target.files[0];
-        e.target.value = "";// resetea el input para poder elegir el mismo archivo otra vez
-        if (!file) return;
+        e.target.value = ""; // resetea el input para poder elegir el mismo archivo otra vez
+        if (!file) {
+            setImportMsg("Debes seleccionar un archivo");
+            setImportSuccess(false);
+            return;
+        }
 
         // limpìa mensaje pa cuando importando
         setImportMsg("");
         setImporting(true);
+        setImportSuccess(false);
 
         try {
             await importWorkersExcel(file);
             setImportMsg("Usuarios importados correctamente");
+            setImportSuccess(true);
             setView("workers");
             await loadWorkers();
-
         } catch (err) {
             setImportMsg("Error al importar: " + err.message);
+            setImportSuccess(false);
         } finally {
             setImporting(false);
         }
@@ -71,7 +80,6 @@ export default function CalculosDocumentos() {
             loadAdmins();
         }
     }, [view]);
-
 
     async function loadAdmins() {
         setAdminsLoading(true);
@@ -105,7 +113,7 @@ export default function CalculosDocumentos() {
     }, []);
 
 
-    // clases botones 
+    // clases botones
     let workersBtnClass = "cdToggleBtn";
     let adminsBtnClass = "cdToggleBtn";
 
@@ -265,7 +273,7 @@ export default function CalculosDocumentos() {
         setEditForm((p) => ({ ...p, [name]: value }));
     }
 
-    // tabla 
+    // tabla
     let title = "";
     let headers = [];
     let colSpan = 0;

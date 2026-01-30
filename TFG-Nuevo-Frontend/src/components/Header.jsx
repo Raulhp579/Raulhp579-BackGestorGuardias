@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import "../components/style/Header.css";
 import { useNotifications } from "../context/NotificationsContext";
 
@@ -13,8 +13,13 @@ function getInitials(name = "") {
 
 export default function Header({ onMenuClick, user, onLogout, onProfile }) {
     const [menuOpen, setMenuOpen] = useState(false);
-    const { items, unreadCount, markAllRead, clearAll } = useNotifications();
+    const { items, unreadCount, markAllRead, clearAll, openNotifTick } = useNotifications();
     const [notifOpen, setNotifOpen] = useState(false);
+
+    // cuando se añade una notificación, se abre el popup sin click
+    useEffect(() => {
+        if (openNotifTick > 0) setNotifOpen(true);
+    }, [openNotifTick]);
 
     const displayName = user?.name ?? "Usuario";
     const avatarUrl = user?.avatarUrl ?? "";
@@ -23,19 +28,12 @@ export default function Header({ onMenuClick, user, onLogout, onProfile }) {
     return (
         <header className="cdHeader">
             <div className="cdHeaderInner">
-                {/* IZQUIERDA: hamburguesa móvil */}
                 <div className="cdHeaderLeft">
-                    <button
-                        className="cdIconBtn cdMenuBtn"
-                        type="button"
-                        aria-label="Abrir menú"
-                        onClick={onMenuClick}
-                    >
+                    <button className="cdIconBtn cdMenuBtn" type="button" aria-label="Abrir menú" onClick={onMenuClick}>
                         <span className="material-icons-outlined">menu</span>
                     </button>
                 </div>
 
-                {/* CENTRO */}
                 <div className="cdBrand cdBrandCenter">
                     <svg className="cdLogo" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M12 2L2 22h20L12 2zm0 3.8L18.4 20H5.6L12 5.8z" />
@@ -43,7 +41,6 @@ export default function Header({ onMenuClick, user, onLogout, onProfile }) {
                     <span>GuardiApp</span>
                 </div>
 
-                {/* DERECHA */}
                 <div className="cdHeaderRight">
                     <div className="cdNotifWrap">
                         <button
@@ -54,7 +51,7 @@ export default function Header({ onMenuClick, user, onLogout, onProfile }) {
                             aria-expanded={notifOpen}
                             onClick={() => {
                                 setNotifOpen((v) => !v);
-                                // si lo abres, marca como leído
+                                // si lo abres manualmente con click, entonces sí lo marcas leído
                                 if (!notifOpen) markAllRead();
                             }}
                         >
@@ -96,6 +93,7 @@ export default function Header({ onMenuClick, user, onLogout, onProfile }) {
                         )}
                     </div>
 
+                    {/* ...el resto igual (avatar/menu) */}
                     <div className="cdAvatarWrap">
                         <button
                             className="cdAvatarBtn"
@@ -122,30 +120,6 @@ export default function Header({ onMenuClick, user, onLogout, onProfile }) {
                                         <div className="cdMenuName">{displayName}</div>
                                         {user?.email && <div className="cdMenuEmail">{user.email}</div>}
                                     </div>
-
-                            {/* en algun momento lo metemos
-                                    <button
-                                        className="cdMenuItem"
-                                        type="button"
-                                        role="menuitem"
-                                        onClick={() => {
-                                            setMenuOpen(false);
-                                            onProfile?.();
-                                        }}
-                                    >
-                                        <span className="material-icons-outlined">account_circle</span>
-                                        Perfil
-                                    </button>
-
-                                    <button
-                                        className="cdMenuItem"
-                                        type="button"
-                                        role="menuitem"
-                                        onClick={() => setMenuOpen(false)}
-                                    >
-                                        <span className="material-icons-outlined">settings</span>
-                                        Ajustes
-                                    </button> */}
 
                                     <div className="cdMenuDivider" />
 

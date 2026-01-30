@@ -65,6 +65,7 @@ class WorkerController extends Controller
                     "rank"=>$worker->rank,
                     "registration_date"=>$worker->registration_date,
                     "discharge_date"=>$worker->discharge_date,
+                    "id_speciality"=>$worker->id_speciality,
                     "speciality"=>$worker->speciality ? $worker->speciality->name : null
                 ];
             }

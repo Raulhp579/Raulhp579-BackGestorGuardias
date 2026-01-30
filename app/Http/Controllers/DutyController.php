@@ -84,10 +84,14 @@ class DutyController extends Controller
             $duties = [];
             foreach($allDuties as $duty){
                 $duties[] = [
+                    "id"=>$duty->id,
                     "date"=>$duty->date,
                     "duty_type"=>$duty->duty_type,
+                    "id_speciality"=>$duty->id_speciality,
                     "speciality"=>$duty->worker->speciality->name,
+                    "id_worker"=>$duty->id_worker,
                     "worker" =>$duty->worker->name,
+                    "id_chief_worker"=>$duty->id_chief_worker,
                     "chief_worker"=>$duty->chief->name??null,
                     "is_chief"   => (int) $duty->id_worker === (int) $duty->id_chief_worker,
                 ];

@@ -14,30 +14,67 @@
     --shadow-soft: 0 10px 20px rgba(0, 0, 0, 0.06),
         0 4px 10px rgba(0, 0, 0, 0.04);
 }
-html{
- background-color: #f3f4f6;
-}
 
+html {
+    background-color: var(--bg);
+}
 
 /* ====== PAGE (DESKTOP) ====== */
 .loginPage {
     min-height: 100vh;
-    background: var(--bg);
     font-family: Roboto, system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+
+    position: relative;
+    overflow: hidden;
+
+    /* 🔑 para que mix-blend-mode se note bien */
+    isolation: isolate;
+
+    /* Variables del mouse (las setea JS) */
+    --mx: 0.5;
+    --my: 0.5;
+    --mv: 0;
+
+    /* Lienzo base: limpio, hospital/corporativo */
+    background:
+        radial-gradient(900px 520px at 18% 22%,
+            color-mix(in srgb, var(--primary) 8%, transparent) 0%,
+            transparent 62%),
+        radial-gradient(980px 620px at 82% 30%,
+            color-mix(in srgb, var(--primary-hover) 7%, transparent) 0%,
+            transparent 64%),
+        var(--bg);
+
+    animation: loginBgFade 520ms ease-out both;
 }
 
+@keyframes loginBgFade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* El contenido por encima del fondo */
 .loginWrap {
     width: 100%;
     max-width: 520px;
-    /* más ancho en PC */
     display: flex;
     flex-direction: column;
     align-items: center;
+
+    position: relative;
+    z-index: 2;
 }
 
 /* ====== BRAND ====== */
@@ -46,6 +83,8 @@ html{
     flex-direction: column;
     align-items: center;
     margin-bottom: 28px;
+
+    animation: brandEnter 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .brandLogo {
@@ -77,6 +116,9 @@ html{
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-soft);
     padding: 36px 40px;
+
+    animation: loginEnter 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    will-change: transform, opacity, filter;
 }
 
 .loginTitle {
@@ -127,14 +169,13 @@ html{
 .field input:focus {
     background: #ffffff;
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(46, 125, 77, 0.22);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent);
 }
 
 .field:focus-within .fieldIcon {
     color: var(--primary);
 }
 
-/* Botoncito derecha (icono flecha) */
 .fieldAction {
     position: absolute;
     right: 10px;
@@ -177,25 +218,28 @@ html{
     width: 100%;
     margin-top: 8px;
     padding: 14px 16px;
+
     border: none;
     border-radius: 10px;
-    background: #4f7f5a;
-    /* similar a la captura */
+    background: color-mix(in srgb, var(--primary) 78%, #000 22%);
     color: #ffffff;
+
     font-weight: 800;
     font-size: 14px;
     cursor: pointer;
+
     box-shadow: 0 10px 18px rgba(0, 0, 0, 0.10);
     transition: transform 120ms ease, background 150ms ease;
 }
 
 .submitBtn:hover {
-    background: #3f6e4a;
+    background: color-mix(in srgb, var(--primary-hover) 86%, #000 14%);
 }
 
 .submitBtn:active {
     transform: scale(0.985);
 }
+
 .loginFooter {
     margin-top: 22px;
     text-align: center;
@@ -238,5 +282,106 @@ html{
 
     .loginTitle {
         font-size: 24px;
+    }
+}
+
+/* ===== Animaciones entrada ===== */
+@keyframes loginEnter {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+        filter: blur(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+
+@keyframes brandEnter {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== Fondo: capa 1 (partículas grandes) ====== */
+.loginPage::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+
+    /* Fondo con partículas grandes */
+    background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+    background-size: 200% 200%;
+    opacity: 0.5;
+
+    /* Movimiento de la capa 1 */
+    transform: translate(0, 0);
+    animation: layer1Float 20s infinite cubic-bezier(0.25, 1, 0.5, 1); /* Movimiento más suave */
+    will-change: transform;
+}
+
+/* ===== Fondo: capa 2 (partículas pequeñas) ====== */
+.loginPage::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+
+    /* Fondo con partículas pequeñas */
+    background: radial-gradient(circle, var(--primary-hover) 0%, transparent 80%);
+    background-size: 300% 300%;
+    opacity: 0.3;
+
+    /* Movimiento de la capa 2 */
+    transform: translate(0, 0);
+    animation: layer2Float 25s infinite cubic-bezier(0.25, 1, 0.5, 1); /* Movimiento más suave */
+    will-change: transform;
+}
+
+/* Animación de la capa 1 */
+@keyframes layer1Float {
+    0% {
+        transform: translate(0, 0);
+    }
+    50% {
+        transform: translate(20px, -20px); /* Movimiento más amplio */
+    }
+    100% {
+        transform: translate(0, 0);
+    }
+}
+
+/* Animación de la capa 2 */
+@keyframes layer2Float {
+    0% {
+        transform: translate(0, 0);
+    }
+    50% {
+        transform: translate(-30px, 30px); /* Movimiento más amplio y en dirección opuesta */
+    }
+    100% {
+        transform: translate(0, 0);
+    }
+}
+
+/* Accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+    .loginPage::before,
+    .loginPage::after {
+        animation: none;
+        transform: none;
+        transition: none;
     }
 }
