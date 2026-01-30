@@ -4,6 +4,7 @@ import {
     updateProfile,
     changePassword,
 } from "../services/ProfileService";
+import { getWorkerDuties } from "../services/DutyService";
 import "../styles/PerfilUsuario.css";
 
 export default function PerfilUsuario() {
@@ -28,6 +29,14 @@ export default function PerfilUsuario() {
     const [passwordSuccess, setPasswordSuccess] = useState("");
     const [changingPassword, setChangingPassword] = useState(false);
 
+    // Estado para próximas guardias
+    const [upcomingDuties, setUpcomingDuties] = useState([]);
+    const [loadingDuties, setLoadingDuties] = useState(false);
+
+    // Estado para modal de detalles de guardia
+    const [selectedDuty, setSelectedDuty] = useState(null);
+    const [dutyModalOpen, setDutyModalOpen] = useState(false);
+
     const fileInputRef = useRef(null);
 
     useEffect(() => {
@@ -41,11 +50,38 @@ export default function PerfilUsuario() {
             const data = await getProfile();
             setUser(data);
             setEditName(data.name || "");
+
+            // Si el usuario tiene worker_id, cargar sus guardias
+            if (data.worker_id) {
+                loadUpcomingDuties(data.worker_id);
+            }
         } catch (e) {
             setError("Error al cargar el perfil");
             console.error(e);
         } finally {
             setLoading(false);
+        }
+    }
+
+    async function loadUpcomingDuties(workerId) {
+        setLoadingDuties(true);
+        try {
+            const duties = await getWorkerDuties(workerId);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // Filtrar guardias futuras y ordenar por fecha
+            const futureDuties = duties
+                .filter((duty) => new Date(duty.date) >= today)
+                .sort((a, b) => new Date(a.date) - new Date(b.date))
+                .slice(0, 5); // Solo las próximas 5
+
+            setUpcomingDuties(futureDuties);
+        } catch (e) {
+            console.error("Error al cargar guardias:", e);
+            setUpcomingDuties([]);
+        } finally {
+            setLoadingDuties(false);
         }
     }
 
@@ -418,6 +454,99 @@ export default function PerfilUsuario() {
                 </div>
             </section>
 
+            {/* Próximas Guardias */}
+            {user?.worker_id && (
+                <section className="puCard puDutiesCard">
+                    <h4 className="puCardTitle">
+                        <span className="material-icons-outlined">event</span>
+                        Próximas Guardias
+                    </h4>
+
+                    {loadingDuties ? (
+                        <div className="puDutiesLoading">
+                            <span className="material-icons-outlined puSpinner">
+                                sync
+                            </span>
+                            <span>Cargando guardias...</span>
+                        </div>
+                    ) : upcomingDuties.length === 0 ? (
+                        <div className="puNoDuties">
+                            <span className="material-icons-outlined">
+                                event_busy
+                            </span>
+                            <span>No tienes guardias programadas</span>
+                        </div>
+                    ) : (
+                        <ul className="puDutiesList">
+                            {upcomingDuties.map((duty) => (
+                                <li
+                                    key={duty.id}
+                                    className="puDutyItem puDutyClickable"
+                                    onClick={() => {
+                                        setSelectedDuty(duty);
+                                        setDutyModalOpen(true);
+                                    }}
+                                    role="button"
+                                    tabIndex={0}
+                                    onKeyDown={(e) => {
+                                        if (
+                                            e.key === "Enter" ||
+                                            e.key === " "
+                                        ) {
+                                            setSelectedDuty(duty);
+                                            setDutyModalOpen(true);
+                                        }
+                                    }}
+                                >
+                                    <div className="puDutyDate">
+                                        <span className="puDutyDay">
+                                            {new Date(
+                                                duty.date,
+                                            ).toLocaleDateString("es-ES", {
+                                                weekday: "short",
+                                            })}
+                                        </span>
+                                        <span className="puDutyFullDate">
+                                            {new Date(
+                                                duty.date,
+                                            ).toLocaleDateString("es-ES", {
+                                                day: "numeric",
+                                                month: "short",
+                                            })}
+                                        </span>
+                                    </div>
+                                    <div className="puDutyInfo">
+                                        <span className="puDutyType">
+                                            {duty.duty_type}
+                                        </span>
+                                        {duty.speciality && (
+                                            <span className="puDutySpeciality">
+                                                {duty.speciality}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {duty.is_chief && (
+                                        <span
+                                            className="puDutyChief"
+                                            title="Jefe de guardia"
+                                        >
+                                            <span className="material-icons-outlined">
+                                                star
+                                            </span>
+                                        </span>
+                                    )}
+                                    <span className="puDutyArrow">
+                                        <span className="material-icons-outlined">
+                                            chevron_right
+                                        </span>
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </section>
+            )}
+
             {/* Modal Cambiar Contraseña */}
             {passwordModalOpen && (
                 <div className="puModalOverlay" role="dialog" aria-modal="true">
@@ -506,6 +635,133 @@ export default function PerfilUsuario() {
                                 {changingPassword
                                     ? "Cambiando..."
                                     : "Cambiar Contraseña"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Detalles de Guardia */}
+            {dutyModalOpen && selectedDuty && (
+                <div className="puModalOverlay" role="dialog" aria-modal="true">
+                    <div className="puModalCard puDutyModalCard">
+                        <div className="puModalHead">
+                            <h3 className="puModalTitle">
+                                Detalles de la Guardia
+                            </h3>
+                            <button
+                                className="puModalClose"
+                                onClick={() => {
+                                    setDutyModalOpen(false);
+                                    setSelectedDuty(null);
+                                }}
+                                type="button"
+                                aria-label="Cerrar"
+                            >
+                                <span className="material-icons-outlined">
+                                    close
+                                </span>
+                            </button>
+                        </div>
+
+                        <div className="puModalBody puDutyModalBody">
+                            {/* Fecha destacada */}
+                            <div className="puDutyModalDate">
+                                <span className="material-icons-outlined">
+                                    calendar_today
+                                </span>
+                                <div className="puDutyModalDateText">
+                                    <span className="puDutyModalDateFull">
+                                        {new Date(
+                                            selectedDuty.date,
+                                        ).toLocaleDateString("es-ES", {
+                                            weekday: "long",
+                                            year: "numeric",
+                                            month: "long",
+                                            day: "numeric",
+                                        })}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Detalles en grid */}
+                            <div className="puDutyModalGrid">
+                                <div className="puDutyModalItem">
+                                    <span className="puDutyModalLabel">
+                                        <span className="material-icons-outlined">
+                                            work
+                                        </span>
+                                        Tipo de Guardia
+                                    </span>
+                                    <span className="puDutyModalValue">
+                                        {selectedDuty.duty_type}
+                                    </span>
+                                </div>
+
+                                {selectedDuty.speciality && (
+                                    <div className="puDutyModalItem">
+                                        <span className="puDutyModalLabel">
+                                            <span className="material-icons-outlined">
+                                                local_hospital
+                                            </span>
+                                            Especialidad
+                                        </span>
+                                        <span className="puDutyModalValue">
+                                            {selectedDuty.speciality}
+                                        </span>
+                                    </div>
+                                )}
+
+                                <div className="puDutyModalItem">
+                                    <span className="puDutyModalLabel">
+                                        <span className="material-icons-outlined">
+                                            person
+                                        </span>
+                                        Trabajador
+                                    </span>
+                                    <span className="puDutyModalValue">
+                                        {selectedDuty.worker ||
+                                            user?.name ||
+                                            "-"}
+                                    </span>
+                                </div>
+
+                                {selectedDuty.chief_worker && (
+                                    <div className="puDutyModalItem">
+                                        <span className="puDutyModalLabel">
+                                            <span className="material-icons-outlined">
+                                                supervisor_account
+                                            </span>
+                                            Jefe de Guardia
+                                        </span>
+                                        <span className="puDutyModalValue">
+                                            {selectedDuty.chief_worker}
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Badge de jefe si aplica */}
+                            {selectedDuty.is_chief && (
+                                <div className="puDutyModalChiefBadge">
+                                    <span className="material-icons-outlined">
+                                        star
+                                    </span>
+                                    <span>Eres el Jefe de esta Guardia</span>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="puModalFooter">
+                            <button
+                                className="puBtn primary"
+                                type="button"
+                                onClick={() => {
+                                    setDutyModalOpen(false);
+                                    setSelectedDuty(null);
+                                }}
+                            >
+                                Cerrar
                             </button>
                         </div>
                     </div>

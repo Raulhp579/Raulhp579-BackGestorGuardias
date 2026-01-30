@@ -230,7 +230,7 @@ class UserController extends Controller
                 'name' => 'sometimes|required|string|max:255',
                 'email' => 'sometimes|required|email|unique:users,email,'.$user->id,
                 'password' => 'sometimes|required|min:8',
-                'worker_id' => 'sometimes|nullable|integer|exists:workers,id',
+                'worker_id' => 'sometimes|nullable|integer|exists:worker,id',
             ]);
 
             // Si se envía una nueva contraseña, hashearla

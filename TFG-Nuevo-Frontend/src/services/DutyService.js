@@ -64,3 +64,15 @@ export async function deleteDuty(id) {
         throw error;
     }
 }
+
+// Obtener guardias de un trabajador específico
+export async function getWorkerDuties(workerId) {
+    try {
+        // Obtener todas las guardias y filtrar por worker_id
+        const allDuties = await getDuties();
+        return allDuties.filter((duty) => duty.id_worker === workerId);
+    } catch (error) {
+        console.error("Error al obtener guardias del trabajador:", error);
+        throw error;
+    }
+}
