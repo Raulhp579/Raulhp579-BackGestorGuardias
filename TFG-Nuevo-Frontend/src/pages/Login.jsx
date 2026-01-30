@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "../styles/Login.css";
 import { useNavigate } from "react-router-dom";
 import { login } from "../services/AuthService";
@@ -6,61 +6,82 @@ import { login } from "../services/AuthService";
 export default function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
-    const [loading, setLoading] = useState(false);
-
     const navigate = useNavigate();
 
     async function onSubmit(e) {
         e.preventDefault();
-        setError("");
 
-        // Validar campos vacíos
-        if (!username.trim()) {
-            setError("El usuario es obligatorio");
-            return;
-        }
-        if (!password) {
-            setError("La contraseña es obligatoria");
-            return;
-        }
+        const authPayload = {
+            name: username.trim() || "Usuario",
+            email: `${username.trim()}`,
+            avatarUrl: "",
+        };
 
-        setLoading(true);
+        const user = {
+            email: username,
+            password: password,
+        };
 
-        try {
-            // Guardamos un objeto JSON (lo que AppLayout/Header esperan)
-            const authPayload = {
-                name: username.trim() || "Usuario",
-                email: `${username.trim()}`,
-                avatarUrl: "", // si algún día tienes URL real, la pones aquí
-            };
+        const response = await login(user);
+        localStorage.setItem("token", response.auth.access_token);
 
-            const user = {
-                email: username,
-                password: password,
-            };
+        sessionStorage.setItem("roles", JSON.stringify(response.auth.roles));
 
-            const response = await login(user);
-            localStorage.setItem("token", response.auth.access_token);
+        localStorage.setItem("auth", JSON.stringify(authPayload));
 
-            // Guardar rol en sessionStorage
-            sessionStorage.setItem(
-                "roles",
-                JSON.stringify(response.auth.roles),
-            );
-
-            localStorage.setItem("auth", JSON.stringify(authPayload));
-
-            navigate("/home");
-        } catch (err) {
-            setError(err.message || "Error al iniciar sesión");
-        } finally {
-            setLoading(false);
-        }
+        navigate("/home");
     }
 
+    useEffect(() => {
+        const loginPage = document.querySelector(".loginPage");
+
+        let mouseX = 0;
+        let mouseY = 0;
+        let targetX = 0;
+        let targetY = 0;
+
+        const inertia = 0.05; // Reducimos la inercia para movimientos más suaves
+
+        const animateLayers = () => {
+            targetX += (mouseX - targetX) * inertia;
+            targetY += (mouseY - targetY) * inertia;
+
+            const xOffset1 = (targetX - 0.5) * 20; // Movimiento más sutil para la capa 1
+            const yOffset1 = (targetY - 0.5) * 20;
+
+            const xOffset2 = (targetX - 0.5) * -30; // Movimiento más amplio para la capa 2
+            const yOffset2 = (targetY - 0.5) * -30;
+
+            loginPage.style.setProperty("--layer1-x", `${xOffset1}px`);
+            loginPage.style.setProperty("--layer1-y", `${yOffset1}px`);
+            loginPage.style.setProperty("--layer2-x", `${xOffset2}px`);
+            loginPage.style.setProperty("--layer2-y", `${yOffset2}px`);
+
+            requestAnimationFrame(animateLayers);
+        };
+
+        const handleMouseMove = (e) => {
+            const rect = loginPage.getBoundingClientRect();
+            mouseX = (e.clientX - rect.left) / rect.width; // Posición X relativa
+            mouseY = (e.clientY - rect.top) / rect.height; // Posición Y relativa
+        };
+
+        loginPage.addEventListener("mousemove", handleMouseMove);
+
+        animateLayers();
+
+        return () => {
+            loginPage.removeEventListener("mousemove", handleMouseMove);
+        };
+    }, []);
+
     return (
-        <main className="loginPage">
+        <div className="loginPage">
+            {/* Partículas para el efecto parallax */}
+            {Array.from({ length: 30 }).map((_, index) => (
+                <div key={index} className="particle"></div>
+            ))}
+
             <div className="loginWrap">
                 <header className="brandHeader">
                     <div className="brandLogo" aria-hidden="true">
@@ -72,7 +93,7 @@ export default function Login() {
                             />
                         </svg>
                     </div>
-                    <h1 className="brandTitle">Junta de Andalucía</h1>
+                    <h1 className="brandTitle">GuardiApp</h1>
                 </header>
 
                 <section
@@ -143,46 +164,14 @@ export default function Login() {
                                 }}
                                 disabled={loading}
                             />
-                            <button
-                                type="button"
-                                className="fieldAction"
-                                aria-label="Acción secundaria (placeholder)"
-                                title="Acción secundaria"
-                                onClick={() => {}}
-                            >
-                                <span className="material-icons">
-                                    expand_more
-                                </span>
-                            </button>
                         </div>
 
-                        <div className="helpRow">
-                            <a className="helpLink" href="#">
-                                ¿Problemas de acceso?
-                            </a>
-                        </div>
-
-                        <button
-                            className="submitBtn"
-                            type="submit"
-                            disabled={loading}
-                        >
-                            {loading ? "Accediendo..." : "Acceder"}
+                        <button type="submit" className="submitBtn">
+                            Iniciar Sesión
                         </button>
                     </form>
                 </section>
-
-                <footer className="loginFooter">
-                    <p>
-                        © 2026 Junta de Andalucía. Todos los derechos
-                        reservados.
-                    </p>
-                    <div className="footerLinks">
-                        <a href="#">Aviso Legal</a>
-                        <a href="#">Privacidad</a>
-                    </div>
-                </footer>
             </div>
-        </main>
+        </div>
     );
 }
