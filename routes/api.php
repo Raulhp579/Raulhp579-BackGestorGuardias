@@ -32,8 +32,11 @@ Route::get('/logout', [AuthController::class, 'logout'])->middleware('auth:sanct
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [UserController::class, 'profile']);
     Route::put('/profile', [UserController::class, 'update']);
+    Route::post('/profile', [UserController::class, 'update']); // POST para FormData con archivos importante
     Route::post('/change-password', [UserController::class, 'changePassword']);
     Route::delete('/profile', [UserController::class, 'destroy']);
+    //este hay que crear por tipos y los get deberian verse para los autenticados lo demas va para admin
+    Route::apiResource('/speciality', SpecialityController::class);
 });
 
 // Admin routes (requiere autenticación y rol de admin)
@@ -45,7 +48,7 @@ Route::middleware(['auth:sanctum', isAdmin::class])->group(function () {
     Route::delete('/users/{id}', [UserController::class, 'destroyAdmin']);
     Route::post('/importUsers', [ImportExcelsController::class, 'importWorkers'])->name('import.users');
     Route::post('/importDuties', [ImportExcelsController::class, 'importDuties'])->name('import.duties');
-    Route::apiResource('/speciality', SpecialityController::class);
+
     // CRUD Routes for workers
     Route::apiResource('/workers', WorkerController::class);
 

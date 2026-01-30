@@ -39,9 +39,42 @@ class UserController extends Controller
             $validated = $request->validate([
                 // SI está presente en la solicitud, debe cumplir con todas las demás validaciones
                 'name' => 'sometimes|required|string|max:255',
+                'avatar' => 'sometimes|image|mimes:jpeg,png,jpg,gif|max:2048',
             ]);
 
-            $user->name = $validated['name'];
+            // Actualizar nombre si se envió
+            if (isset($validated['name'])) {
+                $user->name = $validated['name'];
+            }
+
+            // Procesar y guardar avatar si se envió
+            if ($request->hasFile('avatar')) {
+                $avatar = $request->file('avatar');
+
+                // Crear directorio si no existe
+                $avatarPath = public_path('imgs/avatars');
+                if (! file_exists($avatarPath)) {
+                    mkdir($avatarPath, 0755, true);
+                }
+
+                // Eliminar avatar anterior si existe
+                if ($user->avatarUrl) {
+                    $oldAvatarPath = public_path($user->avatarUrl);
+                    if (file_exists($oldAvatarPath)) {
+                        unlink($oldAvatarPath);
+                    }
+                }
+
+                // Generar nombre único para el archivo
+                $fileName = 'avatar_'.$user->id.'_'.time().'.'.$avatar->getClientOriginalExtension();
+
+                // Mover el archivo a la carpeta de avatars
+                $avatar->move($avatarPath, $fileName);
+
+                // Guardar la URL relativa en el usuario
+                $user->avatarUrl = 'imgs/avatars/'.$fileName;
+            }
+
             $user->save();
 
             return response()->json([
@@ -197,6 +230,7 @@ class UserController extends Controller
                 'name' => 'sometimes|required|string|max:255',
                 'email' => 'sometimes|required|email|unique:users,email,'.$user->id,
                 'password' => 'sometimes|required|min:8',
+                'worker_id' => 'sometimes|nullable|integer|exists:workers,id',
             ]);
 
             // Si se envía una nueva contraseña, hashearla

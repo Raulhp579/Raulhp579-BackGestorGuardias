@@ -50,11 +50,14 @@ class DatabaseSeeder extends Seeder
         ])->assignRole('empleado');
 
         User::factory()->create([
-            'name' => 'Usuario3',
-            'email' => 'usuario3@alu.medac.es',
+            'name' => 'Beatriz Ortega Ortega',
+            'email' => 'beatriz.ortega@alu.medac.es',
+            'worker_id'=>null,
+            'avatarUrl'=>'assets/imgs/150.jpg',
             'password'=>Hash::make('password')
         ])->assignRole('empleado');
         
+
         $this->call(SpecialitySeeder::class); 
         
     }
