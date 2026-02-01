@@ -263,7 +263,7 @@ export default function Home() {
                         <div className="benefitsIllustration">
                             <div className="benefitCard">
                                 <span className="material-icons">trending_up</span>
-                                <p>+50% Eficiencia</p>
+                                <p>Mayor Eficiencia</p>
                             </div>
                             <div className="benefitCard">
                                 <span className="material-icons">schedule</span>
@@ -274,29 +274,6 @@ export default function Home() {
                                 <p>Mayor Satisfacción</p>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Stats Section */}
-            <section className="homeStats">
-                <h2 className="homeStatstitle">Confían en Nosotros</h2>
-                <div className="homeStatsGrid">
-                    <div className="homeStatCard">
-                        <h3 className="homeStatNumber">500+</h3>
-                        <p className="homeStatLabel">Usuarios Activos</p>
-                    </div>
-                    <div className="homeStatCard">
-                        <h3 className="homeStatNumber">1K+</h3>
-                        <p className="homeStatLabel">Guardias Planificadas</p>
-                    </div>
-                    <div className="homeStatCard">
-                        <h3 className="homeStatNumber">98%</h3>
-                        <p className="homeStatLabel">Satisfacción</p>
-                    </div>
-                    <div className="homeStatCard">
-                        <h3 className="homeStatNumber">24/7</h3>
-                        <p className="homeStatLabel">Disponibilidad</p>
                     </div>
                 </div>
             </section>
@@ -340,20 +317,6 @@ export default function Home() {
                             <li>Email: info@guardiapp.com</li>
                             <li>Teléfono: +34 900 XXX XXX</li>
                         </ul>
-                    </div>
-                    <div className="homeFooterSection">
-                        <h4>Síguenos</h4>
-                        <div className="homeFooterSocial">
-                            <a href="#" className="homeFooterSocialLink">
-                                <span className="material-icons">facebook</span>
-                            </a>
-                            <a href="#" className="homeFooterSocialLink">
-                                <span className="material-icons">mail</span>
-                            </a>
-                            <a href="#" className="homeFooterSocialLink">
-                                <span className="material-icons">info</span>
-                            </a>
-                        </div>
                     </div>
                 </div>
                 <div className="homeFooterBottom">
