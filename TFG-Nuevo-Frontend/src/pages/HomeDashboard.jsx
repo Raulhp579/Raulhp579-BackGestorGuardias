@@ -8,6 +8,7 @@ import { useNotifications } from "../context/NotificationsContext";
 import { getDuties } from "../services/DutyService";
 import { getSpecialities } from "../services/SpecialitiesService";
 import { importExcel } from "../services/importExcelService";
+import Joyride, { STATUS } from "react-joyride-react-19";
 
 function normalizeTime(t) {
     if (!t) return "";
@@ -38,7 +39,9 @@ export default function HomeDashboard() {
 
     const [idSpeciality, setIdSpeciality] = useState("");
     const [importMonth, setImportMonth] = useState("01");
-    const [importYear, setImportYear] = useState(String(new Date().getFullYear()));
+    const [importYear, setImportYear] = useState(
+        String(new Date().getFullYear()),
+    );
 
     const [excelFile, setExcelFile] = useState(null);
     const fileInputRef = useRef(null);
@@ -62,7 +65,7 @@ export default function HomeDashboard() {
             { value: "11", label: "Noviembre" },
             { value: "12", label: "Diciembre" },
         ],
-        []
+        [],
     );
 
     const years = useMemo(() => {
@@ -88,7 +91,11 @@ export default function HomeDashboard() {
         (async () => {
             try {
                 const data = await getSpecialities();
-                const arr = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+                const arr = Array.isArray(data)
+                    ? data
+                    : Array.isArray(data?.data)
+                      ? data.data
+                      : [];
                 if (alive) setSpecialities(arr);
             } catch (e) {
                 console.error(e);
@@ -106,7 +113,9 @@ export default function HomeDashboard() {
         if (!file) return false;
 
         const validExtensions = [".xls", ".xlsx"];
-        const hasValidExtension = validExtensions.some((ext) => file.name && file.name.toLowerCase().endsWith(ext));
+        const hasValidExtension = validExtensions.some(
+            (ext) => file.name && file.name.toLowerCase().endsWith(ext),
+        );
 
         const validMimeTypes = [
             "application/vnd.ms-excel",
@@ -121,7 +130,10 @@ export default function HomeDashboard() {
 
     async function importDutysExcel({ file, year, month, idSpeciality }) {
         if (!file) return setImportMsg("No se ha seleccionado ningún archivo");
-        if (!year || !month || !idSpeciality) return setImportMsg("Por favor, seleccione año, mes y especialidad");
+        if (!year || !month || !idSpeciality)
+            return setImportMsg(
+                "Por favor, seleccione año, mes y especialidad",
+            );
 
         try {
             setImportMsg("Procesando archivo...");
@@ -133,7 +145,9 @@ export default function HomeDashboard() {
 
             await loadDutiesForCurrentView();
 
-            addNotification(`Se han importado guardias desde Excel (${new Date().toLocaleTimeString()}).`);
+            addNotification(
+                `Se han importado guardias desde Excel (${new Date().toLocaleTimeString()}).`,
+            );
         } catch (error) {
             setImportMsg(error?.message || "Error al importar el archivo");
         }
@@ -166,19 +180,42 @@ export default function HomeDashboard() {
 
     const stats = useMemo(() => {
         const total = events.length;
-        const byType = (t) => events.filter((e) => e.extendedProps?.type === t).length;
+        const byType = (t) =>
+            events.filter((e) => e.extendedProps?.type === t).length;
         const continuidad = byType("CA");
         const alertas = events.filter((e) => !e.start).length;
 
         return [
-            { title: "Continuidad Asistida", value: String(continuidad), note: "Según calendario", icon: "people", accent: "blue" },
-            { title: "Total Guardias", value: String(total), note: "En el mes visible", icon: "bar_chart", accent: "green" },
-            { title: "Alertas", value: String(alertas), note: "Eventos sin fecha", icon: "warning", accent: "red" },
+            {
+                title: "Continuidad Asistida",
+                value: String(continuidad),
+                note: "Según calendario",
+                icon: "people",
+                accent: "blue",
+            },
+            {
+                title: "Total Guardias",
+                value: String(total),
+                note: "En el mes visible",
+                icon: "bar_chart",
+                accent: "green",
+            },
+            {
+                title: "Alertas",
+                value: String(alertas),
+                note: "Eventos sin fecha",
+                icon: "warning",
+                accent: "red",
+            },
         ];
     }, [events]);
 
     function mapDutyToEvent(d) {
-        const id = String(d.id ?? d.uuid ?? (crypto?.randomUUID ? crypto.randomUUID() : Date.now()));
+        const id = String(
+            d.id ??
+                d.uuid ??
+                (crypto?.randomUUID ? crypto.randomUUID() : Date.now()),
+        );
 
         const date = String(d.date ?? "");
         const typeUpper = String(d.duty_type ?? "").toUpperCase();
@@ -223,11 +260,17 @@ export default function HomeDashboard() {
 
         try {
             const data = await callGetDuties(start, end);
-            const arr = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+            const arr = Array.isArray(data)
+                ? data
+                : Array.isArray(data?.data)
+                  ? data.data
+                  : [];
             setEvents(arr.map(mapDutyToEvent));
         } catch (e) {
             console.error(e);
-            setEventsError("No se pudieron cargar las guardias desde la base de datos.");
+            setEventsError(
+                "No se pudieron cargar las guardias desde la base de datos.",
+            );
             setEvents([]);
         } finally {
             setEventsLoading(false);
@@ -253,7 +296,9 @@ export default function HomeDashboard() {
     // Modal Nueva Guardia
     const [newOpen, setNewOpen] = useState(false);
     const [newType, setNewType] = useState("CA");
-    const [newDate, setNewDate] = useState(() => new Date().toISOString().slice(0, 10));
+    const [newDate, setNewDate] = useState(() =>
+        new Date().toISOString().slice(0, 10),
+    );
     const [newTime, setNewTime] = useState("15:00");
     const [newName, setNewName] = useState("");
     const [newIdSpeciality, setNewIdSpeciality] = useState("");
@@ -265,6 +310,44 @@ export default function HomeDashboard() {
         setNewOpen(true);
     }
 
+    // Joyride Steps
+    const [runTour, setRunTour] = useState(false);
+    const tourSteps = [
+        {
+            target: ".tour-import-excel",
+            content:
+                "Aquí puedes importar las guardias desde un archivo Excel. Asegúrate de seleccionar el mes, año y especialidad correctos.",
+            disableBeacon: true,
+        },
+        {
+            target: ".tour-new-guard",
+            content:
+                "Utiliza este botón para añadir manualmente una nueva guardia si no está en el Excel.",
+        },
+        {
+            target: ".tour-filters",
+            content:
+                "Filtra las guardias visibles por tipo (Continuidad, Presencia Física, Localizada) para ver solo lo que te interesa.",
+        },
+    ];
+
+    useEffect(() => {
+        const tutorialDone = localStorage.getItem("homeDashboardTutorialDone");
+        if (!tutorialDone) {
+            setRunTour(true);
+        }
+    }, []);
+
+    const handleJoyrideCallback = (data) => {
+        const { status } = data;
+        const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
+
+        if (finishedStatuses.includes(status)) {
+            localStorage.setItem("homeDashboardTutorialDone", "true");
+            setRunTour(false);
+        }
+    };
+
     // ✅ FIX: define id + no metas funciones dentro
     function addGuardia() {
         if (!newDate) return;
@@ -275,12 +358,18 @@ export default function HomeDashboard() {
         const start = `${newDate}T${timeClean}:00`;
 
         const nameClean = newName.trim();
-        const specialityObj = specialities.find((s) => String(s.id) === String(newIdSpeciality));
-        const specialityLabel = specialityObj?.name || (newIdSpeciality ? `Especialidad #${newIdSpeciality}` : "");
+        const specialityObj = specialities.find(
+            (s) => String(s.id) === String(newIdSpeciality),
+        );
+        const specialityLabel =
+            specialityObj?.name ||
+            (newIdSpeciality ? `Especialidad #${newIdSpeciality}` : "");
 
         const title = `${nameClean || "Sin nombre"} · ${newType}${specialityLabel ? ` · ${specialityLabel}` : ""}`;
 
-        const id = crypto?.randomUUID ? crypto.randomUUID() : String(Date.now());
+        const id = crypto?.randomUUID
+            ? crypto.randomUUID()
+            : String(Date.now());
 
         const newEvent = {
             id,
@@ -291,7 +380,8 @@ export default function HomeDashboard() {
                 type: newType,
                 jefe: false,
                 specialityLabel,
-                workerLabel: nameClean || `Trabajador ${getInitials(nameClean)}`,
+                workerLabel:
+                    nameClean || `Trabajador ${getInitials(nameClean)}`,
                 raw: null,
             },
         };
@@ -299,7 +389,9 @@ export default function HomeDashboard() {
         setEvents((prev) => [newEvent, ...prev]);
         api?.addEvent(newEvent);
 
-        addNotification(`Se ha agregado una nueva guardia a las ${new Date().toLocaleTimeString()}.`);
+        addNotification(
+            `Se ha agregado una nueva guardia a las ${new Date().toLocaleTimeString()}.`,
+        );
         setNewOpen(false);
     }
 
@@ -318,7 +410,11 @@ export default function HomeDashboard() {
 
         try {
             const data = await getSpecialities();
-            const arr = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+            const arr = Array.isArray(data)
+                ? data
+                : Array.isArray(data?.data)
+                  ? data.data
+                  : [];
             setSpecialities(arr);
         } catch (e) {
             console.error(e);
@@ -378,12 +474,16 @@ export default function HomeDashboard() {
 
     async function submitImport() {
         if (!excelFile) return setImportMsg("Debes adjuntar un archivo Excel.");
-        if (!isExcelFile(excelFile)) return setImportMsg("Solo se permiten archivos .xls o .xlsx");
-        if (!idSpeciality) return setImportMsg("Debes seleccionar una especialidad.");
-        if (!importYear || !importMonth) return setImportMsg("Debes seleccionar año y mes.");
+        if (!isExcelFile(excelFile))
+            return setImportMsg("Solo se permiten archivos .xls o .xlsx");
+        if (!idSpeciality)
+            return setImportMsg("Debes seleccionar una especialidad.");
+        if (!importYear || !importMonth)
+            return setImportMsg("Debes seleccionar año y mes.");
 
         const maxMB = 10;
-        if (excelFile.size > maxMB * 1024 * 1024) return setImportMsg(`El archivo supera ${maxMB}MB`);
+        if (excelFile.size > maxMB * 1024 * 1024)
+            return setImportMsg(`El archivo supera ${maxMB}MB`);
 
         setImportUploading(true);
         setImportMsg("");
@@ -412,10 +512,14 @@ export default function HomeDashboard() {
                         <div>
                             <div className="hdStatTitle">{s.title}</div>
                             <div className="hdStatValue">{s.value}</div>
-                            <div className={`hdStatNote ${s.accent}`}>{s.note}</div>
+                            <div className={`hdStatNote ${s.accent}`}>
+                                {s.note}
+                            </div>
                         </div>
                         <div className={`hdStatIcon ${s.accent}`}>
-                            <span className="material-icons-outlined">{s.icon}</span>
+                            <span className="material-icons-outlined">
+                                {s.icon}
+                            </span>
                         </div>
                     </div>
                 ))}
@@ -425,33 +529,70 @@ export default function HomeDashboard() {
             <section className="hdCalendarCard">
                 <div className="hdCalendarTop">
                     <div className="hdMonthPicker">
-                        <button className="hdMiniBtn" aria-label="Mes anterior" type="button" onClick={goPrev}>
-                            <span className="material-icons-outlined">chevron_left</span>
+                        <button
+                            className="hdMiniBtn"
+                            aria-label="Mes anterior"
+                            type="button"
+                            onClick={goPrev}
+                        >
+                            <span className="material-icons-outlined">
+                                chevron_left
+                            </span>
                         </button>
 
-                        <span className="hdMonthLabel">{monthLabel || "..."}</span>
+                        <span className="hdMonthLabel">
+                            {monthLabel || "..."}
+                        </span>
 
-                        <button className="hdMiniBtn" aria-label="Mes siguiente" type="button" onClick={goNext}>
-                            <span className="material-icons-outlined">chevron_right</span>
+                        <button
+                            className="hdMiniBtn"
+                            aria-label="Mes siguiente"
+                            type="button"
+                            onClick={goNext}
+                        >
+                            <span className="material-icons-outlined">
+                                chevron_right
+                            </span>
                         </button>
                     </div>
 
                     <div className="hdActions" style={{ position: "relative" }}>
+                        {/* BUTTON HELP TOUR */}
+
                         {/* IMPORTAR EXCEL */}
-                        <button className="hdBtn primary hdBtnSm" type="button" onClick={openImportModal}>
-                            <span className="material-icons-outlined">table_view</span>
+                        <button
+                            className="hdBtn primary hdBtnSm tour-import-excel"
+                            type="button"
+                            onClick={openImportModal}
+                        >
+                            <span className="material-icons-outlined">
+                                table_view
+                            </span>
                             <span className="hideOnMobile">Importar Excel</span>
                             <span className="showOnMobile">Excel</span>
                         </button>
 
                         {/* MODAL IMPORTAR EXCEL */}
                         {importOpen && (
-                            <div className="hdModalOverlay" role="dialog" aria-modal="true">
+                            <div
+                                className="hdModalOverlay"
+                                role="dialog"
+                                aria-modal="true"
+                            >
                                 <div className="hdModalCard">
                                     <div className="hdModalHead">
-                                        <div className="hdModalTitle">Importar guardias desde Excel</div>
-                                        <button className="hdModalClose" type="button" onClick={closeImportModal} aria-label="Cerrar">
-                                            <span className="material-icons-outlined">close</span>
+                                        <div className="hdModalTitle">
+                                            Importar guardias desde Excel
+                                        </div>
+                                        <button
+                                            className="hdModalClose"
+                                            type="button"
+                                            onClick={closeImportModal}
+                                            aria-label="Cerrar"
+                                        >
+                                            <span className="material-icons-outlined">
+                                                close
+                                            </span>
                                         </button>
                                     </div>
 
@@ -460,28 +601,65 @@ export default function HomeDashboard() {
                                             <span>Especialidad</span>
 
                                             {specialitiesLoading ? (
-                                                <div className="hdControl">Cargando especialidades...</div>
+                                                <div className="hdControl">
+                                                    Cargando especialidades...
+                                                </div>
                                             ) : specialitiesError ? (
-                                                <div className="hdControl">{specialitiesError}</div>
+                                                <div className="hdControl">
+                                                    {specialitiesError}
+                                                </div>
                                             ) : (
-                                                <select className="hdControl" value={idSpeciality} onChange={(e) => setIdSpeciality(e.target.value)}>
-                                                    <option value="">-- Selecciona una especialidad --</option>
+                                                <select
+                                                    className="hdControl"
+                                                    value={idSpeciality}
+                                                    onChange={(e) =>
+                                                        setIdSpeciality(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                >
+                                                    <option value="">
+                                                        -- Selecciona una
+                                                        especialidad --
+                                                    </option>
                                                     {specialities.map((s) => (
-                                                        <option key={s.id} value={String(s.id)}>
-                                                            {s.name} (id: {s.id})
+                                                        <option
+                                                            key={s.id}
+                                                            value={String(s.id)}
+                                                        >
+                                                            {s.name} (id: {s.id}
+                                                            )
                                                         </option>
                                                     ))}
                                                 </select>
                                             )}
                                         </label>
 
-                                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                                        <div
+                                            style={{
+                                                display: "grid",
+                                                gridTemplateColumns: "1fr 1fr",
+                                                gap: 12,
+                                            }}
+                                        >
                                             <label className="hdField">
                                                 <span>Mes</span>
-                                                <select className="hdControl" value={importMonth} onChange={(e) => setImportMonth(e.target.value)}>
+                                                <select
+                                                    className="hdControl"
+                                                    value={importMonth}
+                                                    onChange={(e) =>
+                                                        setImportMonth(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                >
                                                     {months.map((m) => (
-                                                        <option key={m.value} value={m.value}>
-                                                            {m.label} ({m.value})
+                                                        <option
+                                                            key={m.value}
+                                                            value={m.value}
+                                                        >
+                                                            {m.label} ({m.value}
+                                                            )
                                                         </option>
                                                     ))}
                                                 </select>
@@ -489,9 +667,20 @@ export default function HomeDashboard() {
 
                                             <label className="hdField">
                                                 <span>Año</span>
-                                                <select className="hdControl" value={importYear} onChange={(e) => setImportYear(e.target.value)}>
+                                                <select
+                                                    className="hdControl"
+                                                    value={importYear}
+                                                    onChange={(e) =>
+                                                        setImportYear(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                >
                                                     {years.map((y) => (
-                                                        <option key={y} value={y}>
+                                                        <option
+                                                            key={y}
+                                                            value={y}
+                                                        >
                                                             {y}
                                                         </option>
                                                     ))}
@@ -511,7 +700,9 @@ export default function HomeDashboard() {
                                             onDragOver={onDragOver}
                                             onDragLeave={onDragLeave}
                                             onDrop={onDrop}
-                                            onClick={() => fileInputRef.current?.click()}
+                                            onClick={() =>
+                                                fileInputRef.current?.click()
+                                            }
                                             style={{
                                                 marginTop: 12,
                                                 border: `2px dashed ${isDragging ? "#888" : "#ccc"}`,
@@ -523,26 +714,52 @@ export default function HomeDashboard() {
                                             }}
                                             title="Arrastra Excel o haz clic para seleccionarlo"
                                         >
-                                            <div style={{ fontWeight: 600 }}>Arrastra aquí tu Excel (.xls / .xlsx)</div>
-                                            <div style={{ marginTop: 6, opacity: 0.8 }}>o haz clic para seleccionarlo</div>
+                                            <div style={{ fontWeight: 600 }}>
+                                                Arrastra aquí tu Excel (.xls /
+                                                .xlsx)
+                                            </div>
+                                            <div
+                                                style={{
+                                                    marginTop: 6,
+                                                    opacity: 0.8,
+                                                }}
+                                            >
+                                                o haz clic para seleccionarlo
+                                            </div>
 
                                             {excelFile && (
                                                 <div style={{ marginTop: 10 }}>
-                                                    Archivo: <b>{excelFile.name}</b>
+                                                    Archivo:{" "}
+                                                    <b>{excelFile.name}</b>
                                                 </div>
                                             )}
                                         </div>
 
-                                        {importMsg && <p style={{ marginTop: 12 }}>{importMsg}</p>}
+                                        {importMsg && (
+                                            <p style={{ marginTop: 12 }}>
+                                                {importMsg}
+                                            </p>
+                                        )}
                                     </div>
 
                                     <div className="hdModalFooter">
-                                        <button className="hdBtn light hdBtnSm" type="button" onClick={closeImportModal}>
+                                        <button
+                                            className="hdBtn light hdBtnSm"
+                                            type="button"
+                                            onClick={closeImportModal}
+                                        >
                                             Cancelar
                                         </button>
 
-                                        <button className="hdBtn primary hdBtnSm" type="button" disabled={importUploading} onClick={submitImport}>
-                                            {importUploading ? "Subiendo..." : "Importar"}
+                                        <button
+                                            className="hdBtn primary hdBtnSm"
+                                            type="button"
+                                            disabled={importUploading}
+                                            onClick={submitImport}
+                                        >
+                                            {importUploading
+                                                ? "Subiendo..."
+                                                : "Importar"}
                                         </button>
                                     </div>
                                 </div>
@@ -550,15 +767,26 @@ export default function HomeDashboard() {
                         )}
 
                         {/* NUEVA GUARDIA */}
-                        <button className="hdBtn primary hdBtnSm" type="button" onClick={() => openNewGuardiaModal()}>
+                        <button
+                            className="hdBtn primary hdBtnSm tour-new-guard"
+                            type="button"
+                            onClick={() => openNewGuardiaModal()}
+                        >
                             <span className="material-icons-outlined">add</span>
                             <span className="hideOnMobile">Nueva Guardia</span>
                             <span className="showOnMobile">Crear</span>
                         </button>
 
                         {/* FILTROS */}
-                        <button className="hdBtn light hdBtnSm" type="button" onClick={() => setFilterOpen((v) => !v)} aria-expanded={filterOpen}>
-                            <span className="material-icons-outlined">filter_list</span>
+                        <button
+                            className="hdBtn light hdBtnSm tour-filters"
+                            type="button"
+                            onClick={() => setFilterOpen((v) => !v)}
+                            aria-expanded={filterOpen}
+                        >
+                            <span className="material-icons-outlined">
+                                filter_list
+                            </span>
                             Filtros
                         </button>
 
@@ -612,13 +840,23 @@ export default function HomeDashboard() {
                 {/* Estado de carga/errores */}
                 {(eventsLoading || eventsError) && (
                     <div style={{ padding: "10px 16px" }}>
-                        {eventsLoading && <span style={{ fontWeight: 700 }}>Cargando guardias...</span>}
-                        {eventsError && <span style={{ color: "#b91c1c", fontWeight: 700 }}>{eventsError}</span>}
+                        {eventsLoading && (
+                            <span style={{ fontWeight: 700 }}>
+                                Cargando guardias...
+                            </span>
+                        )}
+                        {eventsError && (
+                            <span style={{ color: "#b91c1c", fontWeight: 700 }}>
+                                {eventsError}
+                            </span>
+                        )}
                     </div>
                 )}
 
                 <div className="hdCalendar">
-                    <div className={`hdFullCalendarWrap ${eventsLoading ? "" : "hdEnter"}`}>
+                    <div
+                        className={`hdFullCalendarWrap ${eventsLoading ? "" : "hdEnter"}`}
+                    >
                         <FullCalendar
                             ref={calendarRef}
                             plugins={[dayGridPlugin, interactionPlugin]}
@@ -634,7 +872,9 @@ export default function HomeDashboard() {
                             }}
                             dayHeaderFormat={{ weekday: "short" }}
                             events={filteredEvents}
-                            dayCellClassNames={(arg) => (arg.isToday ? ["hdTodayCell"] : [])}
+                            dayCellClassNames={(arg) =>
+                                arg.isToday ? ["hdTodayCell"] : []
+                            }
                             eventContent={(arg) => {
                                 const type = arg.event.extendedProps?.type;
                                 const jefe = arg.event.extendedProps?.jefe;
@@ -642,18 +882,28 @@ export default function HomeDashboard() {
 
                                 return (
                                     <div className={`hdFcChip ${type || ""}`}>
-                                        <span className="hdFcChipText">{text}</span>
+                                        <span className="hdFcChipText">
+                                            {text}
+                                        </span>
                                         {jefe && (
-                                            <span className="material-icons-outlined hdFcJefe" title="Jefe de Guardia">
+                                            <span
+                                                className="material-icons-outlined hdFcJefe"
+                                                title="Jefe de Guardia"
+                                            >
                                                 local_police
                                             </span>
                                         )}
                                     </div>
                                 );
                             }}
-                            dateClick={(info) => openNewGuardiaModal(info.dateStr)}
+                            dateClick={(info) =>
+                                openNewGuardiaModal(info.dateStr)
+                            }
                             eventClick={(info) => {
-                                console.log("eventClick raw:", info.event.extendedProps?.raw);
+                                console.log(
+                                    "eventClick raw:",
+                                    info.event.extendedProps?.raw,
+                                );
                             }}
                         />
                     </div>
@@ -666,24 +916,44 @@ export default function HomeDashboard() {
                     <div className="hdModalCard">
                         <div className="hdModalHead">
                             <div className="hdModalTitle">Nueva Guardia</div>
-                            <button className="hdModalClose" onClick={() => setNewOpen(false)} type="button" aria-label="Cerrar">
-                                <span className="material-icons-outlined">close</span>
+                            <button
+                                className="hdModalClose"
+                                onClick={() => setNewOpen(false)}
+                                type="button"
+                                aria-label="Cerrar"
+                            >
+                                <span className="material-icons-outlined">
+                                    close
+                                </span>
                             </button>
                         </div>
 
                         <div className="hdModalBody">
                             <label className="hdField">
                                 <span>Tipo</span>
-                                <select value={newType} onChange={(e) => setNewType(e.target.value)} className="hdControl">
+                                <select
+                                    value={newType}
+                                    onChange={(e) => setNewType(e.target.value)}
+                                    className="hdControl"
+                                >
                                     <option value="CA">CA (Continuidad)</option>
-                                    <option value="PF">PF (Presencia Física)</option>
-                                    <option value="LOC">LOC (Localizada)</option>
+                                    <option value="PF">
+                                        PF (Presencia Física)
+                                    </option>
+                                    <option value="LOC">
+                                        LOC (Localizada)
+                                    </option>
                                 </select>
                             </label>
 
                             <label className="hdField">
                                 <span>Fecha</span>
-                                <input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} className="hdControl" />
+                                <input
+                                    type="date"
+                                    value={newDate}
+                                    onChange={(e) => setNewDate(e.target.value)}
+                                    className="hdControl"
+                                />
                             </label>
 
                             <label className="hdField">
@@ -699,8 +969,16 @@ export default function HomeDashboard() {
 
                             <label className="hdField">
                                 <span>Especialidad</span>
-                                <select className="hdControl" value={newIdSpeciality} onChange={(e) => setNewIdSpeciality(e.target.value)}>
-                                    <option value="">Selecciona una especialidad</option>
+                                <select
+                                    className="hdControl"
+                                    value={newIdSpeciality}
+                                    onChange={(e) =>
+                                        setNewIdSpeciality(e.target.value)
+                                    }
+                                >
+                                    <option value="">
+                                        Selecciona una especialidad
+                                    </option>
                                     {specialities.map((s) => (
                                         <option key={s.id} value={String(s.id)}>
                                             {s.name} (id: {s.id})
@@ -711,15 +989,28 @@ export default function HomeDashboard() {
 
                             <label className="hdField">
                                 <span>Hora</span>
-                                <input type="time" value={newTime} onChange={(e) => setNewTime(e.target.value)} className="hdControl" />
+                                <input
+                                    type="time"
+                                    value={newTime}
+                                    onChange={(e) => setNewTime(e.target.value)}
+                                    className="hdControl"
+                                />
                             </label>
                         </div>
 
                         <div className="hdModalFooter">
-                            <button className="hdBtn light hdBtnSm" type="button" onClick={() => setNewOpen(false)}>
+                            <button
+                                className="hdBtn light hdBtnSm"
+                                type="button"
+                                onClick={() => setNewOpen(false)}
+                            >
                                 Cancelar
                             </button>
-                            <button className="hdBtn primary hdBtnSm" type="button" onClick={addGuardia}>
+                            <button
+                                className="hdBtn primary hdBtnSm"
+                                type="button"
+                                onClick={addGuardia}
+                            >
                                 Guardar
                             </button>
                         </div>
@@ -744,11 +1035,35 @@ export default function HomeDashboard() {
                         <span>Localizada (LOC)</span>
                     </div>
                     <div className="hdLegendItem">
-                        <span className="material-icons-outlined amber">local_police</span>
+                        <span className="material-icons-outlined amber">
+                            local_police
+                        </span>
                         <span>Jefe de Guardia</span>
                     </div>
                 </div>
             </section>
+            <Joyride
+                steps={tourSteps}
+                run={runTour}
+                continuous
+                showProgress
+                showSkipButton
+                scrollOffset={150}
+                callback={handleJoyrideCallback}
+                styles={{
+                    options: {
+                        zIndex: 10000,
+                        primaryColor: "#007bff",
+                    },
+                }}
+                locale={{
+                    back: "Atrás",
+                    close: "Cerrar",
+                    last: "Finalizar",
+                    next: "Siguiente",
+                    skip: "Saltar",
+                }}
+            />
         </div>
     );
 }

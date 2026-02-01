@@ -3,12 +3,14 @@ import "../styles/GestionGuardias.css";
 import { getDuties, updateDuty, deleteDuty } from "../services/DutyService";
 import { assignChiefs, getWorkers, isUserAdmin } from "../services/userService";
 import { getSpecialities } from "../services/SpecialitiesService";
+
 import RowActions from "../components/RowActions/RowActions";
+import Joyride, { STATUS } from "react-joyride-react-19";
 
 export default function GestionGuardias() {
     const SKELETON_ROWS = 8;
 
-    // ✅ micro-animaciones filas (EDIT + DELETE)
+    // micro-animaciones filas (EDIT + DELETE)
     const [updatedRowId, setUpdatedRowId] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
 
@@ -33,9 +35,11 @@ export default function GestionGuardias() {
     // modal asignar jefes
     const [isAssignOpen, setIsAssignOpen] = useState(false);
     const [assignMonth, setAssignMonth] = useState(() =>
-        String(new Date().getMonth() + 1).padStart(2, "0")
+        String(new Date().getMonth() + 1).padStart(2, "0"),
     );
-    const [assignYear, setAssignYear] = useState(() => String(new Date().getFullYear()));
+    const [assignYear, setAssignYear] = useState(() =>
+        String(new Date().getFullYear()),
+    );
     const [assignLoading, setAssignLoading] = useState(false);
     const [assignMsg, setAssignMsg] = useState("");
 
@@ -53,9 +57,15 @@ export default function GestionGuardias() {
 
     // modal generar pdf
     const [pdfOpen, setPdfOpen] = useState(false);
-    const [pdfDay, setPdfDay] = useState(() => String(new Date().getDate()).padStart(2, "0"));
-    const [pdfMonth, setPdfMonth] = useState(() => String(new Date().getMonth() + 1).padStart(2, "0"));
-    const [pdfYear, setPdfYear] = useState(() => String(new Date().getFullYear()));
+    const [pdfDay, setPdfDay] = useState(() =>
+        String(new Date().getDate()).padStart(2, "0"),
+    );
+    const [pdfMonth, setPdfMonth] = useState(() =>
+        String(new Date().getMonth() + 1).padStart(2, "0"),
+    );
+    const [pdfYear, setPdfYear] = useState(() =>
+        String(new Date().getFullYear()),
+    );
     const [pdfLoading, setPdfLoading] = useState(false);
     const [pdfError, setPdfError] = useState("");
     const [editSaving, setEditSaving] = useState(false);
@@ -82,8 +92,54 @@ export default function GestionGuardias() {
             { value: "11", label: "Noviembre" },
             { value: "12", label: "Diciembre" },
         ],
-        []
+        [],
     );
+
+    // Joyride Steps
+    const [runTour, setRunTour] = useState(false);
+    const tourSteps = [
+        {
+            target: ".tour-search-name",
+            content: "Busca guardias por el nombre del trabajador.",
+            disableBeacon: true,
+        },
+        {
+            target: ".tour-search-date",
+            content: "Filtra las guardias por una fecha específica.",
+        },
+        {
+            target: ".tour-create-guard",
+            content: "Crea una nueva guardia manualmente.",
+        },
+        {
+            target: ".tour-assign-chief",
+            content:
+                "Asigna automáticamente los jefes de guardia para un mes seleccionado.",
+        },
+        {
+            target: ".tour-generate-pdf",
+            content: "Genera y descarga un PDF con la plantilla del día.",
+        },
+    ];
+
+    useEffect(() => {
+        const tutorialDone = localStorage.getItem(
+            "gestionGuardiasTutorialDone",
+        );
+        if (!tutorialDone) {
+            setRunTour(true);
+        }
+    }, []);
+
+    const handleJoyrideCallback = (data) => {
+        const { status } = data;
+        const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
+
+        if (finishedStatuses.includes(status)) {
+            localStorage.setItem("gestionGuardiasTutorialDone", "true");
+            setRunTour(false);
+        }
+    };
 
     const years = useMemo(() => {
         const now = new Date().getFullYear();
@@ -106,7 +162,11 @@ export default function GestionGuardias() {
 
         try {
             const data = await getDuties();
-            const arr = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+            const arr = Array.isArray(data)
+                ? data
+                : Array.isArray(data?.data)
+                  ? data.data
+                  : [];
             setGuardias(arr);
             setPage(1);
         } catch (e) {
@@ -134,14 +194,22 @@ export default function GestionGuardias() {
             }
             try {
                 const w = await getWorkers();
-                const arr = Array.isArray(w) ? w : Array.isArray(w?.data) ? w.data : [];
+                const arr = Array.isArray(w)
+                    ? w
+                    : Array.isArray(w?.data)
+                      ? w.data
+                      : [];
                 setWorkers(arr);
             } catch {
                 setWorkers([]);
             }
             try {
                 const s = await getSpecialities();
-                const arr = Array.isArray(s) ? s : Array.isArray(s?.data) ? s.data : [];
+                const arr = Array.isArray(s)
+                    ? s
+                    : Array.isArray(s?.data)
+                      ? s.data
+                      : [];
                 setSpecialities(arr);
             } catch {
                 setSpecialities([]);
@@ -152,17 +220,17 @@ export default function GestionGuardias() {
     // paginación calculada
     const filteredGuardias = useMemo(() => {
         let result = guardias;
-        
+
         if (searchChief.trim()) {
-            result = result.filter((g) => 
-                (g.worker ?? "").toLowerCase().includes(searchChief.toLowerCase())
+            result = result.filter((g) =>
+                (g.worker ?? "")
+                    .toLowerCase()
+                    .includes(searchChief.toLowerCase()),
             );
         }
-        
+
         if (searchDate.trim()) {
-            result = result.filter((g) => 
-                (g.date ?? "").includes(searchDate)
-            );
+            result = result.filter((g) => (g.date ?? "").includes(searchDate));
         }
 
         // Ordenamiento
@@ -181,7 +249,7 @@ export default function GestionGuardias() {
                 return sortOrder === "asc" ? cmp : -cmp;
             });
         }
-        
+
         return sorted;
     }, [guardias, searchChief, searchDate, sortBy, sortOrder]);
 
@@ -204,7 +272,8 @@ export default function GestionGuardias() {
 
     const pageButtons = useMemo(() => {
         const maxButtons = 7;
-        if (totalPages <= maxButtons) return Array.from({ length: totalPages }, (_, i) => i + 1);
+        if (totalPages <= maxButtons)
+            return Array.from({ length: totalPages }, (_, i) => i + 1);
 
         const nums = [];
         const start = Math.max(2, page - 2);
@@ -279,7 +348,10 @@ export default function GestionGuardias() {
             id_speciality: row.id_speciality ? String(row.id_speciality) : "",
             id_worker: row.id_worker ? String(row.id_worker) : "",
             id_chief_worker:
-                row.id_chief_worker === null || row.id_chief_worker === undefined ? "" : String(row.id_chief_worker),
+                row.id_chief_worker === null ||
+                row.id_chief_worker === undefined
+                    ? ""
+                    : String(row.id_chief_worker),
         });
         setEditOpen(true);
     }
@@ -307,7 +379,7 @@ export default function GestionGuardias() {
     function getDaysInMonth(month, year) {
         const m = parseInt(month);
         const y = parseInt(year);
-        
+
         if (m === 2) {
             // Febrero: 28 o 29 (año bisiesto)
             return y % 4 === 0 && (y % 100 !== 0 || y % 400 === 0) ? 29 : 28;
@@ -325,15 +397,18 @@ export default function GestionGuardias() {
         setPdfError("");
         try {
             const token = localStorage.getItem("token");
-            const url = new URL("/api/plantilla-dia-pdf", window.location.origin);
+            const url = new URL(
+                "/api/plantilla-dia-pdf",
+                window.location.origin,
+            );
             url.searchParams.append("day", pdfDay);
             url.searchParams.append("month", pdfMonth);
             url.searchParams.append("year", pdfYear);
-            
+
             const response = await fetch(url.toString(), {
                 method: "GET",
                 headers: {
-                    "Authorization": `Bearer ${token}`,
+                    Authorization: `Bearer ${token}`,
                 },
             });
 
@@ -349,7 +424,9 @@ export default function GestionGuardias() {
             const blob = await response.blob();
             if (blob.type === "application/json") {
                 const text = await blob.text();
-                throw new Error(JSON.parse(text).error || "Error al generar PDF");
+                throw new Error(
+                    JSON.parse(text).error || "Error al generar PDF",
+                );
             }
 
             const urlBlob = window.URL.createObjectURL(blob);
@@ -360,7 +437,7 @@ export default function GestionGuardias() {
             a.click();
             window.URL.revokeObjectURL(urlBlob);
             document.body.removeChild(a);
-            
+
             setPdfOpen(false);
         } catch (err) {
             console.error("Error al generar PDF:", err);
@@ -386,9 +463,14 @@ export default function GestionGuardias() {
         const payload = {
             date: editForm.date,
             duty_type: editForm.duty_type,
-            id_speciality: editForm.id_speciality ? Number(editForm.id_speciality) : null,
+            id_speciality: editForm.id_speciality
+                ? Number(editForm.id_speciality)
+                : null,
             id_worker: editForm.id_worker ? Number(editForm.id_worker) : null,
-            id_chief_worker: editForm.id_chief_worker === "" ? null : Number(editForm.id_chief_worker),
+            id_chief_worker:
+                editForm.id_chief_worker === ""
+                    ? null
+                    : Number(editForm.id_chief_worker),
         };
 
         setEditSaving(true);
@@ -400,21 +482,25 @@ export default function GestionGuardias() {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
-                            "Authorization": `Bearer ${localStorage.getItem("auth_token")}`,
+                            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
                         },
                         body: JSON.stringify(payload),
                     });
                     if (!res.ok) throw new Error("Error al crear la guardia");
                     return res.json();
                 })();
-                
+
                 setGuardias((prev) => [response.data || response, ...prev]);
             } else {
                 // Editar guardia existente
                 if (!editRowId) return;
                 await updateDuty(editRowId, payload);
-                setGuardias((prev) => prev.map((g) => (g.id === editRowId ? { ...g, ...payload } : g)));
-                
+                setGuardias((prev) =>
+                    prev.map((g) =>
+                        g.id === editRowId ? { ...g, ...payload } : g,
+                    ),
+                );
+
                 setUpdatedRowId(editRowId);
                 setTimeout(() => setUpdatedRowId(null), 1200);
             }
@@ -478,25 +564,51 @@ export default function GestionGuardias() {
                 <div className="ggTableCard">
                     <div className="ggTableCardTop">
                         <div>
-                            <h2 className="ggTableCardTitle">Gestión de Guardias</h2>
+                            <h2 className="ggTableCardTitle">
+                                Gestión de Guardias
+                            </h2>
                         </div>
                         <div className="ggTableCount">
-                            {loading ? "Cargando..." : `${filteredGuardias.length}`} registros
+                            {loading
+                                ? "Cargando..."
+                                : `${filteredGuardias.length}`}{" "}
+                            registros
                         </div>
                     </div>
 
                     {isAdmin && (
                         <div className="ggButtonsContainer">
-                            <button className="ggCtaBtn" type="button" onClick={handleCreateGuardia} disabled={loading}>
-                                <span className="material-icons">add_circle_outline</span>
+                            <button
+                                className="ggCtaBtn tour-create-guard"
+                                type="button"
+                                onClick={handleCreateGuardia}
+                                disabled={loading}
+                            >
+                                <span className="material-icons">
+                                    add_circle_outline
+                                </span>
                                 <span>Crear guardia</span>
                             </button>
-                            <button className="ggCtaBtn" type="button" onClick={openAssignModal} disabled={loading}>
-                                <span className="material-icons">supervised_user_circle</span>
+                            <button
+                                className="ggCtaBtn tour-assign-chief"
+                                type="button"
+                                onClick={openAssignModal}
+                                disabled={loading}
+                            >
+                                <span className="material-icons">
+                                    supervised_user_circle
+                                </span>
                                 <span>Asignar jefe automáticamente</span>
                             </button>
-                            <button className="ggCtaBtn ggCtaPdfBtn" type="button" onClick={handleGeneratePdf} disabled={loading}>
-                                <span className="material-icons">file_download</span>
+                            <button
+                                className="ggCtaBtn ggCtaPdfBtn tour-generate-pdf"
+                                type="button"
+                                onClick={handleGeneratePdf}
+                                disabled={loading}
+                            >
+                                <span className="material-icons">
+                                    file_download
+                                </span>
                                 <span>Generar PDF</span>
                             </button>
                         </div>
@@ -514,7 +626,7 @@ export default function GestionGuardias() {
                             </label>
                             <input
                                 type="text"
-                                className="ggSearchInput"
+                                className="ggSearchInput tour-search-name"
                                 placeholder="Buscar por nombre..."
                                 value={searchChief}
                                 onChange={(e) => {
@@ -531,7 +643,9 @@ export default function GestionGuardias() {
                                     }}
                                     title="Limpiar búsqueda"
                                 >
-                                    <span className="material-icons">close</span>
+                                    <span className="material-icons">
+                                        close
+                                    </span>
                                 </button>
                             )}
                         </div>
@@ -543,7 +657,7 @@ export default function GestionGuardias() {
                             </label>
                             <input
                                 type="date"
-                                className="ggSearchInput"
+                                className="ggSearchInput tour-search-date"
                                 value={searchDate}
                                 onChange={(e) => {
                                     setSearchDate(e.target.value);
@@ -559,7 +673,9 @@ export default function GestionGuardias() {
                                     }}
                                     title="Limpiar búsqueda"
                                 >
-                                    <span className="material-icons">close</span>
+                                    <span className="material-icons">
+                                        close
+                                    </span>
                                 </button>
                             )}
                         </div>
@@ -569,7 +685,13 @@ export default function GestionGuardias() {
                                 <span className="material-icons">sort</span>
                                 Ordenar por
                             </label>
-                            <div style={{ display: "flex", gap: "6px", width: "100%" }}>
+                            <div
+                                style={{
+                                    display: "flex",
+                                    gap: "6px",
+                                    width: "100%",
+                                }}
+                            >
                                 <select
                                     className="ggSearchInput"
                                     value={sortBy}
@@ -581,18 +703,24 @@ export default function GestionGuardias() {
                                 </select>
                                 <button
                                     className="ggSearchInput"
-                                    onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                                    onClick={() =>
+                                        setSortOrder(
+                                            sortOrder === "asc"
+                                                ? "desc"
+                                                : "asc",
+                                        )
+                                    }
                                     title={`Ordenado ${sortOrder === "asc" ? "ascendente" : "descendente"}`}
-                                    style={{ 
-                                        flex: 0.5, 
-                                        padding: "8px 12px", 
+                                    style={{
+                                        flex: 0.5,
+                                        padding: "8px 12px",
                                         cursor: "pointer",
                                         background: "#f3f4f6",
                                         border: "1px solid #d1d5db",
                                         borderRadius: "8px",
                                         fontSize: "14px",
                                         fontWeight: "600",
-                                        color: "#1f2937"
+                                        color: "#1f2937",
                                     }}
                                 >
                                     {sortOrder === "asc" ? "↑" : "↓"}
@@ -607,42 +735,56 @@ export default function GestionGuardias() {
                                 <tr>
                                     <th className="ggColDate">FECHA</th>
                                     <th className="ggColCenter">TIPO</th>
-                                    <th className="ggColCenter">ESPECIALIDAD</th>
+                                    <th className="ggColCenter">
+                                        ESPECIALIDAD
+                                    </th>
                                     <th className="ggColCenter">TRABAJADOR</th>
                                     <th className="ggColCenter">JEFE</th>
-                                    {isAdmin && <th className="ggColActions">ACCIONES</th>}
+                                    {isAdmin && (
+                                        <th className="ggColActions">
+                                            ACCIONES
+                                        </th>
+                                    )}
                                 </tr>
                             </thead>
 
                             <tbody>
                                 {loading ? (
-                                    Array.from({ length: SKELETON_ROWS }).map((_, i) => (
-                                        <tr key={`sk-${i}`} className="ggSkRow">
-                                            <td className="ggColDate">
-                                                <div className="ggSk skMd" />
-                                            </td>
-                                            <td className="ggColCenter">
-                                                <div className="ggSk skXs" />
-                                            </td>
-                                            <td className="ggColCenter">
-                                                <div className="ggSk skLg" />
-                                            </td>
-                                            <td className="ggColCenter">
-                                                <div className="ggSk skLg" />
-                                            </td>
-                                            <td className="ggColCenter">
-                                                <div className="ggSk skSm" />
-                                            </td>
-                                            {isAdmin && (
-                                                <td className="ggColActions">
-                                                    <div className="ggSk skBtn" />
+                                    Array.from({ length: SKELETON_ROWS }).map(
+                                        (_, i) => (
+                                            <tr
+                                                key={`sk-${i}`}
+                                                className="ggSkRow"
+                                            >
+                                                <td className="ggColDate">
+                                                    <div className="ggSk skMd" />
                                                 </td>
-                                            )}
-                                        </tr>
-                                    ))
+                                                <td className="ggColCenter">
+                                                    <div className="ggSk skXs" />
+                                                </td>
+                                                <td className="ggColCenter">
+                                                    <div className="ggSk skLg" />
+                                                </td>
+                                                <td className="ggColCenter">
+                                                    <div className="ggSk skLg" />
+                                                </td>
+                                                <td className="ggColCenter">
+                                                    <div className="ggSk skSm" />
+                                                </td>
+                                                {isAdmin && (
+                                                    <td className="ggColActions">
+                                                        <div className="ggSk skBtn" />
+                                                    </td>
+                                                )}
+                                            </tr>
+                                        ),
+                                    )
                                 ) : pagedGuardias.length === 0 ? (
                                     <tr>
-                                        <td className="ggEmpty" colSpan={isAdmin ? 6 : 5}>
+                                        <td
+                                            className="ggEmpty"
+                                            colSpan={isAdmin ? 6 : 5}
+                                        >
                                             No hay guardias registradas.
                                         </td>
                                     </tr>
@@ -652,27 +794,51 @@ export default function GestionGuardias() {
                                             key={g.id}
                                             className={[
                                                 "ggRowEnter",
-                                                g.id === updatedRowId ? "ggRowUpdated" : "",
-                                                g.id === deletingId ? "ggRowExit" : "",
+                                                g.id === updatedRowId
+                                                    ? "ggRowUpdated"
+                                                    : "",
+                                                g.id === deletingId
+                                                    ? "ggRowExit"
+                                                    : "",
                                             ].join(" ")}
                                         >
-                                            <td className="ggColDate">{g.date ? new Date(g.date).toLocaleDateString('es-ES') : "-"}</td>
-
-                                            <td className="ggColCenter">
-                                                <span className={`ggPill ${pillClass(g.duty_type)}`}>{g.duty_type}</span>
+                                            <td className="ggColDate">
+                                                {g.date
+                                                    ? new Date(
+                                                          g.date,
+                                                      ).toLocaleDateString(
+                                                          "es-ES",
+                                                      )
+                                                    : "-"}
                                             </td>
 
-                                            <td className="ggColCenter">{g.speciality}</td>
-                                            <td className="ggColCenter">{g.worker}</td>
-                                            <td className="ggColCenter">{g.chief_worker ?? "—"}</td>
+                                            <td className="ggColCenter">
+                                                <span
+                                                    className={`ggPill ${pillClass(g.duty_type)}`}
+                                                >
+                                                    {g.duty_type}
+                                                </span>
+                                            </td>
+
+                                            <td className="ggColCenter">
+                                                {g.speciality}
+                                            </td>
+                                            <td className="ggColCenter">
+                                                {g.worker}
+                                            </td>
+                                            <td className="ggColCenter">
+                                                {g.chief_worker ?? "—"}
+                                            </td>
 
                                             {isAdmin && (
                                                 <td className="ggColActions">
-                                                    <RowActions 
-                                                        row={g} 
-                                                        onEdit={handleEdit} 
+                                                    <RowActions
+                                                        row={g}
+                                                        onEdit={handleEdit}
                                                         onDelete={handleDelete}
-                                                        disabled={deletingId === g.id}
+                                                        disabled={
+                                                            deletingId === g.id
+                                                        }
                                                     />
                                                 </td>
                                             )}
@@ -684,15 +850,25 @@ export default function GestionGuardias() {
                     </div>
 
                     <div className="ggPager">
-                        <button className="ggPagerBtn" type="button" onClick={goPrev} disabled={page === 1 || loading}>
-                            <span className="material-icons-outlined">chevron_left</span>
+                        <button
+                            className="ggPagerBtn"
+                            type="button"
+                            onClick={goPrev}
+                            disabled={page === 1 || loading}
+                        >
+                            <span className="material-icons-outlined">
+                                chevron_left
+                            </span>
                             Anterior
                         </button>
 
                         <div className="ggPagerNums" aria-label="Páginas">
                             {pageButtons.map((p, idx) =>
                                 p === "..." ? (
-                                    <span className="ggPagerEllipsis" key={`e-${idx}`}>
+                                    <span
+                                        className="ggPagerEllipsis"
+                                        key={`e-${idx}`}
+                                    >
                                         …
                                     </span>
                                 ) : (
@@ -705,31 +881,48 @@ export default function GestionGuardias() {
                                     >
                                         {p}
                                     </button>
-                                )
+                                ),
                             )}
                         </div>
 
-                        <button className="ggPagerBtn" type="button" onClick={goNext} disabled={page === totalPages || loading}>
+                        <button
+                            className="ggPagerBtn"
+                            type="button"
+                            onClick={goNext}
+                            disabled={page === totalPages || loading}
+                        >
                             Siguiente
-                            <span className="material-icons-outlined">chevron_right</span>
+                            <span className="material-icons-outlined">
+                                chevron_right
+                            </span>
                         </button>
                     </div>
                 </div>
-
             </main>
 
             {/* MODAL ASIGNAR JEFE */}
             {isAssignOpen && (
-                <div className="modalOverlay" role="dialog" aria-modal="true" aria-label="Asignar Jefe de Guardia">
+                <div
+                    className="modalOverlay"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Asignar Jefe de Guardia"
+                >
                     <div className="modalSheet">
                         <div className="modalBody">
                             <div className="modalHeader">
                                 <div className="modalIcon">
-                                    <span className="material-icons">admin_panel_settings</span>
+                                    <span className="material-icons">
+                                        admin_panel_settings
+                                    </span>
                                 </div>
                                 <div>
-                                    <div className="modalTitle">Asignar jefe automáticamente</div>
-                                    <div className="modalSubtitle">Selecciona mes y año para el reparto.</div>
+                                    <div className="modalTitle">
+                                        Asignar jefe automáticamente
+                                    </div>
+                                    <div className="modalSubtitle">
+                                        Selecciona mes y año para el reparto.
+                                    </div>
                                 </div>
                             </div>
 
@@ -739,11 +932,16 @@ export default function GestionGuardias() {
                                     <select
                                         className="control"
                                         value={assignMonth}
-                                        onChange={(e) => setAssignMonth(e.target.value)}
+                                        onChange={(e) =>
+                                            setAssignMonth(e.target.value)
+                                        }
                                         disabled={assignLoading}
                                     >
                                         {months.map((m) => (
-                                            <option key={m.value} value={m.value}>
+                                            <option
+                                                key={m.value}
+                                                value={m.value}
+                                            >
                                                 {m.label} ({m.value})
                                             </option>
                                         ))}
@@ -755,7 +953,9 @@ export default function GestionGuardias() {
                                     <select
                                         className="control"
                                         value={assignYear}
-                                        onChange={(e) => setAssignYear(e.target.value)}
+                                        onChange={(e) =>
+                                            setAssignYear(e.target.value)
+                                        }
                                         disabled={assignLoading}
                                     >
                                         {years.map((y) => (
@@ -767,8 +967,14 @@ export default function GestionGuardias() {
                                 </label>
 
                                 {assignMsg && (
-                                    <div className="label" style={{ gridColumn: "1 / -1" }}>
-                                        <div className="control" style={{ background: "#F9FAFB" }}>
+                                    <div
+                                        className="label"
+                                        style={{ gridColumn: "1 / -1" }}
+                                    >
+                                        <div
+                                            className="control"
+                                            style={{ background: "#F9FAFB" }}
+                                        >
                                             {assignMsg}
                                         </div>
                                     </div>
@@ -777,10 +983,22 @@ export default function GestionGuardias() {
                         </div>
 
                         <div className="modalFooter">
-                            <button className="btnPrimary" onClick={handleAssignChiefs} type="button" disabled={assignLoading}>
-                                {assignLoading ? "Asignando..." : "Asignar automáticamente"}
+                            <button
+                                className="btnPrimary"
+                                onClick={handleAssignChiefs}
+                                type="button"
+                                disabled={assignLoading}
+                            >
+                                {assignLoading
+                                    ? "Asignando..."
+                                    : "Asignar automáticamente"}
                             </button>
-                            <button className="btnSecondary" onClick={() => setIsAssignOpen(false)} type="button" disabled={assignLoading}>
+                            <button
+                                className="btnSecondary"
+                                onClick={() => setIsAssignOpen(false)}
+                                type="button"
+                                disabled={assignLoading}
+                            >
                                 Cancelar
                             </button>
                         </div>
@@ -790,24 +1008,47 @@ export default function GestionGuardias() {
 
             {/* MODAL EDITAR/CREAR */}
             {editOpen && (
-                <div className="modalOverlay centered" role="dialog" aria-modal="true" aria-label={isCreating ? "Crear Guardia" : "Editar Guardia"}>
+                <div
+                    className="modalOverlay centered"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label={isCreating ? "Crear Guardia" : "Editar Guardia"}
+                >
                     <div className="modalSheet">
                         <form onSubmit={handleSaveEdit}>
                             <div className="modalBody">
                                 <div className="modalHeader">
                                     <div className="modalIcon">
-                                        <span className="material-icons">{isCreating ? "add_circle_outline" : "edit"}</span>
+                                        <span className="material-icons">
+                                            {isCreating
+                                                ? "add_circle_outline"
+                                                : "edit"}
+                                        </span>
                                     </div>
                                     <div>
-                                        <div className="modalTitle">{isCreating ? "Crear Guardia" : "Editar Guardia"}</div>
+                                        <div className="modalTitle">
+                                            {isCreating
+                                                ? "Crear Guardia"
+                                                : "Editar Guardia"}
+                                        </div>
                                         <div className="modalSubtitle">
-                                            {isCreating ? "Crea una nueva guardia completando los campos." : "Actualiza los campos de la guardia seleccionada."}
+                                            {isCreating
+                                                ? "Crea una nueva guardia completando los campos."
+                                                : "Actualiza los campos de la guardia seleccionada."}
                                         </div>
                                     </div>
                                 </div>
 
                                 {editError && (
-                                    <div style={{ background: "#fef2f2", border: "1px solid #fecaca", color: "#b91c1c", padding: 12, borderRadius: 10 }}>
+                                    <div
+                                        style={{
+                                            background: "#fef2f2",
+                                            border: "1px solid #fecaca",
+                                            color: "#b91c1c",
+                                            padding: 12,
+                                            borderRadius: 10,
+                                        }}
+                                    >
                                         {editError}
                                     </div>
                                 )}
@@ -819,7 +1060,12 @@ export default function GestionGuardias() {
                                             className="control"
                                             type="date"
                                             value={editForm.date}
-                                            onChange={(e) => setEditForm((p) => ({ ...p, date: e.target.value }))}
+                                            onChange={(e) =>
+                                                setEditForm((p) => ({
+                                                    ...p,
+                                                    date: e.target.value,
+                                                }))
+                                            }
                                             disabled={editSaving}
                                         />
                                     </label>
@@ -829,7 +1075,12 @@ export default function GestionGuardias() {
                                         <select
                                             className="control"
                                             value={editForm.duty_type}
-                                            onChange={(e) => setEditForm((p) => ({ ...p, duty_type: e.target.value }))}
+                                            onChange={(e) =>
+                                                setEditForm((p) => ({
+                                                    ...p,
+                                                    duty_type: e.target.value,
+                                                }))
+                                            }
                                             disabled={editSaving}
                                         >
                                             <option value="CA">CA</option>
@@ -843,12 +1094,21 @@ export default function GestionGuardias() {
                                         <select
                                             className="control"
                                             value={editForm.id_speciality}
-                                            onChange={(e) => setEditForm((p) => ({ ...p, id_speciality: e.target.value }))}
+                                            onChange={(e) =>
+                                                setEditForm((p) => ({
+                                                    ...p,
+                                                    id_speciality:
+                                                        e.target.value,
+                                                }))
+                                            }
                                             disabled={editSaving}
                                         >
                                             <option value="">—</option>
                                             {specialities.map((s) => (
-                                                <option key={s.id} value={String(s.id)}>
+                                                <option
+                                                    key={s.id}
+                                                    value={String(s.id)}
+                                                >
                                                     {s.name} (id: {s.id})
                                                 </option>
                                             ))}
@@ -860,30 +1120,54 @@ export default function GestionGuardias() {
                                         <select
                                             className="control"
                                             value={editForm.id_worker}
-                                            onChange={(e) => setEditForm((p) => ({ ...p, id_worker: e.target.value }))}
+                                            onChange={(e) =>
+                                                setEditForm((p) => ({
+                                                    ...p,
+                                                    id_worker: e.target.value,
+                                                }))
+                                            }
                                             disabled={editSaving}
                                         >
                                             <option value="">—</option>
                                             {workers.map((w) => (
-                                                <option key={w.id} value={String(w.id)}>
-                                                    {w.name ?? w.email ?? `ID ${w.id}`}
+                                                <option
+                                                    key={w.id}
+                                                    value={String(w.id)}
+                                                >
+                                                    {w.name ??
+                                                        w.email ??
+                                                        `ID ${w.id}`}
                                                 </option>
                                             ))}
                                         </select>
                                     </label>
 
-                                    <label className="label" style={{ gridColumn: "1 / -1" }}>
+                                    <label
+                                        className="label"
+                                        style={{ gridColumn: "1 / -1" }}
+                                    >
                                         Jefe (opcional)
                                         <select
                                             className="control"
                                             value={editForm.id_chief_worker}
-                                            onChange={(e) => setEditForm((p) => ({ ...p, id_chief_worker: e.target.value }))}
+                                            onChange={(e) =>
+                                                setEditForm((p) => ({
+                                                    ...p,
+                                                    id_chief_worker:
+                                                        e.target.value,
+                                                }))
+                                            }
                                             disabled={editSaving}
                                         >
                                             <option value="">—</option>
                                             {workers.map((w) => (
-                                                <option key={w.id} value={String(w.id)}>
-                                                    {w.name ?? w.email ?? `ID ${w.id}`}
+                                                <option
+                                                    key={w.id}
+                                                    value={String(w.id)}
+                                                >
+                                                    {w.name ??
+                                                        w.email ??
+                                                        `ID ${w.id}`}
                                                 </option>
                                             ))}
                                         </select>
@@ -892,8 +1176,18 @@ export default function GestionGuardias() {
                             </div>
 
                             <div className="modalFooter">
-                                <button className="btnPrimary" type="submit" disabled={editSaving}>
-                                    {editSaving ? (isCreating ? "Creando..." : "Guardando...") : (isCreating ? "Crear" : "Guardar")}
+                                <button
+                                    className="btnPrimary"
+                                    type="submit"
+                                    disabled={editSaving}
+                                >
+                                    {editSaving
+                                        ? isCreating
+                                            ? "Creando..."
+                                            : "Guardando..."
+                                        : isCreating
+                                          ? "Crear"
+                                          : "Guardar"}
                                 </button>
                                 <button
                                     className="btnSecondary"
@@ -916,24 +1210,53 @@ export default function GestionGuardias() {
 
             {/* MODAL BORRAR */}
             {deleteOpen && deleteRow && (
-                <div className="modalOverlay centered" role="dialog" aria-modal="true" aria-label="Confirmar borrado">
+                <div
+                    className="modalOverlay centered"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Confirmar borrado"
+                >
                     <div className="modalSheet">
                         <div className="modalBody">
                             <div className="modalHeader">
-                                <div className="modalIcon" style={{ background: "rgba(185, 28, 28, .12)", color: "#b91c1c" }}>
-                                    <span className="material-icons">delete_forever</span>
+                                <div
+                                    className="modalIcon"
+                                    style={{
+                                        background: "rgba(185, 28, 28, .12)",
+                                        color: "#b91c1c",
+                                    }}
+                                >
+                                    <span className="material-icons">
+                                        delete_forever
+                                    </span>
                                 </div>
                                 <div>
-                                    <div className="modalTitle">Eliminar guardia</div>
-                                    <div className="modalSubtitle">Esta acción no se puede deshacer.</div>
+                                    <div className="modalTitle">
+                                        Eliminar guardia
+                                    </div>
+                                    <div className="modalSubtitle">
+                                        Esta acción no se puede deshacer.
+                                    </div>
                                 </div>
                             </div>
 
                             <div className="formGrid">
-                                <div className="label" style={{ gridColumn: "1 / -1" }}>
+                                <div
+                                    className="label"
+                                    style={{ gridColumn: "1 / -1" }}
+                                >
                                     Resumen
-                                    <div className="control" style={{ background: "#F9FAFB" }}>
-                                        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                                    <div
+                                        className="control"
+                                        style={{ background: "#F9FAFB" }}
+                                    >
+                                        <div
+                                            style={{
+                                                display: "flex",
+                                                gap: 10,
+                                                flexWrap: "wrap",
+                                            }}
+                                        >
                                             <span>
                                                 <b>ID:</b> {deleteRow.id}
                                             </span>
@@ -941,10 +1264,12 @@ export default function GestionGuardias() {
                                                 <b>Fecha:</b> {deleteRow.date}
                                             </span>
                                             <span>
-                                                <b>Tipo:</b> {deleteRow.duty_type}
+                                                <b>Tipo:</b>{" "}
+                                                {deleteRow.duty_type}
                                             </span>
                                             <span>
-                                                <b>Trabajador:</b> {deleteRow.id_worker}
+                                                <b>Trabajador:</b>{" "}
+                                                {deleteRow.id_worker}
                                             </span>
                                         </div>
                                     </div>
@@ -971,10 +1296,21 @@ export default function GestionGuardias() {
                         </div>
 
                         <div className="modalFooter">
-                            <button type="button" onClick={confirmDelete} className="btnPrimary" style={{ background: "#b91c1c" }} disabled={deleteLoading}>
+                            <button
+                                type="button"
+                                onClick={confirmDelete}
+                                className="btnPrimary"
+                                style={{ background: "#b91c1c" }}
+                                disabled={deleteLoading}
+                            >
                                 {deleteLoading ? "Eliminando..." : "Eliminar"}
                             </button>
-                            <button type="button" onClick={cancelDelete} className="btnSecondary" disabled={deleteLoading}>
+                            <button
+                                type="button"
+                                onClick={cancelDelete}
+                                className="btnSecondary"
+                                disabled={deleteLoading}
+                            >
                                 Cancelar
                             </button>
                         </div>
@@ -984,16 +1320,33 @@ export default function GestionGuardias() {
 
             {/* MODAL GENERAR PDF */}
             {pdfOpen && (
-                <div className="modalOverlay centered" role="dialog" aria-modal="true" aria-label="Generar PDF">
+                <div
+                    className="modalOverlay centered"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Generar PDF"
+                >
                     <div className="modalSheet">
                         <div className="modalBody">
                             <div className="modalHeader">
-                                <div className="modalIcon" style={{ background: "rgba(185, 28, 28, .12)", color: "#b91c1c" }}>
-                                    <span className="material-icons">file_download</span>
+                                <div
+                                    className="modalIcon"
+                                    style={{
+                                        background: "rgba(185, 28, 28, .12)",
+                                        color: "#b91c1c",
+                                    }}
+                                >
+                                    <span className="material-icons">
+                                        file_download
+                                    </span>
                                 </div>
                                 <div>
-                                    <div className="modalTitle">Generar PDF</div>
-                                    <div className="modalSubtitle">Selecciona la fecha para generar el PDF</div>
+                                    <div className="modalTitle">
+                                        Generar PDF
+                                    </div>
+                                    <div className="modalSubtitle">
+                                        Selecciona la fecha para generar el PDF
+                                    </div>
                                 </div>
                             </div>
 
@@ -1003,11 +1356,27 @@ export default function GestionGuardias() {
                                     <select
                                         className="control"
                                         value={pdfDay}
-                                        onChange={(e) => setPdfDay(e.target.value)}
+                                        onChange={(e) =>
+                                            setPdfDay(e.target.value)
+                                        }
                                         disabled={pdfLoading}
                                     >
-                                        {Array.from({ length: getDaysInMonth(pdfMonth, pdfYear) }, (_, i) => i + 1).map((d) => (
-                                            <option key={d} value={String(d).padStart(2, "0")}>
+                                        {Array.from(
+                                            {
+                                                length: getDaysInMonth(
+                                                    pdfMonth,
+                                                    pdfYear,
+                                                ),
+                                            },
+                                            (_, i) => i + 1,
+                                        ).map((d) => (
+                                            <option
+                                                key={d}
+                                                value={String(d).padStart(
+                                                    2,
+                                                    "0",
+                                                )}
+                                            >
                                                 {String(d).padStart(2, "0")}
                                             </option>
                                         ))}
@@ -1019,26 +1388,48 @@ export default function GestionGuardias() {
                                     <select
                                         className="control"
                                         value={pdfMonth}
-                                        onChange={(e) => setPdfMonth(e.target.value)}
+                                        onChange={(e) =>
+                                            setPdfMonth(e.target.value)
+                                        }
                                         disabled={pdfLoading}
                                     >
-                                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((m) => (
-                                            <option key={m} value={String(m).padStart(2, "0")}>
+                                        {[
+                                            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+                                            12,
+                                        ].map((m) => (
+                                            <option
+                                                key={m}
+                                                value={String(m).padStart(
+                                                    2,
+                                                    "0",
+                                                )}
+                                            >
                                                 {String(m).padStart(2, "0")}
                                             </option>
                                         ))}
                                     </select>
                                 </label>
 
-                                <label className="label" style={{ gridColumn: "1 / -1" }}>
+                                <label
+                                    className="label"
+                                    style={{ gridColumn: "1 / -1" }}
+                                >
                                     Año
                                     <select
                                         className="control"
                                         value={pdfYear}
-                                        onChange={(e) => setPdfYear(e.target.value)}
+                                        onChange={(e) =>
+                                            setPdfYear(e.target.value)
+                                        }
                                         disabled={pdfLoading}
                                     >
-                                        {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - 5 + i).map((y) => (
+                                        {Array.from(
+                                            { length: 10 },
+                                            (_, i) =>
+                                                new Date().getFullYear() -
+                                                5 +
+                                                i,
+                                        ).map((y) => (
                                             <option key={y} value={String(y)}>
                                                 {y}
                                             </option>
@@ -1067,16 +1458,49 @@ export default function GestionGuardias() {
                         </div>
 
                         <div className="modalFooter">
-                            <button type="button" onClick={confirmGeneratePdf} className="btnPrimary" style={{ background: "#b91c1c" }} disabled={pdfLoading}>
+                            <button
+                                type="button"
+                                onClick={confirmGeneratePdf}
+                                className="btnPrimary"
+                                style={{ background: "#b91c1c" }}
+                                disabled={pdfLoading}
+                            >
                                 {pdfLoading ? "Generando..." : "Generar PDF"}
                             </button>
-                            <button type="button" onClick={cancelPdf} className="btnSecondary" disabled={pdfLoading}>
+                            <button
+                                type="button"
+                                onClick={cancelPdf}
+                                className="btnSecondary"
+                                disabled={pdfLoading}
+                            >
                                 Cancelar
                             </button>
                         </div>
                     </div>
                 </div>
             )}
+            <Joyride
+                steps={tourSteps}
+                run={runTour}
+                continuous
+                showProgress
+                showSkipButton
+                scrollOffset={150}
+                callback={handleJoyrideCallback}
+                styles={{
+                    options: {
+                        zIndex: 10000,
+                        primaryColor: "#007bff",
+                    },
+                }}
+                locale={{
+                    back: "Atrás",
+                    close: "Cerrar",
+                    last: "Finalizar",
+                    next: "Siguiente",
+                    skip: "Saltar",
+                }}
+            />
         </div>
     );
 }
