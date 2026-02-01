@@ -1485,6 +1485,7 @@ export default function GestionGuardias() {
                 continuous
                 showProgress
                 showSkipButton
+                scrollOffset={150}
                 callback={handleJoyrideCallback}
                 styles={{
                     options: {
