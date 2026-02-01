@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import AppLayout from "../layout/AppLayout";
 import ProtectedRoute from "../components/ProtectedRoute/ProtectedRoute";
 
+import Home from "../pages/Home";
 import Login from "../pages/Login";
 import HomeDashboard from "../pages/HomeDashboard";
 import Guardias from "../pages/GestionGuardias";
@@ -17,10 +18,11 @@ import Privacidad from "../pages/Privacidad";
 export default function AppRouter() {
     return (
         <Routes>
-            {/* Pública */}
+            {/* Público */}
+            <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
 
-            {/* Privadas con layout (Header + Sidebar + Footer si lo metes en AppLayout) */}
+            {/* Privadas con layout (Header + Sidebar + Footer) */}
             <Route element={<AppLayout />}>
                 <Route path="/home" element={<HomeDashboard />} />
                 <Route path="/perfil" element={<PerfilUsuario />} />
@@ -35,8 +37,7 @@ export default function AppRouter() {
             </Route>
 
             {/* Default */}
-            <Route path="/" element={<Navigate to="/Home" replace />} />
-            <Route path="*" element={<Navigate to="/Home" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
     );
 }

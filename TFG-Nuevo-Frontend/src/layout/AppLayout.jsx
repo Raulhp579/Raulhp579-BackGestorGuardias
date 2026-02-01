@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import "../styles/AppLayout.css";
 import Header from "../components/Header";
@@ -13,6 +13,8 @@ export default function AppLayout() {
         avatarUrl: "",
     });
     const navigate = useNavigate();
+    const location = useLocation();
+    const isHome = location.pathname === "/";
 
     // Cargar perfil del usuario al montar el componente
     useEffect(() => {
@@ -54,8 +56,9 @@ export default function AppLayout() {
 
     return (
         <div className="appShell">
-            {/* Sidebar */}
-            <aside className={`appSidebar ${open ? "open" : ""}`}>
+            {/* Sidebar - oculto en página Home */}
+            {!isHome && (
+                <aside className={`appSidebar ${open ? "open" : ""}`}>
                 <div className="appSidebarBrand">
                     <svg
                         className="appSidebarLogo"
@@ -136,6 +139,7 @@ export default function AppLayout() {
                     © 2026 SAS - Junta de Andalucía
                 </div>
             </aside>
+            )}
 
             {/* Derecha */}
             <div className="appBody">
