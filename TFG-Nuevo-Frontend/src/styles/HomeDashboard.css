@@ -1188,3 +1188,169 @@ body {
 .hdStats .hdStatCard:nth-child(3) {
     animation-delay: .19s;
 }
+
+/* ===== SEARCH OVERRIDES (PEGAR AL FINAL) ===== */
+
+.hdSearchWrap {
+    flex: 0 1 420px !important;
+    /* ✅ ya no se estira infinito */
+    min-width: 260px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+.hdSearchWrap .hdSearch {
+    position: relative !important;
+    width: 80% !important;
+    max-width: 420px !important;
+    /* ✅ menos ancho */
+}
+
+/* input (gana a cualquier regla duplicada) */
+.hdSearchWrap .hdSearchInput {
+    width: 100% !important;
+    height: 44px !important;
+    padding: 0 44px 0 44px !important;
+    /* ✅ hueco para lupa y X */
+    border-radius: 999px !important;
+    border: 1px solid rgba(0, 0, 0, .10) !important;
+    background: rgba(255, 255, 255, .85) !important;
+    backdrop-filter: blur(8px) !important;
+    outline: none !important;
+    font-size: 14px !important;
+    box-sizing: border-box !important;
+}
+
+.hdSearchWrap .hdSearchInput:focus {
+    border-color: rgba(46, 125, 77, .35) !important;
+    box-shadow: 0 0 0 3px rgba(46, 125, 77, .12) !important;
+}
+
+/* lupa izquierda (forzada dentro del input) */
+.hdSearchWrap .hdSearchIcon {
+    position: absolute !important;
+    left: 14px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    font-size: 20px !important;
+    color: rgba(31, 41, 55, .55) !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+    display: block !important;
+    z-index: 2 !important;
+}
+
+/* botón limpiar derecha (dentro del input) */
+.hdSearchWrap .hdSearchClear {
+    position: absolute !important;
+    right: 8px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    height: 34px !important;
+    width: 34px !important;
+    display: grid !important;
+    place-items: center !important;
+    border: none !important;
+    background: transparent !important;
+    cursor: pointer !important;
+    opacity: .75 !important;
+    border-radius: 999px !important;
+    z-index: 3 !important;
+}
+
+.hdSearchWrap .hdSearchClear:hover {
+    background: rgba(0, 0, 0, .06) !important;
+    opacity: 1 !important;
+}
+
+/* =========================
+   TOP BAR MOBILE (PRO)
+   ========================= */
+@media (max-width: 768px) {
+
+    /* Asegura layout tipo app */
+    .hdCalendarTop {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+    }
+
+    /* 1) Mes arriba */
+    .hdMonthPicker {
+        order: 1 !important;
+        width: 100% !important;
+        justify-content: flex-start !important;
+    }
+
+    /* 2) Acciones en columna (pero dentro ordenamos) */
+    .hdActions {
+        order: 2 !important;
+        width: 100% !important;
+
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+    }
+
+    /* 2a) Buscador: SIEMPRE debajo del mes, 100% */
+    .hdSearchWrap {
+        order: 1 !important;
+        width: 100% !important;
+        flex: 0 0 100% !important;
+        min-width: 0 !important;
+        justify-content: stretch !important;
+    }
+
+    .hdSearchWrap .hdSearch {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .hdSearchWrap .hdSearchInput {
+        width: 100% !important;
+        height: 44px !important;
+        border-radius: 14px !important;
+        /* look app */
+        font-size: 15px !important;
+        padding-left: 44px !important;
+    }
+
+    .hdSearchWrap .hdSearchIcon {
+        left: 14px !important;
+    }
+
+    /* 3) Botones: fila de 3 columnas iguales */
+    .hdActions>button.hdBtn {
+        order: 2 !important;
+        flex: 1 1 calc(33.333% - 7px) !important;
+        min-width: 0 !important;
+        height: 44px !important;
+        border-radius: 14px !important;
+        justify-content: center !important;
+        padding: 0 12px !important;
+        gap: 8px !important;
+    }
+
+    /* Evita que el texto se coma el icono */
+    .hdActions>button.hdBtn span {
+        white-space: nowrap !important;
+    }
+
+    /* Si tienes versiones cortas en móvil */
+    .hideOnMobile {
+        display: none !important;
+    }
+
+    .showOnMobile {
+        display: inline !important;
+    }
+
+    /* Si algún botón se ve “aplastado”, reducimos el icono un pelín */
+    .hdActions>button.hdBtn .material-icons-outlined {
+        font-size: 20px !important;
+    }
+}
