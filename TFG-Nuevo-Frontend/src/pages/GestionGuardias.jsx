@@ -10,7 +10,7 @@ import Joyride, { STATUS } from "react-joyride-react-19";
 export default function GestionGuardias() {
     const SKELETON_ROWS = 8;
 
-    // ✅ micro-animaciones filas (EDIT + DELETE)
+    // micro-animaciones filas (EDIT + DELETE)
     const [updatedRowId, setUpdatedRowId] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
 
