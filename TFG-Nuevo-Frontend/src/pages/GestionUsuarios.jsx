@@ -10,7 +10,9 @@ import {
     deleteAdmin as deleteAdminApi,
 } from "../services/userService";
 import { getSpecialities } from "../services/SpecialitiesService";
+
 import RowActions from "../components/RowActions/RowActions";
+import Joyride, { STATUS } from "react-joyride-react-19";
 import {
     deleteWorker as deleteWorkerApi,
     updateWorker,
@@ -39,6 +41,44 @@ export default function GestionUsuarios() {
     const [adminsError, setAdminsError] = useState("");
 
     const [specialities, setSpecialities] = useState([]);
+
+    // Joyride Steps
+    const [runTour, setRunTour] = useState(false);
+    const tourSteps = [
+        {
+            target: ".tour-view-toggle",
+            content:
+                "Alterna entre la vista de trabajadores y usuarios administradores.",
+            disableBeacon: true,
+        },
+        {
+            target: ".tour-import-users",
+            content: "Importa masivamente trabajadores desde un archivo Excel.",
+        },
+        {
+            target: ".tour-search-users",
+            content: "Busca usuarios o trabajadores por nombre.",
+        },
+    ];
+
+    useEffect(() => {
+        const tutorialDone = localStorage.getItem(
+            "gestionUsuariosTutorialDone",
+        );
+        if (!tutorialDone) {
+            setRunTour(true);
+        }
+    }, []);
+
+    const handleJoyrideCallback = (data) => {
+        const { status } = data;
+        const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
+
+        if (finishedStatuses.includes(status)) {
+            localStorage.setItem("gestionUsuariosTutorialDone", "true");
+            setRunTour(false);
+        }
+    };
 
     // import excel
     const fileInputRef = useRef(null);
@@ -566,7 +606,7 @@ export default function GestionUsuarios() {
     return (
         <div className="cdPage">
             <main className="cdMain">
-                <div className="cdToggle">
+                <div className="cdToggle tour-view-toggle">
                     <button
                         className={workersBtnClass}
                         type="button"
@@ -596,7 +636,7 @@ export default function GestionUsuarios() {
                                 onChange={onPickExcel}
                             />
                             <button
-                                className="cdBtnSecondary"
+                                className="cdBtnSecondary tour-import-users"
                                 type="button"
                                 disabled={importing}
                                 onClick={() => fileInputRef.current?.click()}
@@ -608,6 +648,35 @@ export default function GestionUsuarios() {
                                     ? "Importando..."
                                     : "Importar usuarios"}
                             </button>
+                            {/* TOAST de notificaciones */}
+                            {toast.visible && (
+                                <div
+                                    className={`cdToast ${toast.type === "error" ? "error" : "success"}`}
+                                >
+                                    {toast.message}
+                                </div>
+                            )}
+                            <Joyride
+                                steps={tourSteps}
+                                run={runTour}
+                                continuous
+                                showProgress
+                                showSkipButton
+                                callback={handleJoyrideCallback}
+                                styles={{
+                                    options: {
+                                        zIndex: 10000,
+                                        primaryColor: "#007bff",
+                                    },
+                                }}
+                                locale={{
+                                    back: "Atrás",
+                                    close: "Cerrar",
+                                    last: "Finalizar",
+                                    next: "Siguiente",
+                                    skip: "Saltar",
+                                }}
+                            />
                             {importMsg && (
                                 <p className="cdInfo" style={{ margin: 0 }}>
                                     {importMsg}
@@ -619,7 +688,7 @@ export default function GestionUsuarios() {
                             <span className="material-icons">search</span>
                             <input
                                 type="text"
-                                className="cdSearchInput"
+                                className="cdSearchInput tour-search-users"
                                 placeholder="Buscar por nombre..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
