@@ -8,6 +8,7 @@ import "./index.css";
 import { loadFullCalendarCss } from "./fullcalendarStyles";
 import { NotificationsProvider } from "./context/NotificationsContext";
 
+
 // Carga CSS de FullCalendar antes de renderizar
 loadFullCalendarCss();
 

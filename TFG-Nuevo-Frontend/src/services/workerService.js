@@ -36,3 +36,16 @@ export async function updateWorker(workerId, payload) {
 
     return await response.json();
 }
+
+export async function getWorkers() {
+    const response = await fetch(`${API_BASE_URL}/workers`, {
+        method: "GET",
+        headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+        throw new Error("Error al obtener los trabajadores");
+    }
+
+    return await response.json();
+}
