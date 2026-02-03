@@ -180,7 +180,7 @@ export default function HomeDashboard() {
         setEventsError("");
 
         try {
-            const data = await callGetDuties(start, end, debouncedName);
+            const data = await callGetDuties(start, end);
             const arr = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
             setEvents(arr.map(mapDutyToEvent));
         } catch (e) {
@@ -190,7 +190,7 @@ export default function HomeDashboard() {
         } finally {
             setEventsLoading(false);
         }
-    }, [debouncedName]);
+    }, []);
 
     useEffect(() => {
         syncTitle();
@@ -201,7 +201,7 @@ export default function HomeDashboard() {
 
     useEffect(() => {
         loadDutiesForCurrentView();
-    }, [debouncedName, loadDutiesForCurrentView]);
+    }, [loadDutiesForCurrentView]);
 
     // Filtros
     const [filterOpen, setFilterOpen] = useState(false);

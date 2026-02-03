@@ -475,10 +475,10 @@ body {
 
 /* Alineación y mismo tamaño para los 3 botones del header del calendario */
 .hdActions {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    display: flex;
     gap: 14px;
     align-items: stretch;
+    justify-content: flex-end;
 }
 
 .hdBtn {
