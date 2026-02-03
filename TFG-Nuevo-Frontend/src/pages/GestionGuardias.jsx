@@ -1,13 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import "../styles/GestionGuardias.css";
 import { getDuties, updateDuty, deleteDuty } from "../services/DutyService";
 import { assignChiefs, getWorkers, isUserAdmin } from "../services/userService";
 import { getSpecialities } from "../services/SpecialitiesService";
+import { importExcel } from "../services/importExcelService";
+import { useNotifications } from "../context/NotificationsContext";
 
 import RowActions from "../components/RowActions/RowActions";
 import Joyride, { STATUS } from "react-joyride-react-19";
 
 export default function GestionGuardias() {
+    const { addNotification } = useNotifications();
     const SKELETON_ROWS = 8;
 
     // micro-animaciones filas (EDIT + DELETE)
@@ -31,6 +34,24 @@ export default function GestionGuardias() {
     // paginación
     const [page, setPage] = useState(1);
     const pageSize = 10;
+
+    // ✅ estados que usas en el modal de importación
+    const [importOpen, setImportOpen] = useState(false);
+    const [specialitiesLoading, setSpecialitiesLoading] = useState(false);
+    const [specialitiesError, setSpecialitiesError] = useState("");
+
+    const [idSpeciality, setIdSpeciality] = useState("");
+    const [importMonth, setImportMonth] = useState("01");
+    const [importYear, setImportYear] = useState(
+        String(new Date().getFullYear()),
+    );
+
+    const [excelFile, setExcelFile] = useState(null);
+    const fileInputRef = useRef(null);
+
+    const [isDragging, setIsDragging] = useState(false);
+    const [importUploading, setImportUploading] = useState(false);
+    const [importMsg, setImportMsg] = useState("");
 
     // modal asignar jefes
     const [isAssignOpen, setIsAssignOpen] = useState(false);
@@ -120,6 +141,11 @@ export default function GestionGuardias() {
             target: ".tour-generate-pdf",
             content: "Genera y descarga un PDF con la plantilla del día.",
         },
+        {
+            target: ".tour-import-excel",
+            content:
+                "Importa guardias desde un archivo Excel. Asegúrate de seleccionar el mes, año y especialidad correctos.",
+        },
     ];
 
     useEffect(() => {
@@ -140,6 +166,157 @@ export default function GestionGuardias() {
             setRunTour(false);
         }
     };
+
+    // Helpers Excel
+    function isExcelFile(file) {
+        if (!file) return false;
+
+        const validExtensions = [".xls", ".xlsx"];
+        const hasValidExtension = validExtensions.some(
+            (ext) => file.name && file.name.toLowerCase().endsWith(ext),
+        );
+
+        const validMimeTypes = [
+            "application/vnd.ms-excel",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/vnd.ms-excel.sheet.macroEnabled.12",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.template",
+        ];
+        const hasValidMimeType = validMimeTypes.includes(file.type);
+
+        return hasValidExtension || hasValidMimeType;
+    }
+
+    async function importDutysExcel({ file, year, month, idSpeciality }) {
+        if (!file) return setImportMsg("No se ha seleccionado ningún archivo");
+        if (!year || !month || !idSpeciality)
+            return setImportMsg(
+                "Por favor, seleccione año, mes y especialidad",
+            );
+
+        try {
+            setImportMsg("Procesando archivo...");
+
+            await importExcel({ file, year, month, idSpeciality });
+
+            setImportMsg("Archivo importado correctamente");
+            setExcelFile(null);
+
+            await reloadDuties();
+
+            addNotification(
+                `Se han importado guardias desde Excel (${new Date().toLocaleTimeString()}).`,
+            );
+        } catch (error) {
+            setImportMsg(error?.message || "Error al importar el archivo");
+        }
+    }
+
+    async function openImportModal() {
+        setImportMonth(String(new Date().getMonth() + 1).padStart(2, "0"));
+        setImportYear(String(new Date().getFullYear()));
+
+        setImportMsg("");
+        setExcelFile(null);
+        setIdSpeciality("");
+        setImportOpen(true);
+
+        setSpecialitiesLoading(true);
+        setSpecialitiesError("");
+
+        try {
+            const data = await getSpecialities();
+            const arr = Array.isArray(data)
+                ? data
+                : Array.isArray(data?.data)
+                  ? data.data
+                  : [];
+            setSpecialities(arr);
+        } catch (e) {
+            console.error(e);
+            setSpecialities([]);
+            setSpecialitiesError("No se pudieron cargar las especialidades.");
+        } finally {
+            setSpecialitiesLoading(false);
+        }
+    }
+
+    function closeImportModal() {
+        setImportOpen(false);
+        setIsDragging(false);
+    }
+
+    function onPickExcelFile(e) {
+        const file = e.target.files?.[0];
+        e.target.value = "";
+        if (!file) return;
+
+        if (!isExcelFile(file)) {
+            setImportMsg("Solo se permiten archivos .xls o .xlsx");
+            setExcelFile(null);
+            return;
+        }
+
+        setExcelFile(file);
+        setImportMsg("");
+    }
+
+    function onDragOver(e) {
+        e.preventDefault();
+        setIsDragging(true);
+    }
+
+    function onDragLeave(e) {
+        e.preventDefault();
+        setIsDragging(false);
+    }
+
+    function onDrop(e) {
+        e.preventDefault();
+        setIsDragging(false);
+
+        const file = e.dataTransfer.files?.[0];
+        if (!file) return;
+
+        if (!isExcelFile(file)) {
+            setImportMsg("Solo se permiten archivos .xls o .xlsx");
+            setExcelFile(null);
+            return;
+        }
+
+        setExcelFile(file);
+        setImportMsg("");
+    }
+
+    async function submitImport() {
+        if (!excelFile) return setImportMsg("Debes adjuntar un archivo Excel.");
+        if (!isExcelFile(excelFile))
+            return setImportMsg("Solo se permiten archivos .xls o .xlsx");
+        if (!idSpeciality)
+            return setImportMsg("Debes seleccionar una especialidad.");
+        if (!importYear || !importMonth)
+            return setImportMsg("Debes seleccionar año y mes.");
+
+        const maxMB = 10;
+        if (excelFile.size > maxMB * 1024 * 1024)
+            return setImportMsg(`El archivo supera ${maxMB}MB`);
+
+        setImportUploading(true);
+        setImportMsg("");
+
+        try {
+            await importDutysExcel({
+                file: excelFile,
+                year: importYear,
+                month: importMonth,
+                idSpeciality: idSpeciality,
+            });
+        } catch (e) {
+            setImportMsg(`Error al subir: ${e.message}`);
+        } finally {
+            setImportUploading(false);
+        }
+    }
 
     const years = useMemo(() => {
         const now = new Date().getFullYear();
@@ -611,6 +788,17 @@ export default function GestionGuardias() {
                                 </span>
                                 <span>Generar PDF</span>
                             </button>
+                            <button
+                                className="ggCtaBtn tour-import-excel"
+                                type="button"
+                                onClick={openImportModal}
+                                disabled={loading}
+                            >
+                                <span className="material-icons">
+                                    table_view
+                                </span>
+                                <span>Importar Excel</span>
+                            </button>
                         </div>
                     )}
 
@@ -1000,6 +1188,195 @@ export default function GestionGuardias() {
                                 disabled={assignLoading}
                             >
                                 Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* MODAL IMPORTAR EXCEL */}
+            {importOpen && (
+                <div
+                    className="modalOverlay"
+                    role="dialog"
+                    aria-modal="true"
+                >
+                    <div className="modalSheet">
+                        <div className="modalBody">
+                            <div className="modalHeader">
+                                <div className="modalIcon">
+                                    <span className="material-icons">
+                                        table_view
+                                    </span>
+                                </div>
+                                <div>
+                                    <div className="modalTitle">
+                                        Importar guardias desde Excel
+                                    </div>
+                                    <div className="modalSubtitle">
+                                        Aquí puedes importar las guardias desde un archivo Excel. Asegúrate de seleccionar el mes, año y especialidad correctos.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="formGrid">
+                                <label className="label" style={{ gridColumn: "1 / -1" }}>
+                                    <span>Especialidad</span>
+
+                                    {specialitiesLoading ? (
+                                        <div className="control">
+                                            Cargando especialidades...
+                                        </div>
+                                    ) : specialitiesError ? (
+                                        <div className="control">
+                                            {specialitiesError}
+                                        </div>
+                                    ) : (
+                                        <select
+                                            className="control"
+                                            value={idSpeciality}
+                                            onChange={(e) =>
+                                                setIdSpeciality(
+                                                    e.target.value,
+                                                )
+                                            }
+                                        >
+                                            <option value="">
+                                                -- Selecciona una
+                                                especialidad --
+                                            </option>
+                                            {specialities.map((s) => (
+                                                <option
+                                                    key={s.id}
+                                                    value={String(s.id)}
+                                                >
+                                                    {s.name} (id: {s.id}
+                                                    )
+                                                </option>
+                                            ))}
+                                        </select>
+                                    )}
+                                </label>
+
+                                <label className="label">
+                                    <span>Mes</span>
+                                    <select
+                                        className="control"
+                                        value={importMonth}
+                                        onChange={(e) =>
+                                            setImportMonth(
+                                                e.target.value,
+                                            )
+                                        }
+                                    >
+                                        {months.map((m) => (
+                                            <option
+                                                key={m.value}
+                                                value={m.value}
+                                            >
+                                                {m.label} ({m.value}
+                                                )
+                                            </option>
+                                        ))}
+                                    </select>
+                                </label>
+
+                                <label className="label">
+                                    <span>Año</span>
+                                    <select
+                                        className="control"
+                                        value={importYear}
+                                        onChange={(e) =>
+                                            setImportYear(
+                                                e.target.value,
+                                            )
+                                        }
+                                    >
+                                        {years.map((y) => (
+                                            <option
+                                                key={y}
+                                                value={y}
+                                            >
+                                                {y}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </label>
+
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                    style={{ display: "none" }}
+                                    onChange={onPickExcelFile}
+                                />
+
+                                <div
+                                    onDragOver={onDragOver}
+                                    onDragLeave={onDragLeave}
+                                    onDrop={onDrop}
+                                    onClick={() =>
+                                        fileInputRef.current?.click()
+                                    }
+                                    style={{
+                                        gridColumn: "1 / -1",
+                                        marginTop: 12,
+                                        border: `2px dashed ${isDragging ? "#888" : "#ccc"}`,
+                                        borderRadius: 12,
+                                        padding: 16,
+                                        cursor: "pointer",
+                                        textAlign: "center",
+                                        userSelect: "none",
+                                    }}
+                                    title="Arrastra Excel o haz clic para seleccionarlo"
+                                >
+                                    <div style={{ fontWeight: 600 }}>
+                                        Arrastra aquí tu Excel (.xls /
+                                        .xlsx)
+                                    </div>
+                                    <div
+                                        style={{
+                                            marginTop: 6,
+                                            opacity: 0.8,
+                                        }}
+                                    >
+                                        o haz clic para seleccionarlo
+                                    </div>
+
+                                    {excelFile && (
+                                        <div style={{ marginTop: 10 }}>
+                                            Archivo:{" "}
+                                            <b>{excelFile.name}</b>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {importMsg && (
+                                    <div style={{ marginTop: 12, gridColumn: "1 / -1" }}>
+                                        {importMsg}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="modalFooter">
+                            <button
+                                className="btnSecondary"
+                                type="button"
+                                onClick={closeImportModal}
+                            >
+                                Cancelar
+                            </button>
+
+                            <button
+                                className="btnPrimary"
+                                type="button"
+                                disabled={importUploading}
+                                onClick={submitImport}
+                            >
+                                {importUploading
+                                    ? "Subiendo..."
+                                    : "Importar"}
                             </button>
                         </div>
                     </div>
