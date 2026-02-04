@@ -64,6 +64,16 @@ export default function HomeDashboard() {
     // ✅ NUEVO: rango visible actual (para stats del mes visible)
     const [viewRange, setViewRange] = useState({ start: "", end: "" });
 
+    // ✅ Estados faltantes (añadidos para evitar errores de referencia)
+    const [searchName, setSearchName] = useState("");
+    const [workers, setWorkers] = useState([]);
+    const [workersLoading, setWorkersLoading] = useState(false);
+    const [workersError, setWorkersError] = useState("");
+
+    function openImportModal() {
+        console.log("Import modal placeholder");
+    }
+
     function getMonthYearFromCalendar() {
         const api = calendarRef.current?.getApi();
         const d = api?.getDate() ?? new Date();
@@ -338,72 +348,99 @@ export default function HomeDashboard() {
                         </button>
                     </div>
 
-                    <div className="hdActions" style={{ position: "relative" }}>
-                        {/* BUTTON HELP TOUR */}
+                    <div className="hdSearchWrap" role="search" aria-label="Buscar por nombre">
+                        <div className="hdSearch">
+                            <span className="material-icons-outlined hdSearchIcon" aria-hidden="true">
+                                search
+                            </span>
 
-                        {/* NUEVA GUARDIA */}
-                        <button className="hdBtn primary hdBtnSm tour-new-guard" type="button" onClick={() => openNewGuardiaModal()}>
-                            <span className="material-icons-outlined">add</span>
-                            <span className="hideOnMobile">Nueva Guardia</span>
-                            <span className="showOnMobile">Crear</span>
-                        </button>
+                            <input
+                                className="hdSearchInput"
+                                type="text"
+                                placeholder="Buscar por nombre..."
+                                value={searchName}
+                                onChange={(e) => setSearchName(e.target.value)}
+                            />
 
-                        {/* FILTROS */}
-                        <button
-                            className="hdBtn light hdBtnSm tour-filters"
-                            type="button"
-                            onClick={() => setFilterOpen((v) => !v)}
-                            aria-expanded={filterOpen}
-                        >
-                            <span className="material-icons-outlined">filter_list</span>
-                            Filtros
-                        </button>
-
-                        {filterOpen && (
-                            <div className="hdFilterMenu" role="menu">
+                            {searchName && (
                                 <button
                                     type="button"
-                                    className={`hdFilterItem ${filterType === "ALL" ? "active" : ""}`}
-                                    onClick={() => {
-                                        setFilterType("ALL");
-                                        setFilterOpen(false);
-                                    }}
+                                    className="hdSearchClear"
+                                    onClick={() => setSearchName("")}
+                                    aria-label="Limpiar búsqueda"
+                                    title="Limpiar"
                                 >
-                                    Todos
+                                    <span className="material-icons-outlined">close</span>
                                 </button>
-                                <button
-                                    type="button"
-                                    className={`hdFilterItem ${filterType === "CA" ? "active" : ""}`}
-                                    onClick={() => {
-                                        setFilterType("CA");
-                                        setFilterOpen(false);
-                                    }}
-                                >
-                                    Continuidad (CA)
-                                </button>
-                                <button
-                                    type="button"
-                                    className={`hdFilterItem ${filterType === "PF" ? "active" : ""}`}
-                                    onClick={() => {
-                                        setFilterType("PF");
-                                        setFilterOpen(false);
-                                    }}
-                                >
-                                    Presencia Física (PF)
-                                </button>
-                                <button
-                                    type="button"
-                                    className={`hdFilterItem ${filterType === "LOC" ? "active" : ""}`}
-                                    onClick={() => {
-                                        setFilterType("LOC");
-                                        setFilterOpen(false);
-                                    }}
-                                >
-                                    Localizada (LOC)
-                                </button>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
+
+
+
+
+                    {/* NUEVA GUARDIA */}
+                    <button className="hdBtn primary hdBtnSm tour-new-guard" type="button" onClick={() => openNewGuardiaModal()}>
+                        <span className="material-icons-outlined">add</span>
+                        <span className="hideOnMobile">Nueva Guardia</span>
+                        <span className="showOnMobile">Crear</span>
+                    </button>
+
+                    {/* FILTROS */}
+                    <button
+                        className="hdBtn light hdBtnSm tour-filters"
+                        type="button"
+                        onClick={() => setFilterOpen((v) => !v)}
+                        aria-expanded={filterOpen}
+                    >
+                        <span className="material-icons-outlined">filter_list</span>
+                        Filtros
+                    </button>
+
+                    {filterOpen && (
+                        <div className="hdFilterMenu" role="menu">
+                            <button
+                                type="button"
+                                className={`hdFilterItem ${filterType === "ALL" ? "active" : ""}`}
+                                onClick={() => {
+                                    setFilterType("ALL");
+                                    setFilterOpen(false);
+                                }}
+                            >
+                                Todos
+                            </button>
+                            <button
+                                type="button"
+                                className={`hdFilterItem ${filterType === "CA" ? "active" : ""}`}
+                                onClick={() => {
+                                    setFilterType("CA");
+                                    setFilterOpen(false);
+                                }}
+                            >
+                                Continuidad (CA)
+                            </button>
+                            <button
+                                type="button"
+                                className={`hdFilterItem ${filterType === "PF" ? "active" : ""}`}
+                                onClick={() => {
+                                    setFilterType("PF");
+                                    setFilterOpen(false);
+                                }}
+                            >
+                                Presencia Física (PF)
+                            </button>
+                            <button
+                                type="button"
+                                className={`hdFilterItem ${filterType === "LOC" ? "active" : ""}`}
+                                onClick={() => {
+                                    setFilterType("LOC");
+                                    setFilterOpen(false);
+                                }}
+                            >
+                                Localizada (LOC)
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 {(eventsLoading || eventsError) && (
@@ -454,6 +491,7 @@ export default function HomeDashboard() {
                         />
                     </div>
                 </div>
+
             </section>
 
             {/* MODAL NUEVA GUARDIA */}
