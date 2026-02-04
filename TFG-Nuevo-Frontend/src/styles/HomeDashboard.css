@@ -1192,7 +1192,7 @@ body {
 /* ===== SEARCH OVERRIDES (PEGAR AL FINAL) ===== */
 
 .hdSearchWrap {
-    flex: 0 1 420px !important;
+    flex: 1 !important;
     /* ✅ ya no se estira infinito */
     min-width: 260px !important;
     display: flex !important;
