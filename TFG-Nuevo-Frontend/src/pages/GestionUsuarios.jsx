@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/GestionUsuarios.css";
 import "../styles/AppLayout.css";
 import "../styles/GestionUsuarios.extra.css";
@@ -19,6 +20,7 @@ import {
 } from "../services/workerService";
 
 export default function GestionUsuarios() {
+    const navigate = useNavigate();
     const SKELETON_ROWS = 8;
 
     // ver trabajadores y admins
@@ -46,37 +48,38 @@ export default function GestionUsuarios() {
     const [runTour, setRunTour] = useState(false);
     const tourSteps = [
         {
-            target: ".tour-view-toggle",
-            content:
-                "Alterna entre la vista de trabajadores y usuarios administradores.",
-            disableBeacon: true,
-        },
-        {
             target: ".tour-import-users",
-            content: "Importa masivamente trabajadores desde un archivo Excel.",
-        },
-        {
-            target: ".tour-search-users",
-            content: "Busca usuarios o trabajadores por nombre.",
+            content:
+                "Paso 1: Importa masivamente los trabajadores desde un archivo Excel.",
+            disableBeacon: true,
         },
     ];
 
     useEffect(() => {
-        const tutorialDone = localStorage.getItem(
-            "gestionUsuariosTutorialDone",
-        );
-        if (!tutorialDone) {
+        // En este paso global, si no hay flag de terminado global, iniciamos
+        const globalDone = localStorage.getItem("global_tutorial_done");
+        if (!globalDone) {
             setRunTour(true);
         }
     }, []);
 
     const handleJoyrideCallback = (data) => {
         const { status } = data;
-        const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
+        const finishedStatuses = [STATUS.FINISHED]; // Solo si finaliza (botón Siguiente)
+
+        // Si el usuario "salta" (skip), se considera que abandona el tutorial global
+        if (status === STATUS.SKIPPED) {
+            setRunTour(false);
+            localStorage.setItem("global_tutorial_done", "true");
+            return;
+        }
 
         if (finishedStatuses.includes(status)) {
-            localStorage.setItem("gestionUsuariosTutorialDone", "true");
+            // Pasamos a la fase 2: Guardias
+            localStorage.setItem("tutorial_phase", "PHASE_GUARDS");
             setRunTour(false);
+            // Navegar a la siguiente pantalla (ruta correcta ver AppRouter.jsx)
+            navigate("/guardias");
         }
     };
 
@@ -661,7 +664,7 @@ export default function GestionUsuarios() {
                                 run={runTour}
                                 continuous
                                 showProgress
-                                showSkipButton
+                                showSkipButton={true}
                                 scrollOffset={150}
                                 callback={handleJoyrideCallback}
                                 styles={{
@@ -673,9 +676,9 @@ export default function GestionUsuarios() {
                                 locale={{
                                     back: "Atrás",
                                     close: "Cerrar",
-                                    last: "Finalizar",
+                                    last: "Siguiente: Explicar Guardias",
                                     next: "Siguiente",
-                                    skip: "Saltar",
+                                    skip: "Saltar tutorial",
                                 }}
                             />
                             {importMsg && (

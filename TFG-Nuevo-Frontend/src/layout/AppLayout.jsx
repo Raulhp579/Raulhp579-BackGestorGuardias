@@ -43,6 +43,34 @@ export default function AppLayout() {
         loadUser();
     }, [navigate]);
 
+    // Redirección forzada para el tutorial global
+    useEffect(() => {
+        const globalDone = localStorage.getItem("global_tutorial_done");
+
+        if (!globalDone) {
+            const phase = localStorage.getItem("tutorial_phase");
+            const pathname = location.pathname;
+
+            // Lógica de redirección según la fase
+            if (!phase) {
+                // Fase 1: Usuarios (Inicio)
+                if (pathname !== "/usuarios") {
+                    navigate("/usuarios");
+                }
+            } else if (phase === "PHASE_GUARDS") {
+                // Fase 2: Guardias
+                if (pathname !== "/guardias") {
+                    navigate("/guardias");
+                }
+            } else if (phase === "PHASE_HOME") {
+                // Fase 3: Home
+                if (pathname !== "/home") {
+                    navigate("/home");
+                }
+            }
+        }
+    }, [location.pathname, navigate]);
+
     // logout
     function logout() {
         localStorage.removeItem("token");
@@ -59,86 +87,92 @@ export default function AppLayout() {
             {/* Sidebar - oculto en página Home */}
             {!isHome && (
                 <aside className={`appSidebar ${open ? "open" : ""}`}>
-                <div className="appSidebarBrand">
-                    <svg
-                        className="appSidebarLogo"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                    >
-                        <path d="M12 2L2 22h20L12 2zm0 3.8L18.4 20H5.6L12 5.8z"></path>
-                    </svg>
+                    <div className="appSidebarBrand">
+                        <svg
+                            className="appSidebarLogo"
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                        >
+                            <path d="M12 2L2 22h20L12 2zm0 3.8L18.4 20H5.6L12 5.8z"></path>
+                        </svg>
 
-                    <h1 className="appSidebarTitle">
-                        Junta de <br /> Andalucía
-                    </h1>
+                        <h1 className="appSidebarTitle">
+                            Junta de <br /> Andalucía
+                        </h1>
 
-                    <button
-                        className="appIconBtn ghost closeOnlyMobile"
-                        onClick={closeMenu}
-                        aria-label="Cerrar menú"
-                        type="button"
-                    >
-                        <span className="material-icons-outlined">close</span>
-                    </button>
-                </div>
+                        <button
+                            className="appIconBtn ghost closeOnlyMobile"
+                            onClick={closeMenu}
+                            aria-label="Cerrar menú"
+                            type="button"
+                        >
+                            <span className="material-icons-outlined">
+                                close
+                            </span>
+                        </button>
+                    </div>
 
-                <nav className="appNav">
-                    <NavLink
-                        to="/home"
-                        onClick={closeMenu}
-                        className={({ isActive }) =>
-                            `appNavItem ${isActive ? "active" : ""}`
-                        }
-                    >
-                        <span className="material-icons-outlined">home</span>
-                        <span>Inicio</span>
-                    </NavLink>
+                    <nav className="appNav">
+                        <NavLink
+                            to="/home"
+                            onClick={closeMenu}
+                            className={({ isActive }) =>
+                                `appNavItem ${isActive ? "active" : ""}`
+                            }
+                        >
+                            <span className="material-icons-outlined">
+                                home
+                            </span>
+                            <span>Inicio</span>
+                        </NavLink>
 
-                    <NavLink
-                        to="/guardias"
-                        onClick={closeMenu}
-                        className={({ isActive }) =>
-                            `appNavItem ${isActive ? "active" : ""}`
-                        }
-                    >
-                        <span className="material-icons-outlined">
-                            calendar_month
-                        </span>
-                        <span>Gestión de Guardias</span>
-                    </NavLink>
+                        <NavLink
+                            to="/guardias"
+                            onClick={closeMenu}
+                            className={({ isActive }) =>
+                                `appNavItem ${isActive ? "active" : ""}`
+                            }
+                        >
+                            <span className="material-icons-outlined">
+                                calendar_month
+                            </span>
+                            <span>Gestión de Guardias</span>
+                        </NavLink>
 
-                    <NavLink
-                        to="/usuarios"
-                        onClick={closeMenu}
-                        className={({ isActive }) =>
-                            `appNavItem ${isActive ? "active" : ""}`
-                        }
-                    >
-                        <span className="material-icons-outlined">
-                            calculate
-                        </span>
-                        <span>Administrar usuarios</span>
-                    </NavLink>
+                        <NavLink
+                            to="/usuarios"
+                            onClick={closeMenu}
+                            className={({ isActive }) =>
+                                `appNavItem ${isActive ? "active" : ""}`
+                            }
+                        >
+                            <span className="material-icons-outlined">
+                                calculate
+                            </span>
+                            <span>Administrar usuarios</span>
+                        </NavLink>
 
-                    <div className="appNavDivider" />
+                        <div className="appNavDivider" />
 
-                    <button
-                        className="appNavItem danger"
-                        onClick={() => {
-                            closeMenu();
-                            logout();
-                        }}
-                        type="button"
-                    >
-                        <span className="material-icons-outlined">logout</span>
-                        <span>Cerrar Sesión</span>
-                    </button>
-                </nav>
+                        <button
+                            className="appNavItem danger"
+                            onClick={() => {
+                                closeMenu();
+                                logout();
+                            }}
+                            type="button"
+                        >
+                            <span className="material-icons-outlined">
+                                logout
+                            </span>
+                            <span>Cerrar Sesión</span>
+                        </button>
+                    </nav>
 
-                <div className="appSidebarFooter">
-                    © 2026 SAS - Junta de Andalucía
-                </div>
-            </aside>
+                    <div className="appSidebarFooter">
+                        © 2026 SAS - Junta de Andalucía
+                    </div>
+                </aside>
             )}
 
             {/* Derecha */}

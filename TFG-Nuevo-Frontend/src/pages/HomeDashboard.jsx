@@ -45,7 +45,9 @@ export default function HomeDashboard() {
 
     const [idSpeciality, setIdSpeciality] = useState("");
     const [importMonth, setImportMonth] = useState("01");
-    const [importYear, setImportYear] = useState(String(new Date().getFullYear()));
+    const [importYear, setImportYear] = useState(
+        String(new Date().getFullYear()),
+    );
 
     const [excelFile, setExcelFile] = useState(null);
     const fileInputRef = useRef(null);
@@ -80,7 +82,7 @@ export default function HomeDashboard() {
             { value: "11", label: "Noviembre" },
             { value: "12", label: "Diciembre" },
         ],
-        []
+        [],
     );
 
     const years = useMemo(() => {
@@ -113,7 +115,11 @@ export default function HomeDashboard() {
         (async () => {
             try {
                 const data = await getSpecialities();
-                const arr = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+                const arr = Array.isArray(data)
+                    ? data
+                    : Array.isArray(data?.data)
+                      ? data.data
+                      : [];
                 if (alive) setSpecialities(arr);
             } catch (e) {
                 console.error(e);
@@ -136,7 +142,11 @@ export default function HomeDashboard() {
 
             try {
                 const data = await getWorkers();
-                const arr = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+                const arr = Array.isArray(data)
+                    ? data
+                    : Array.isArray(data?.data)
+                      ? data.data
+                      : [];
                 if (alive) setWorkers(arr);
             } catch (e) {
                 console.error(e);
@@ -160,7 +170,7 @@ export default function HomeDashboard() {
 
         const validExtensions = [".xls", ".xlsx"];
         const hasValidExtension = validExtensions.some(
-            (ext) => file.name && file.name.toLowerCase().endsWith(ext)
+            (ext) => file.name && file.name.toLowerCase().endsWith(ext),
         );
 
         const validMimeTypes = [
@@ -176,7 +186,10 @@ export default function HomeDashboard() {
 
     async function importDutysExcel({ file, year, month, idSpeciality }) {
         if (!file) return setImportMsg("No se ha seleccionado ningún archivo");
-        if (!year || !month || !idSpeciality) return setImportMsg("Por favor, seleccione año, mes y especialidad");
+        if (!year || !month || !idSpeciality)
+            return setImportMsg(
+                "Por favor, seleccione año, mes y especialidad",
+            );
 
         try {
             setImportMsg("Procesando archivo...");
@@ -188,7 +201,9 @@ export default function HomeDashboard() {
 
             await loadDutiesForCurrentView();
 
-            addNotification(`Se han importado guardias desde Excel (${new Date().toLocaleTimeString()}).`);
+            addNotification(
+                `Se han importado guardias desde Excel (${new Date().toLocaleTimeString()}).`,
+            );
         } catch (error) {
             setImportMsg(error?.message || "Error al importar el archivo");
         }
@@ -218,24 +233,53 @@ export default function HomeDashboard() {
     // ✅ helper: eventos dentro del rango visible
     const eventsInView = useMemo(() => {
         if (!viewRange.start || !viewRange.end) return events;
-        return events.filter((e) => e.start && e.start >= viewRange.start && e.start < viewRange.end);
+        return events.filter(
+            (e) =>
+                e.start &&
+                e.start >= viewRange.start &&
+                e.start < viewRange.end,
+        );
     }, [events, viewRange]);
 
     // ✅ STATS usando solo el mes visible (rango visible)
     const stats = useMemo(() => {
         const totalVisible = eventsInView.length;
-        const continuidadVisible = eventsInView.filter((e) => e.extendedProps?.type === "CA").length;
+        const continuidadVisible = eventsInView.filter(
+            (e) => e.extendedProps?.type === "CA",
+        ).length;
         const alertas = events.filter((e) => !e.start).length;
 
         return [
-            { title: "Continuidad Asistida", value: String(continuidadVisible), note: "En el mes visible", icon: "people", accent: "blue" },
-            { title: "Total Guardias", value: String(totalVisible), note: "En el mes visible", icon: "bar_chart", accent: "green" },
-            { title: "Alertas", value: String(alertas), note: "Eventos sin fecha", icon: "warning", accent: "red" },
+            {
+                title: "Continuidad Asistida",
+                value: String(continuidadVisible),
+                note: "En el mes visible",
+                icon: "people",
+                accent: "blue",
+            },
+            {
+                title: "Total Guardias",
+                value: String(totalVisible),
+                note: "En el mes visible",
+                icon: "bar_chart",
+                accent: "green",
+            },
+            {
+                title: "Alertas",
+                value: String(alertas),
+                note: "Eventos sin fecha",
+                icon: "warning",
+                accent: "red",
+            },
         ];
     }, [events, eventsInView]);
 
     function mapDutyToEvent(d) {
-        const id = String(d.id ?? d.uuid ?? (crypto?.randomUUID ? crypto.randomUUID() : Date.now()));
+        const id = String(
+            d.id ??
+                d.uuid ??
+                (crypto?.randomUUID ? crypto.randomUUID() : Date.now()),
+        );
 
         const date = String(d.date ?? "");
         const typeUpper = String(d.duty_type ?? "").toUpperCase();
@@ -283,11 +327,17 @@ export default function HomeDashboard() {
 
         try {
             const data = await callGetDuties(start, end, debouncedName);
-            const arr = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+            const arr = Array.isArray(data)
+                ? data
+                : Array.isArray(data?.data)
+                  ? data.data
+                  : [];
             setEvents(arr.map(mapDutyToEvent));
         } catch (e) {
             console.error(e);
-            setEventsError("No se pudieron cargar las guardias desde la base de datos.");
+            setEventsError(
+                "No se pudieron cargar las guardias desde la base de datos.",
+            );
             setEvents([]);
         } finally {
             setEventsLoading(false);
@@ -317,7 +367,9 @@ export default function HomeDashboard() {
     // Modal Nueva Guardia
     const [newOpen, setNewOpen] = useState(false);
     const [newType, setNewType] = useState("CA");
-    const [newDate, setNewDate] = useState(() => new Date().toISOString().slice(0, 10));
+    const [newDate, setNewDate] = useState(() =>
+        new Date().toISOString().slice(0, 10),
+    );
     const [newTime, setNewTime] = useState("15:00");
 
     // se mantiene porque lo tienes en UI
@@ -341,22 +393,26 @@ export default function HomeDashboard() {
     const tourSteps = [
         {
             target: ".tour-import-excel",
-            content: "Aquí puedes importar las guardias desde un archivo Excel. Asegúrate de seleccionar el mes, año y especialidad correctos.",
+            content:
+                "Aquí puedes importar las guardias desde un archivo Excel. Asegúrate de seleccionar el mes, año y especialidad correctos.",
             disableBeacon: true,
         },
         {
             target: ".tour-new-guard",
-            content: "Utiliza este botón para añadir manualmente una nueva guardia si no está en el Excel.",
+            content:
+                "Utiliza este botón para añadir manualmente una nueva guardia si no está en el Excel.",
         },
         {
             target: ".tour-filters",
-            content: "Filtra las guardias visibles por tipo (Continuidad, Presencia Física, Localizada) para ver solo lo que te interesa.",
+            content:
+                "Filtra las guardias visibles por tipo (Continuidad, Presencia Física, Localizada) para ver solo lo que te interesa.",
         },
     ];
 
     useEffect(() => {
-        const tutorialDone = localStorage.getItem("homeDashboardTutorialDone");
-        if (!tutorialDone) {
+        // Fase 3: Home / Dashboard
+        const phase = localStorage.getItem("tutorial_phase");
+        if (phase === "PHASE_HOME") {
             setRunTour(true);
         }
     }, []);
@@ -366,7 +422,9 @@ export default function HomeDashboard() {
         const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
 
         if (finishedStatuses.includes(status)) {
-            localStorage.setItem("homeDashboardTutorialDone", "true");
+            // FIN DEL TUTORIAL GLOBAL
+            localStorage.setItem("global_tutorial_done", "true");
+            localStorage.removeItem("tutorial_phase");
             setRunTour(false);
         }
     };
@@ -401,7 +459,9 @@ export default function HomeDashboard() {
 
             await loadDutiesForCurrentView();
 
-            addNotification(`Guardia creada correctamente (${new Date().toLocaleTimeString()}).`);
+            addNotification(
+                `Guardia creada correctamente (${new Date().toLocaleTimeString()}).`,
+            );
             setNewOpen(false);
         } catch (e) {
             console.error(e);
@@ -424,7 +484,11 @@ export default function HomeDashboard() {
 
         try {
             const data = await getSpecialities();
-            const arr = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+            const arr = Array.isArray(data)
+                ? data
+                : Array.isArray(data?.data)
+                  ? data.data
+                  : [];
             setSpecialities(arr);
         } catch (e) {
             console.error(e);
@@ -484,12 +548,16 @@ export default function HomeDashboard() {
 
     async function submitImport() {
         if (!excelFile) return setImportMsg("Debes adjuntar un archivo Excel.");
-        if (!isExcelFile(excelFile)) return setImportMsg("Solo se permiten archivos .xls o .xlsx");
-        if (!idSpeciality) return setImportMsg("Debes seleccionar una especialidad.");
-        if (!importYear || !importMonth) return setImportMsg("Debes seleccionar año y mes.");
+        if (!isExcelFile(excelFile))
+            return setImportMsg("Solo se permiten archivos .xls o .xlsx");
+        if (!idSpeciality)
+            return setImportMsg("Debes seleccionar una especialidad.");
+        if (!importYear || !importMonth)
+            return setImportMsg("Debes seleccionar año y mes.");
 
         const maxMB = 10;
-        if (excelFile.size > maxMB * 1024 * 1024) return setImportMsg(`El archivo supera ${maxMB}MB`);
+        if (excelFile.size > maxMB * 1024 * 1024)
+            return setImportMsg(`El archivo supera ${maxMB}MB`);
 
         setImportUploading(true);
         setImportMsg("");
@@ -517,10 +585,14 @@ export default function HomeDashboard() {
                         <div>
                             <div className="hdStatTitle">{s.title}</div>
                             <div className="hdStatValue">{s.value}</div>
-                            <div className={`hdStatNote ${s.accent}`}>{s.note}</div>
+                            <div className={`hdStatNote ${s.accent}`}>
+                                {s.note}
+                            </div>
                         </div>
                         <div className={`hdStatIcon ${s.accent}`}>
-                            <span className="material-icons-outlined">{s.icon}</span>
+                            <span className="material-icons-outlined">
+                                {s.icon}
+                            </span>
                         </div>
                     </div>
                 ))}
@@ -530,21 +602,44 @@ export default function HomeDashboard() {
             <section className="hdCalendarCard">
                 <div className="hdCalendarTop">
                     <div className="hdMonthPicker">
-                        <button className="hdMiniBtn" aria-label="Mes anterior" type="button" onClick={goPrev}>
-                            <span className="material-icons-outlined">chevron_left</span>
+                        <button
+                            className="hdMiniBtn"
+                            aria-label="Mes anterior"
+                            type="button"
+                            onClick={goPrev}
+                        >
+                            <span className="material-icons-outlined">
+                                chevron_left
+                            </span>
                         </button>
 
-                        <span className="hdMonthLabel">{monthLabel || "..."}</span>
+                        <span className="hdMonthLabel">
+                            {monthLabel || "..."}
+                        </span>
 
-                        <button className="hdMiniBtn" aria-label="Mes siguiente" type="button" onClick={goNext}>
-                            <span className="material-icons-outlined">chevron_right</span>
+                        <button
+                            className="hdMiniBtn"
+                            aria-label="Mes siguiente"
+                            type="button"
+                            onClick={goNext}
+                        >
+                            <span className="material-icons-outlined">
+                                chevron_right
+                            </span>
                         </button>
                     </div>
 
                     {/* 🔎 INPUT CENTRADO */}
-                    <div className="hdSearchWrap" role="search" aria-label="Buscar por nombre">
+                    <div
+                        className="hdSearchWrap"
+                        role="search"
+                        aria-label="Buscar por nombre"
+                    >
                         <div className="hdSearch">
-                            <span className="material-icons-outlined hdSearchIcon" aria-hidden="true">
+                            <span
+                                className="material-icons-outlined hdSearchIcon"
+                                aria-hidden="true"
+                            >
                                 search
                             </span>
 
@@ -564,7 +659,9 @@ export default function HomeDashboard() {
                                     aria-label="Limpiar búsqueda"
                                     title="Limpiar"
                                 >
-                                    <span className="material-icons-outlined">close</span>
+                                    <span className="material-icons-outlined">
+                                        close
+                                    </span>
                                 </button>
                             )}
                         </div>
@@ -684,7 +781,11 @@ export default function HomeDashboard() {
                         )} */}
 
                         {/* NUEVA GUARDIA */}
-                        <button className="hdBtn primary hdBtnSm tour-new-guard" type="button" onClick={() => openNewGuardiaModal()}>
+                        <button
+                            className="hdBtn primary hdBtnSm tour-new-guard"
+                            type="button"
+                            onClick={() => openNewGuardiaModal()}
+                        >
                             <span className="material-icons-outlined">add</span>
                             <span className="hideOnMobile">Nueva Guardia</span>
                             <span className="showOnMobile">Crear</span>
@@ -697,7 +798,9 @@ export default function HomeDashboard() {
                             onClick={() => setFilterOpen((v) => !v)}
                             aria-expanded={filterOpen}
                         >
-                            <span className="material-icons-outlined">filter_list</span>
+                            <span className="material-icons-outlined">
+                                filter_list
+                            </span>
                             Filtros
                         </button>
 
@@ -750,13 +853,23 @@ export default function HomeDashboard() {
 
                 {(eventsLoading || eventsError) && (
                     <div style={{ padding: "10px 16px" }}>
-                        {eventsLoading && <span style={{ fontWeight: 700 }}>Cargando guardias...</span>}
-                        {eventsError && <span style={{ color: "#b91c1c", fontWeight: 700 }}>{eventsError}</span>}
+                        {eventsLoading && (
+                            <span style={{ fontWeight: 700 }}>
+                                Cargando guardias...
+                            </span>
+                        )}
+                        {eventsError && (
+                            <span style={{ color: "#b91c1c", fontWeight: 700 }}>
+                                {eventsError}
+                            </span>
+                        )}
                     </div>
                 )}
 
                 <div className="hdCalendar">
-                    <div className={`hdFullCalendarWrap ${eventsLoading ? "" : "hdEnter"}`}>
+                    <div
+                        className={`hdFullCalendarWrap ${eventsLoading ? "" : "hdEnter"}`}
+                    >
                         <FullCalendar
                             ref={calendarRef}
                             plugins={[dayGridPlugin, interactionPlugin]}
@@ -772,7 +885,9 @@ export default function HomeDashboard() {
                             }}
                             dayHeaderFormat={{ weekday: "short" }}
                             events={filteredEvents}
-                            dayCellClassNames={(arg) => (arg.isToday ? ["hdTodayCell"] : [])}
+                            dayCellClassNames={(arg) =>
+                                arg.isToday ? ["hdTodayCell"] : []
+                            }
                             eventContent={(arg) => {
                                 const type = arg.event.extendedProps?.type;
                                 const jefe = arg.event.extendedProps?.jefe;
@@ -780,18 +895,28 @@ export default function HomeDashboard() {
 
                                 return (
                                     <div className={`hdFcChip ${type || ""}`}>
-                                        <span className="hdFcChipText">{text}</span>
+                                        <span className="hdFcChipText">
+                                            {text}
+                                        </span>
                                         {jefe && (
-                                            <span className="material-icons-outlined hdFcJefe" title="Jefe de Guardia">
+                                            <span
+                                                className="material-icons-outlined hdFcJefe"
+                                                title="Jefe de Guardia"
+                                            >
                                                 local_police
                                             </span>
                                         )}
                                     </div>
                                 );
                             }}
-                            dateClick={(info) => openNewGuardiaModal(info.dateStr)}
+                            dateClick={(info) =>
+                                openNewGuardiaModal(info.dateStr)
+                            }
                             eventClick={(info) => {
-                                console.log("eventClick raw:", info.event.extendedProps?.raw);
+                                console.log(
+                                    "eventClick raw:",
+                                    info.event.extendedProps?.raw,
+                                );
                             }}
                         />
                     </div>
@@ -804,24 +929,44 @@ export default function HomeDashboard() {
                     <div className="hdModalCard">
                         <div className="hdModalHead">
                             <div className="hdModalTitle">Nueva Guardia</div>
-                            <button className="hdModalClose" onClick={() => setNewOpen(false)} type="button" aria-label="Cerrar">
-                                <span className="material-icons-outlined">close</span>
+                            <button
+                                className="hdModalClose"
+                                onClick={() => setNewOpen(false)}
+                                type="button"
+                                aria-label="Cerrar"
+                            >
+                                <span className="material-icons-outlined">
+                                    close
+                                </span>
                             </button>
                         </div>
 
                         <div className="hdModalBody">
                             <label className="hdField">
                                 <span>Tipo</span>
-                                <select value={newType} onChange={(e) => setNewType(e.target.value)} className="hdControl">
+                                <select
+                                    value={newType}
+                                    onChange={(e) => setNewType(e.target.value)}
+                                    className="hdControl"
+                                >
                                     <option value="CA">CA (Continuidad)</option>
-                                    <option value="PF">PF (Presencia Física)</option>
-                                    <option value="LOC">LOC (Localizada)</option>
+                                    <option value="PF">
+                                        PF (Presencia Física)
+                                    </option>
+                                    <option value="LOC">
+                                        LOC (Localizada)
+                                    </option>
                                 </select>
                             </label>
 
                             <label className="hdField">
                                 <span>Fecha</span>
-                                <input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} className="hdControl" />
+                                <input
+                                    type="date"
+                                    value={newDate}
+                                    onChange={(e) => setNewDate(e.target.value)}
+                                    className="hdControl"
+                                />
                             </label>
 
                             {/* NUEVO: selector de trabajador requerido por backend */}
@@ -829,18 +974,29 @@ export default function HomeDashboard() {
                                 <span>Trabajador</span>
 
                                 {workersLoading ? (
-                                    <div className="hdControl">Cargando trabajadores...</div>
+                                    <div className="hdControl">
+                                        Cargando trabajadores...
+                                    </div>
                                 ) : workersError ? (
-                                    <div className="hdControl">{workersError}</div>
+                                    <div className="hdControl">
+                                        {workersError}
+                                    </div>
                                 ) : (
                                     <select
                                         className="hdControl"
                                         value={newWorkerId}
-                                        onChange={(e) => setNewWorkerId(e.target.value)}
+                                        onChange={(e) =>
+                                            setNewWorkerId(e.target.value)
+                                        }
                                     >
-                                        <option value="">Selecciona un trabajador</option>
+                                        <option value="">
+                                            Selecciona un trabajador
+                                        </option>
                                         {workers.map((w) => (
-                                            <option key={w.id} value={String(w.id)}>
+                                            <option
+                                                key={w.id}
+                                                value={String(w.id)}
+                                            >
                                                 {w.name} (id: {w.id})
                                             </option>
                                         ))}
@@ -850,8 +1006,16 @@ export default function HomeDashboard() {
 
                             <label className="hdField">
                                 <span>Especialidad</span>
-                                <select className="hdControl" value={newIdSpeciality} onChange={(e) => setNewIdSpeciality(e.target.value)}>
-                                    <option value="">Selecciona una especialidad</option>
+                                <select
+                                    className="hdControl"
+                                    value={newIdSpeciality}
+                                    onChange={(e) =>
+                                        setNewIdSpeciality(e.target.value)
+                                    }
+                                >
+                                    <option value="">
+                                        Selecciona una especialidad
+                                    </option>
                                     {specialities.map((s) => (
                                         <option key={s.id} value={String(s.id)}>
                                             {s.name} (id: {s.id})
@@ -862,15 +1026,28 @@ export default function HomeDashboard() {
 
                             <label className="hdField">
                                 <span>Hora</span>
-                                <input type="time" value={newTime} onChange={(e) => setNewTime(e.target.value)} className="hdControl" />
+                                <input
+                                    type="time"
+                                    value={newTime}
+                                    onChange={(e) => setNewTime(e.target.value)}
+                                    className="hdControl"
+                                />
                             </label>
                         </div>
 
                         <div className="hdModalFooter">
-                            <button className="hdBtn light hdBtnSm" type="button" onClick={() => setNewOpen(false)}>
+                            <button
+                                className="hdBtn light hdBtnSm"
+                                type="button"
+                                onClick={() => setNewOpen(false)}
+                            >
                                 Cancelar
                             </button>
-                            <button className="hdBtn primary hdBtnSm" type="button" onClick={addGuardia}>
+                            <button
+                                className="hdBtn primary hdBtnSm"
+                                type="button"
+                                onClick={addGuardia}
+                            >
                                 Guardar
                             </button>
                         </div>
@@ -895,7 +1072,9 @@ export default function HomeDashboard() {
                         <span>Localizada (LOC)</span>
                     </div>
                     <div className="hdLegendItem">
-                        <span className="material-icons-outlined amber">local_police</span>
+                        <span className="material-icons-outlined amber">
+                            local_police
+                        </span>
                         <span>Jefe de Guardia</span>
                     </div>
                 </div>
@@ -906,7 +1085,7 @@ export default function HomeDashboard() {
                 run={runTour}
                 continuous
                 showProgress
-                showSkipButton
+                showSkipButton={true}
                 scrollOffset={150}
                 callback={handleJoyrideCallback}
                 styles={{
@@ -918,9 +1097,9 @@ export default function HomeDashboard() {
                 locale={{
                     back: "Atrás",
                     close: "Cerrar",
-                    last: "Finalizar",
+                    last: "Finalizar Tutorial",
                     next: "Siguiente",
-                    skip: "Saltar",
+                    skip: "Saltar tutorial",
                 }}
             />
         </div>
