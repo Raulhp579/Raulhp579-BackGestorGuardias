@@ -8,6 +8,7 @@ import HomeDashboard from "../pages/HomeDashboard";
 import Guardias from "../pages/GestionGuardias";
 import GestionUsuarios from "../pages/GestionUsuarios";
 import PerfilUsuario from "../pages/PerfilUsuario";
+import MisGuardias from "../pages/MisGuardias";
 
 // Nuevas páginas legales
 import AvisoLegal from "../pages/AvisoLegal";
@@ -26,6 +27,7 @@ export default function AppRouter() {
             <Route element={<AppLayout />}>
                 <Route path="/home" element={<HomeDashboard />} />
                 <Route path="/perfil" element={<PerfilUsuario />} />
+                <Route path="/mis-guardias" element={<MisGuardias />} />
                 <Route path="/guardias" element={<Guardias />} />
                 <Route path="/usuarios" element={<GestionUsuarios />} />
 

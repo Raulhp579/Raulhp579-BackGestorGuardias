@@ -62,6 +62,9 @@ Route::middleware(['auth:sanctum', isAdmin::class])->group(function () {
     Route::get('/assingChiefs', [DutyController::class, 'assignChief']);
 
     Route::get('/plantilla-dia-pdf', [PdfController::class,'generarPdfDia']); 
+
+    // New route for paginated worker duties (accessible by admin and likely the user themselves)
+    Route::get('/duties/worker/{id}', [DutyController::class, 'getWorkerDutiesPaginated']); 
 });
 
 // ---------------------Duties routes-----------------------------

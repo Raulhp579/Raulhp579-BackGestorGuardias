@@ -4,7 +4,6 @@ import {
     updateProfile,
     changePassword,
 } from "../services/ProfileService";
-import { getWorkerDuties } from "../services/DutyService";
 import "../styles/PerfilUsuario.css";
 
 export default function PerfilUsuario() {
@@ -50,38 +49,11 @@ export default function PerfilUsuario() {
             const data = await getProfile();
             setUser(data);
             setEditName(data.name || "");
-
-            // Si el usuario tiene worker_id, cargar sus guardias
-            if (data.worker_id) {
-                loadUpcomingDuties(data.worker_id);
-            }
         } catch (e) {
             setError("Error al cargar el perfil");
             console.error(e);
         } finally {
             setLoading(false);
-        }
-    }
-
-    async function loadUpcomingDuties(workerId) {
-        setLoadingDuties(true);
-        try {
-            const duties = await getWorkerDuties(workerId);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            // Filtrar guardias futuras y ordenar por fecha
-            const futureDuties = duties
-                .filter((duty) => new Date(duty.date) >= today)
-                .sort((a, b) => new Date(a.date) - new Date(b.date))
-                .slice(0, 5); // Solo las próximas 5
-
-            setUpcomingDuties(futureDuties);
-        } catch (e) {
-            console.error("Error al cargar guardias:", e);
-            setUpcomingDuties([]);
-        } finally {
-            setLoadingDuties(false);
         }
     }
 
@@ -447,99 +419,6 @@ export default function PerfilUsuario() {
                     </button>
                 </div>
             </section>
-
-            {/* Próximas Guardias */}
-            {user?.worker_id && (
-                <section className="puCard puDutiesCard">
-                    <h4 className="puCardTitle">
-                        <span className="material-icons-outlined">event</span>
-                        Próximas Guardias
-                    </h4>
-
-                    {loadingDuties ? (
-                        <div className="puDutiesLoading">
-                            <span className="material-icons-outlined puSpinner">
-                                sync
-                            </span>
-                            <span>Cargando guardias...</span>
-                        </div>
-                    ) : upcomingDuties.length === 0 ? (
-                        <div className="puNoDuties">
-                            <span className="material-icons-outlined">
-                                event_busy
-                            </span>
-                            <span>No tienes guardias programadas</span>
-                        </div>
-                    ) : (
-                        <ul className="puDutiesList">
-                            {upcomingDuties.map((duty) => (
-                                <li
-                                    key={duty.id}
-                                    className="puDutyItem puDutyClickable"
-                                    onClick={() => {
-                                        setSelectedDuty(duty);
-                                        setDutyModalOpen(true);
-                                    }}
-                                    role="button"
-                                    tabIndex={0}
-                                    onKeyDown={(e) => {
-                                        if (
-                                            e.key === "Enter" ||
-                                            e.key === " "
-                                        ) {
-                                            setSelectedDuty(duty);
-                                            setDutyModalOpen(true);
-                                        }
-                                    }}
-                                >
-                                    <div className="puDutyDate">
-                                        <span className="puDutyDay">
-                                            {new Date(
-                                                duty.date,
-                                            ).toLocaleDateString("es-ES", {
-                                                weekday: "short",
-                                            })}
-                                        </span>
-                                        <span className="puDutyFullDate">
-                                            {new Date(
-                                                duty.date,
-                                            ).toLocaleDateString("es-ES", {
-                                                day: "numeric",
-                                                month: "short",
-                                            })}
-                                        </span>
-                                    </div>
-                                    <div className="puDutyInfo">
-                                        <span className="puDutyType">
-                                            {duty.duty_type}
-                                        </span>
-                                        {duty.speciality && (
-                                            <span className="puDutySpeciality">
-                                                {duty.speciality}
-                                            </span>
-                                        )}
-                                    </div>
-                                    {duty.is_chief && (
-                                        <span
-                                            className="puDutyChief"
-                                            title="Jefe de guardia"
-                                        >
-                                            <span className="material-icons-outlined">
-                                                star
-                                            </span>
-                                        </span>
-                                    )}
-                                    <span className="puDutyArrow">
-                                        <span className="material-icons-outlined">
-                                            chevron_right
-                                        </span>
-                                    </span>
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                </section>
-            )}
 
             {/* Modal Cambiar Contraseña */}
             {passwordModalOpen && (

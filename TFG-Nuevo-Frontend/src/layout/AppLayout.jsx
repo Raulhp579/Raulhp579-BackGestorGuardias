@@ -114,19 +114,6 @@ export default function AppLayout() {
 
                     <nav className="appNav">
                         <NavLink
-                            to="/home"
-                            onClick={closeMenu}
-                            className={({ isActive }) =>
-                                `appNavItem ${isActive ? "active" : ""}`
-                            }
-                        >
-                            <span className="material-icons-outlined">
-                                home
-                            </span>
-                            <span>Inicio</span>
-                        </NavLink>
-
-                        <NavLink
                             to="/guardias"
                             onClick={closeMenu}
                             className={({ isActive }) =>
@@ -153,6 +140,45 @@ export default function AppLayout() {
                         </NavLink>
 
                         <div className="appNavDivider" />
+
+                        <NavLink
+                            to="/home"
+                            onClick={closeMenu}
+                            className={({ isActive }) =>
+                                `appNavItem ${isActive ? "active" : ""}`
+                            }
+                        >
+                            <span className="material-icons-outlined">
+                                home
+                            </span>
+                            <span>Inicio</span>
+                        </NavLink>
+
+                        <NavLink
+                            to="/perfil"
+                            onClick={closeMenu}
+                            className={({ isActive }) =>
+                                `appNavItem ${isActive ? "active" : ""}`
+                            }
+                        >
+                            <span className="material-icons-outlined">
+                                person
+                            </span>
+                            <span>Mi Perfil</span>
+                        </NavLink>
+
+                        <NavLink
+                            to="/mis-guardias"
+                            onClick={closeMenu}
+                            className={({ isActive }) =>
+                                `appNavItem ${isActive ? "active" : ""}`
+                            }
+                        >
+                            <span className="material-icons-outlined">
+                                event
+                            </span>
+                            <span>Mis Guardias</span>
+                        </NavLink>
 
                         <button
                             className="appNavItem danger"
