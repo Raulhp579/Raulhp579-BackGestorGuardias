@@ -88,11 +88,11 @@ class DutyController extends Controller
                     "date"=>$duty->date,
                     "duty_type"=>$duty->duty_type,
                     "id_speciality"=>$duty->id_speciality,
-                    "speciality"=>$duty->worker->speciality->name,
+                    "speciality"=>$duty->worker?->speciality?->name ?? null,
                     "id_worker"=>$duty->id_worker,
-                    "worker" =>$duty->worker->name,
+                    "worker" =>$duty->worker?->name ?? null,
                     "id_chief_worker"=>$duty->id_chief_worker,
-                    "chief_worker"=>$duty->chief->name??null,
+                    "chief_worker"=>$duty->chief?->name ?? null,
                     "is_chief"   => (int) $duty->id_worker === (int) $duty->id_chief_worker,
                 ];
             }
@@ -446,11 +446,11 @@ class DutyController extends Controller
                     "date" => $duty->date,
                     "duty_type" => $duty->duty_type,
                     "id_speciality" => $duty->id_speciality,
-                    "speciality" => $duty->worker->speciality->name ?? null,
+                    "speciality" => $duty->worker?->speciality?->name ?? null,
                     "id_worker" => $duty->id_worker,
-                    "worker" => $duty->worker->name ?? null,
+                    "worker" => $duty->worker?->name ?? null,
                     "id_chief_worker" => $duty->id_chief_worker,
-                    "chief_worker" => $duty->chief->name ?? null,
+                    "chief_worker" => $duty->chief?->name ?? null,
                     "is_chief" => (int) $duty->id_worker === (int) $duty->id_chief_worker,
                 ];
             });

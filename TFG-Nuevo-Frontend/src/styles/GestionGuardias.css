@@ -1,15 +1,15 @@
 :root {
     --primary: #007041;
-    --secondary: #2D453C;
+    --secondary: #2d453c;
 
-    --bg: #F3F4F6;
-    --card: #FFFFFF;
-    --border: #E5E7EB;
+    --bg: #f3f4f6;
+    --card: #ffffff;
+    --border: #e5e7eb;
 
     --text: #111827;
-    --muted: #6B7280;
+    --muted: #6b7280;
 
-    --shadow-soft: 0 6px 12px rgba(0, 0, 0, .06);
+    --shadow-soft: 0 6px 12px rgba(0, 0, 0, 0.06);
     --r: 14px;
 }
 
@@ -22,7 +22,13 @@ body {
     height: 100%;
     margin: 0;
     background: var(--bg);
-    font-family: Inter, system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+    font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        Segoe UI,
+        Arial,
+        sans-serif;
 }
 
 .ggPage {
@@ -59,8 +65,12 @@ body {
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    border-bottom: 1px solid rgba(0, 0, 0, .06);
-    background: linear-gradient(to bottom, rgba(0, 112, 65, .10), rgba(255, 255, 255, 0));
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 112, 65, 0.1),
+        rgba(255, 255, 255, 0)
+    );
     flex-wrap: wrap;
 }
 
@@ -73,9 +83,9 @@ body {
 
 .ggTableCount {
     font-weight: 800;
-    color: rgba(17, 24, 39, .65);
-    background: rgba(0, 112, 65, .10);
-    border: 1px solid rgba(0, 112, 65, .20);
+    color: rgba(17, 24, 39, 0.65);
+    background: rgba(0, 112, 65, 0.1);
+    border: 1px solid rgba(0, 112, 65, 0.2);
     padding: 6px 12px;
     border-radius: 999px;
     font-size: 13px;
@@ -112,7 +122,7 @@ body {
 
 .ggCtaPdfBtn:hover:not(:disabled) {
     background: #991b1b !important;
-    box-shadow: 0 8px 16px rgba(185, 28, 28, .25) !important;
+    box-shadow: 0 8px 16px rgba(185, 28, 28, 0.25) !important;
 }
 
 /* Search Input Container */
@@ -167,8 +177,8 @@ body {
 
 .ggSearchInput:focus {
     border-color: var(--primary);
-    background: rgba(0, 112, 65, .02);
-    box-shadow: 0 0 0 3px rgba(0, 112, 65, .08);
+    background: rgba(0, 112, 65, 0.02);
+    box-shadow: 0 0 0 3px rgba(0, 112, 65, 0.08);
 }
 
 select.ggSearchInput {
@@ -225,13 +235,13 @@ select.ggSearchInput {
     padding: 16px;
     color: #dc2626;
     font-weight: 700;
-    background: rgba(220, 38, 38, .06);
+    background: rgba(220, 38, 38, 0.06);
 }
 
 .ggTableEmpty {
     text-align: center;
     padding: 24px 14px;
-    color: #9CA3AF;
+    color: #9ca3af;
     font-weight: 700;
 }
 
@@ -250,18 +260,18 @@ select.ggSearchInput {
     z-index: 1;
     text-align: left;
     font-size: 11px;
-    letter-spacing: .08em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgba(17, 24, 39, .65);
+    color: rgba(17, 24, 39, 0.65);
     background: #fff;
     padding: 8px 10px;
-    border-bottom: 1px solid rgba(0, 0, 0, .08);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     font-weight: 700;
 }
 
 .ggTable tbody td {
     padding: 8px 10px;
-    border-bottom: 1px solid rgba(0, 0, 0, .08);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     font-size: 13px;
     color: var(--text);
 }
@@ -271,7 +281,7 @@ select.ggSearchInput {
 }
 
 .ggTable tbody tr:hover {
-    background: #F9FAFB;
+    background: #f9fafb;
 }
 
 /* Micro-animaciones */
@@ -291,7 +301,7 @@ select.ggSearchInput {
 }
 
 .ggRowUpdated {
-    background: rgba(0, 112, 65, .08) !important;
+    background: rgba(0, 112, 65, 0.08) !important;
 }
 
 .ggRowExit {
@@ -307,16 +317,11 @@ select.ggSearchInput {
 
 /* Skeleton loading */
 .ggSkRow {
-    background: #F9FAFB;
+    background: #f9fafb;
 }
 
 .ggSk {
-    background: linear-gradient(
-        90deg,
-        #E5E7EB 25%,
-        #f3f4f6 50%,
-        #E5E7EB 75%
-    );
+    background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
     background-size: 200% 100%;
     animation: loading 1.5s infinite;
     border-radius: 8px;
@@ -359,10 +364,27 @@ select.ggSearchInput {
 /* Columns */
 .ggColDate {
     width: 120px;
+    padding-left: 24px !important;
 }
 
-.ggColCenter {
+.ggColType {
+    width: 80px;
     text-align: center;
+}
+
+.ggColSpec {
+    width: 20%;
+    text-align: left;
+}
+
+.ggColWorker {
+    width: 25%;
+    text-align: left;
+}
+
+.ggColChief {
+    width: 25%;
+    text-align: left;
 }
 
 .ggColActions {
@@ -386,23 +408,23 @@ select.ggSearchInput {
 }
 
 .ggPill.ca {
-    background: rgba(0, 112, 65, .10);
+    background: rgba(0, 112, 65, 0.1);
     color: var(--primary);
 }
 
 .ggPill.pf {
-    background: rgba(59, 130, 246, .15);
-    color: #1D4ED8;
+    background: rgba(59, 130, 246, 0.15);
+    color: #1d4ed8;
 }
 
 .ggPill.loc {
-    background: rgba(168, 85, 247, .15);
-    color: #6D28D9;
+    background: rgba(168, 85, 247, 0.15);
+    color: #6d28d9;
 }
 
 .ggPill.other {
-    background: rgba(107, 114, 128, .15);
-    color: #4B5563;
+    background: rgba(107, 114, 128, 0.15);
+    color: #4b5563;
 }
 
 /* Action buttons - Usar RowActions component */
@@ -427,7 +449,7 @@ select.ggSearchInput {
     border-radius: 10px;
     font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, .02);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
     display: flex;
     align-items: center;
     gap: 6px;
@@ -435,7 +457,7 @@ select.ggSearchInput {
 }
 
 .ggPagerBtn:hover:not(:disabled) {
-    background: #F9FAFB;
+    background: #f9fafb;
     border-color: var(--primary);
     color: var(--primary);
 }
@@ -465,7 +487,7 @@ select.ggSearchInput {
     cursor: pointer;
     font-weight: 600;
     font-size: 12px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, .02);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
 .ggPagerNum:hover:not(:disabled) {
@@ -504,13 +526,13 @@ select.ggSearchInput {
     align-items: center;
     justify-content: center;
     gap: 10px;
-    box-shadow: 0 6px 12px rgba(0, 112, 65, .15);
+    box-shadow: 0 6px 12px rgba(0, 112, 65, 0.15);
     transition: all 200ms ease;
 }
 
 .ggCtaBtn:hover:not(:disabled) {
-    background: #00592E;
-    box-shadow: 0 8px 16px rgba(0, 112, 65, .25);
+    background: #00592e;
+    box-shadow: 0 8px 16px rgba(0, 112, 65, 0.25);
     transform: translateY(-2px);
 }
 
@@ -530,7 +552,7 @@ select.ggSearchInput {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, .5);
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -549,7 +571,7 @@ select.ggSearchInput {
     width: 100%;
     max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, .2);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
 }
 
 .modalOverlay.centered .modalSheet {
@@ -571,7 +593,7 @@ select.ggSearchInput {
     width: 48px;
     height: 48px;
     border-radius: 12px;
-    background: rgba(0, 112, 65, .12);
+    background: rgba(0, 112, 65, 0.12);
     color: var(--primary);
     display: flex;
     align-items: center;
@@ -628,12 +650,12 @@ select.ggSearchInput {
 
 .control:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(0, 112, 65, .18);
+    box-shadow: 0 0 0 3px rgba(0, 112, 65, 0.18);
 }
 
 .control:disabled {
-    background: #F9FAFB;
-    color: #9CA3AF;
+    background: #f9fafb;
+    color: #9ca3af;
     cursor: not-allowed;
 }
 
@@ -664,8 +686,8 @@ select.control {
 }
 
 .btnPrimary:hover:not(:disabled) {
-    background: #00592E;
-    box-shadow: 0 4px 8px rgba(0, 112, 65, .2);
+    background: #00592e;
+    box-shadow: 0 4px 8px rgba(0, 112, 65, 0.2);
 }
 
 .btnPrimary:disabled {
@@ -685,7 +707,7 @@ select.control {
 }
 
 .btnSecondary:hover:not(:disabled) {
-    background: #F9FAFB;
+    background: #f9fafb;
     border-color: var(--primary);
     color: var(--primary);
 }
