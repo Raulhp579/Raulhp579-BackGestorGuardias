@@ -123,7 +123,7 @@ export default function AppLayout() {
                             <span className="material-icons-outlined">
                                 calendar_month
                             </span>
-                            <span>Gestión de Guardias</span>
+                            <span>Guardias</span>
                         </NavLink>
 
                         <NavLink
@@ -136,7 +136,7 @@ export default function AppLayout() {
                             <span className="material-icons-outlined">
                                 calculate
                             </span>
-                            <span>Administrar usuarios</span>
+                            <span>Usuarios</span>
                         </NavLink>
 
                         <div className="appNavDivider" />
