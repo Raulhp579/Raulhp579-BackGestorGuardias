@@ -1354,3 +1354,422 @@ body {
         font-size: 20px !important;
     }
 }
+
+
+/* Modal detalle guardia: responsive pro */
+.hdDutyModalCard {
+    width: min(560px, 92vw);
+    max-height: min(70vh, 560px);
+    overflow: auto;
+}
+
+.hdDutyDetailTitle {
+    font-weight: 800;
+    font-size: 16px;
+    margin-bottom: 12px;
+}
+
+.hdDutyDetailGrid {
+    display: grid;
+    gap: 10px;
+}
+
+.hdDutyRow {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 12px;
+    align-items: start;
+}
+
+.hdDutyKey {
+    font-size: 12px;
+    font-weight: 700;
+    opacity: 0.65;
+}
+
+.hdDutyVal {
+    font-size: 14px;
+    font-weight: 600;
+    word-break: break-word;
+}
+
+/* Móvil */
+@media (max-width: 600px) {
+    .hdDutyModalCard {
+        width: 94vw;
+        max-height: 78vh;
+    }
+
+    .hdDutyRow {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+
+    .hdDutyKey {
+        font-size: 11px;
+    }
+}
+
+/* =========================
+   FIX VISIBILIDAD MODAL DETALLE (MÁS BRILLO / SIN TRANSPARENCIA)
+   PEGAR AL FINAL
+   ========================= */
+
+/* Overlay un pelín menos agresivo para que el modal destaque */
+.hdModalOverlay {
+    background: rgba(0, 0, 0, .45) !important;
+    backdrop-filter: blur(6px) !important;
+}
+
+/* Card del modal detalle: más “panel” y sombra pro */
+.hdModalCard.hdDutyModalCard {
+    border-radius: 18px !important;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, .35) !important;
+    border: 1px solid rgba(17, 24, 39, .10) !important;
+}
+
+/* Header y footer heredan el fondo y se ven limpios */
+.hdModalCard.hdDutyModalCard .hdModalHead,
+.hdModalCard.hdDutyModalCard .hdModalFooter {
+    background: inherit !important;
+}
+
+/* Texto: más contraste por defecto */
+.hdModalCard.hdDutyModalCard .hdModalTitle {
+    color: inherit !important;
+}
+
+/* Botón X con buen contraste */
+.hdModalCard.hdDutyModalCard .hdModalClose {
+    color: inherit !important;
+    opacity: .9;
+}
+
+.hdModalCard.hdDutyModalCard .hdModalClose:hover {
+    background: rgba(255, 255, 255, .25) !important;
+}
+
+/* ====== COLORES SÓLIDOS por tipo (igual lógica que chip, pero SIN alpha) ====== */
+
+/* CA: verde suave sólido + brillo */
+.hdModalCard.hdDutyModalCard.CA {
+    background: #E9F6EF !important;
+    /* sólido */
+    color: #0B5A35 !important;
+    border: 1px solid rgba(0, 112, 65, .22) !important;
+    box-shadow:
+        0 24px 70px rgba(0, 0, 0, .35),
+        inset 0 1px 0 rgba(255, 255, 255, .75) !important;
+    /* brillo */
+}
+
+/* PF: tu primary en versión panel sólida */
+.hdModalCard.hdDutyModalCard.PF {
+    background: #E7F0EC !important;
+    /* sólido */
+    color: #244A3E !important;
+    border: 1px solid rgba(47, 93, 78, .22) !important;
+    box-shadow:
+        0 24px 70px rgba(0, 0, 0, .35),
+        inset 0 1px 0 rgba(255, 255, 255, .75) !important;
+}
+
+/* LOC: gris sólido */
+.hdModalCard.hdDutyModalCard.LOC {
+    background: #EEF0F3 !important;
+    /* sólido */
+    color: #374151 !important;
+    border: 1px solid rgba(107, 114, 128, .22) !important;
+    box-shadow:
+        0 24px 70px rgba(0, 0, 0, .35),
+        inset 0 1px 0 rgba(255, 255, 255, .75) !important;
+}
+
+/* Labels y valores con mejor legibilidad */
+.hdModalCard.hdDutyModalCard .hdDutyKey {
+    opacity: .75 !important;
+    color: inherit !important;
+}
+
+.hdModalCard.hdDutyModalCard .hdDutyVal {
+    color: inherit !important;
+    font-weight: 800 !important;
+}
+
+/* Botón “Cerrar” que combine con el tipo */
+.hdModalCard.hdDutyModalCard .hdBtn.light {
+    background: rgba(255, 255, 255, .65) !important;
+    border: 1px solid rgba(17, 24, 39, .10) !important;
+    color: inherit !important;
+}
+
+.hdModalCard.hdDutyModalCard .hdBtn.light:hover {
+    background: rgba(255, 255, 255, .80) !important;
+}
+
+/* Móvil: ocupa casi todo y se lee perfecto */
+@media (max-width: 600px) {
+    .hdModalCard.hdDutyModalCard {
+        width: 94vw !important;
+        max-height: 80vh !important;
+    }
+}
+
+/*  chips ultra-compactos en móvil para que punto + jefe no rompa */
+@media (max-width: 600px) {
+    .hdFcChip {
+        padding: 3px 6px;
+        border-radius: 12px;
+        gap: 6px;
+    }
+
+    .hdFcChip .dot {
+        width: 9px;
+        height: 9px;
+    }
+
+    .hdFcJefe {
+        font-size: 13px !important;
+        line-height: 1 !important;
+    }
+}
+
+/* =========================
+   MOBILE: month picker full width + centrado pro
+   ========================= */
+@media (max-width: 768px) {
+    .hdMonthPicker {
+        width: 100% !important;
+        justify-content: center !important;
+        gap: 10px !important;
+        padding: 8px 10px !important;
+    }
+
+    .hdMonthLabel {
+        flex: 1 !important;
+        text-align: center !important;
+        padding: 0 !important;
+        font-size: 14px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .hdMiniBtn {
+        flex: 0 0 40px !important;
+        width: 40px !important;
+        height: 40px !important;
+        border-radius: 14px !important;
+    }
+}
+
+/* =========================
+   CHIPS PRO: móvil compacto + jefe como badge (no ocupa ancho)
+   ========================= */
+.hdFcChip {
+    position: relative;
+}
+
+/* En móvil: chip más compacto y texto más corto */
+@media (max-width: 600px) {
+    .hdFcChip {
+        padding: 4px 8px !important;
+        border-radius: 999px !important;
+        gap: 6px !important;
+        max-width: 100% !important;
+    }
+
+    /* El punto un pelín más pequeño */
+    .hdFcChip .dot {
+        width: 9px !important;
+        height: 9px !important;
+        flex: 0 0 auto !important;
+    }
+
+    /* En móvil el texto será CA/PF/LOC -> que se vea “pill” */
+    .hdFcChipText {
+        font-size: 11px !important;
+        font-weight: 900 !important;
+        letter-spacing: .02em !important;
+    }
+
+    /* Si es jefe, dejamos espacio para el badge */
+    .hdFcChip.isJefe {
+        padding-right: 26px !important;
+    }
+
+    /* Jefe como badge flotante: no rompe el layout */
+    .hdFcChip.isJefe .hdFcJefe {
+        position: absolute !important;
+        right: 6px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+
+        width: 18px !important;
+        height: 18px !important;
+        display: grid !important;
+        place-items: center !important;
+
+        font-size: 14px !important;
+        line-height: 1 !important;
+
+        border-radius: 999px !important;
+        background: rgba(255, 255, 255, .70) !important;
+        border: 1px solid rgba(180, 83, 9, .25) !important;
+        color: #b45309 !important;
+        opacity: 1 !important;
+    }
+}
+
+/* En desktop dejamos el jefe inline normal */
+@media (min-width: 601px) {
+    .hdFcChip.isJefe .hdFcJefe {
+        position: static !important;
+        transform: none !important;
+        width: auto !important;
+        height: auto !important;
+        background: transparent !important;
+        border: 0 !important;
+    }
+}
+
+/* Móvil: chip compacto y jefe como “badge” único (no se mezcla con el dot) */
+@media (max-width: 600px) {
+    .hdFcChip {
+        border-radius: 999px !important;
+        padding: 4px 10px !important;
+        gap: 8px !important;
+    }
+
+    /* Dot consistente */
+    .hdFcChip .dot {
+        width: 9px !important;
+        height: 9px !important;
+        flex: 0 0 auto !important;
+    }
+
+    /* Texto: C/P/L centrado y con peso */
+    .hdFcChipText {
+        font-weight: 900 !important;
+        font-size: 12px !important;
+        line-height: 1 !important;
+    }
+
+    /* Cuando es jefe: dejamos espacio al badge */
+    .hdFcChip.isJefe {
+        padding-right: 30px !important;
+    }
+
+    /* Badge del jefe (único icono visual a la derecha) */
+    .hdFcChip.isJefe .hdFcJefe {
+        position: absolute !important;
+        right: 7px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+
+        width: 20px !important;
+        height: 20px !important;
+        display: grid !important;
+        place-items: center !important;
+
+        border-radius: 999px !important;
+        background: rgba(255, 255, 255, .85) !important;
+        border: 1px solid rgba(180, 83, 9, .25) !important;
+
+        font-size: 15px !important;
+        line-height: 1 !important;
+        color: #b45309 !important;
+        opacity: 1 !important;
+    }
+}
+
+/* ✅ MÓVIL: chips centrados (dot y letra centrados), jefe a la derecha como badge */
+@media (max-width: 600px) {
+
+    /* El chip se comporta como “badge” centrado */
+    .hdFullCalendarWrap .hdFcChip {
+        position: relative !important;
+        justify-content: center !important;
+        /* ✅ centra contenido */
+        gap: 8px !important;
+        padding: 4px 12px !important;
+        border-radius: 999px !important;
+    }
+
+    /* El texto (C/P/L) centrado */
+    .hdFullCalendarWrap .hdFcChipText {
+        flex: 0 0 auto !important;
+        /* ✅ no se estira */
+        min-width: auto !important;
+        text-align: center !important;
+        font-weight: 900 !important;
+    }
+
+    /* El dot no empuja el layout: queda al lado del texto, centrado */
+    .hdFullCalendarWrap .hdFcChip .dot {
+        flex: 0 0 auto !important;
+        margin: 0 !important;
+    }
+
+    /* Si es jefe: reservamos hueco a la derecha para el badge */
+    .hdFullCalendarWrap .hdFcChip.isJefe {
+        padding-right: 34px !important;
+        /* ✅ espacio para el escudo */
+    }
+
+    /* Badge del jefe fijo a la derecha (sin mover el centro) */
+    .hdFullCalendarWrap .hdFcChip.isJefe .hdFcJefe {
+        position: absolute !important;
+        right: 7px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+    }
+}
+
+/* ✅ MÓVIL: centrar los eventos dentro del día (especialmente los que tienen jefe) */
+@media (max-width: 600px) {
+
+    /* Cada evento (wrapper de FullCalendar) centrado */
+    .hdFullCalendarWrap .fc .fc-daygrid-event-harness {
+        display: flex !important;
+        justify-content: center !important;
+    }
+
+    /* El enlace del evento ocupa “auto” (no 100%) para poder centrarse */
+    .hdFullCalendarWrap .fc .fc-daygrid-event {
+        width: auto !important;
+    }
+
+    /* Por si FC envuelve con otro contenedor */
+    .hdFullCalendarWrap .fc .fc-event-main {
+        display: flex !important;
+        justify-content: center !important;
+    }
+}
+
+/* MÓVIL: un poco más de aire lateral SOLO en chips que tienen jefe */
+@media (max-width: 600px) {
+  /* Si el chip contiene el icono de jefe */
+  .hdFullCalendarWrap .hdFcChip:has(.hdFcJefe) {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  /* Y un pelín de separación entre el punto (tipo) y el icono de jefe */
+  .hdFullCalendarWrap .hdFcChip:has(.hdFcJefe) .hdFcJefe {
+    margin-left: 4px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  /* chips con jefe: un poco más de aire lateral */
+  .hdFullCalendarWrap .hdFcChip.hasChief {
+    padding-left: 75% !important;
+    padding-right: 75% !important;
+  }
+
+  /* separación entre punto de tipo y el escudo */
+  .hdFullCalendarWrap .hdFcChip.hasChief .hdFcJefe {
+    margin-left: 50% !important;
+  }
+}

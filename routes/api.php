@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PdfController;
 
+use App\Http\Controllers\DutyMetaController;
+
 // Preflight CORS para /api/*
 Route::options('/{any}', function (Request $request) {
     $origin = $request->header('Origin');
@@ -65,9 +67,13 @@ Route::middleware(['auth:sanctum', isAdmin::class])->group(function () {
 });
 
 // ---------------------Duties routes-----------------------------
-
+Route::get('/duties/last-update', [DutyMetaController::class, 'lastUpdate']);
 // List all duties
 Route::get('/duties', [DutyController::class, 'index']);
 Route::get('/duties/{id}', [DutyController::class, 'show']);
 Route::get('/duties/day/{date}', [DutyController::class, 'day']);
 Route::post('/login', [AuthController::class, 'login']);
+
+
+
+
