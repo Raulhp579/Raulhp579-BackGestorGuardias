@@ -341,10 +341,7 @@ export default function HomeDashboard() {
     // ✅ STATS (incluye lastUpdateNowTick para que "hace X" se actualice)
     const stats = useMemo(() => {
         const totalVisible = eventsInView.length;
-        const continuidadVisible = eventsInView.filter(
-            (e) => e.extendedProps?.type === "CA",
-        ).length;
-        const alertas = events.filter((e) => !e.start).length;
+        const continuidadVisible = eventsInView.filter((e) => e.extendedProps?.type === "CA").length;
 
         return [
             {
@@ -362,11 +359,11 @@ export default function HomeDashboard() {
                 accent: "green",
             },
             {
-                title: "Alertas",
-                value: String(alertas),
-                note: "Eventos sin fecha",
-                icon: "warning",
-                accent: "red",
+                title: "Última actualización",
+                value: lastUpdateISO ? formatTimeAgo(lastUpdateISO) : "Sin datos",
+                note: "Sincronización con el servidor",
+                icon: "sync",
+                accent: "blue",
             },
         ];
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -520,7 +517,6 @@ export default function HomeDashboard() {
     ];
 
     useEffect(() => {
-        // Fase 3: Home / Dashboard
         const phase = localStorage.getItem("tutorial_phase");
         if (phase === "PHASE_HOME") {
             setRunTour(true);
@@ -532,7 +528,6 @@ export default function HomeDashboard() {
         const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
 
         if (finishedStatuses.includes(status)) {
-            // FIN DEL TUTORIAL GLOBAL
             localStorage.setItem("global_tutorial_done", "true");
             localStorage.removeItem("tutorial_phase");
             setRunTour(false);
@@ -746,12 +741,8 @@ export default function HomeDashboard() {
                         </button>
                     </div>
 
-                    {/* 🔎 INPUT CENTRADO */}
-                    <div
-                        className="hdSearchWrap"
-                        role="search"
-                        aria-label="Buscar por nombre"
-                    >
+                    {/* INPUT CENTRADO */}
+                    <div className="hdSearchWrap" role="search" aria-label="Buscar por nombre">
                         <div className="hdSearch">
                             <span
                                 className="material-icons-outlined hdSearchIcon"
@@ -785,129 +776,6 @@ export default function HomeDashboard() {
                     </div>
 
                     <div className="hdActions" style={{ position: "relative" }}>
-                        {/* IMPORTAR EXCEL}
-                        <button className="hdBtn primary hdBtnSm tour-import-excel" type="button" onClick={openImportModal}>
-                            <span className="material-icons-outlined">table_view</span>
-                            <span className="hideOnMobile">Importar Excel</span>
-                            <span className="showOnMobile">Excel</span>
-                        </button>
-
-                        {/* MODAL IMPORTAR EXCEL 
-                        {importOpen && (
-                            <div className="hdModalOverlay" role="dialog" aria-modal="true">
-                                <div className="hdModalCard">
-                                    <div className="hdModalHead">
-                                        <div className="hdModalTitle">Importar guardias desde Excel</div>
-                                        <button className="hdModalClose" type="button" onClick={closeImportModal} aria-label="Cerrar">
-                                            <span className="material-icons-outlined">close</span>
-                                        </button>
-                                    </div>
-
-                                    <div className="hdModalBody">
-                                        <label className="hdField">
-                                            <span>Especialidad</span>
-
-                                            {specialitiesLoading ? (
-                                                <div className="hdControl">Cargando especialidades...</div>
-                                            ) : specialitiesError ? (
-                                                <div className="hdControl">{specialitiesError}</div>
-                                            ) : (
-                                                <select className="hdControl" value={idSpeciality} onChange={(e) => setIdSpeciality(e.target.value)}>
-                                                    <option value="">-- Selecciona una especialidad --</option>
-                                                    {specialities.map((s) => (
-                                                        <option key={s.id} value={String(s.id)}>
-                                                            {s.name} (id: {s.id})
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            )}
-                                        </label>
-
-                                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                                            <label className="hdField">
-                                                <span>Mes</span>
-                                                <select className="hdControl" value={importMonth} onChange={(e) => setImportMonth(e.target.value)}>
-                                                    {months.map((m) => (
-                                                        <option key={m.value} value={m.value}>
-                                                            {m.label} ({m.value})
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </label>
-
-                                            <label className="hdField">
-                                                <span>Año</span>
-                                                <select className="hdControl" value={importYear} onChange={(e) => setImportYear(e.target.value)}>
-                                                    {years.map((y) => (
-                                                        <option key={y} value={y}>
-                                                            {y}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </label>
-                                        </div>
-
-                                        <input
-                                            ref={fileInputRef}
-                                            type="file"
-                                            accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                                            style={{ display: "none" }}
-                                            onChange={onPickExcelFile}
-                                        />
-
-                                        <div
-                                            onDragOver={onDragOver}
-                                            onDragLeave={onDragLeave}
-                                            onDrop={onDrop}
-                                            onClick={() => fileInputRef.current?.click()}
-                                            style={{
-                                                marginTop: 12,
-                                                border: `2px dashed ${isDragging ? "#888" : "#ccc"}`,
-                                                borderRadius: 12,
-                                                padding: 16,
-                                                cursor: "pointer",
-                                                textAlign: "center",
-                                                userSelect: "none",
-                                            }}
-                                            title="Arrastra Excel o haz clic para seleccionarlo"
-                                        >
-                                            <div style={{ fontWeight: 600 }}>Arrastra aquí tu Excel (.xls / .xlsx)</div>
-                                            <div style={{ marginTop: 6, opacity: 0.8 }}>o haz clic para seleccionarlo</div>
-
-                                            {excelFile && (
-                                                <div style={{ marginTop: 10 }}>
-                                                    Archivo: <b>{excelFile.name}</b>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {importMsg && <p style={{ marginTop: 12 }}>{importMsg}</p>}
-                                    </div>
-
-                                    <div className="hdModalFooter">
-                                        <button className="hdBtn light hdBtnSm" type="button" onClick={closeImportModal}>
-                                            Cancelar
-                                        </button>
-
-                                        <button className="hdBtn primary hdBtnSm" type="button" disabled={importUploading} onClick={submitImport}>
-                                            {importUploading ? "Subiendo..." : "Importar"}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        )} */}
-
-                        {/* NUEVA GUARDIA */}
-                        <button
-                            className="hdBtn primary hdBtnSm tour-new-guard"
-                            type="button"
-                            onClick={() => openNewGuardiaModal()}
-                        >
-                            <span className="material-icons-outlined">add</span>
-                            <span className="hideOnMobile">Nueva Guardia</span>
-                            <span className="showOnMobile">Crear</span>
-                        </button>
-
                         {/* FILTROS */}
                         <button
                             className="hdBtn light hdBtnSm tour-filters"
@@ -1025,15 +893,19 @@ export default function HomeDashboard() {
                                     : fullText;
 
                                 return (
-                                    <div className={`hdFcChip ${type || ""}`}>
-                                        <span className="hdFcChipText">
-                                            {text}
+                                    <div className={`hdFcChip ${type || ""} ${jefe ? "hasChief" : ""}`}>
+                                        {/* Desktop: dot + texto completo */}
+                                        {!isMobile && dotClass && <span className={`dot ${dotClass}`} title={type} />}
+
+                                        {/* Mobile: dot solo si NO es jefe */}
+                                        {isMobile && !jefe && dotClass && <span className={`dot ${dotClass}`} title={type} />}
+
+                                        <span className="hdFcChipText" title={fullText}>
+                                            {label}
                                         </span>
+
                                         {jefe && (
-                                            <span
-                                                className="material-icons-outlined hdFcJefe"
-                                                title="Jefe de Guardia"
-                                            >
+                                            <span className="material-icons-outlined hdFcJefe" title="Jefe de Guardia" aria-label="Jefe de Guardia">
                                                 local_police
                                             </span>
                                         )}
@@ -1044,10 +916,17 @@ export default function HomeDashboard() {
                                 openNewGuardiaModal(info.dateStr)
                             }
                             eventClick={(info) => {
-                                console.log(
-                                    "eventClick raw:",
-                                    info.event.extendedProps?.raw,
-                                );
+                                const raw = info.event.extendedProps?.raw || null;
+
+                                setSelectedDuty({
+                                    title: info.event.title,
+                                    date: info.event.startStr?.slice(0, 10) || "",
+                                    type: info.event.extendedProps?.type || "",
+                                    jefe: Boolean(info.event.extendedProps?.jefe),
+                                    raw,
+                                });
+
+                                setDutyOpen(true);
                             }}
                         />
                     </div>
@@ -1074,127 +953,67 @@ export default function HomeDashboard() {
                             .toUpperCase()}`}
                     >
                         <div className="hdModalHead">
-                            <div className="hdModalTitle">Nueva Guardia</div>
-                            <button
-                                className="hdModalClose"
-                                onClick={() => setNewOpen(false)}
-                                type="button"
-                                aria-label="Cerrar"
-                            >
-                                <span className="material-icons-outlined">
-                                    close
-                                </span>
+                            <div className="hdModalTitle">Detalle de guardia</div>
+                            <button className="hdModalClose" type="button" onClick={closeDutyModal} aria-label="Cerrar">
+                                <span className="material-icons-outlined">close</span>
                             </button>
                         </div>
 
                         <div className="hdModalBody">
-                            <label className="hdField">
-                                <span>Tipo</span>
-                                <select
-                                    value={newType}
-                                    onChange={(e) => setNewType(e.target.value)}
-                                    className="hdControl"
-                                >
-                                    <option value="CA">CA (Continuidad)</option>
-                                    <option value="PF">
-                                        PF (Presencia Física)
-                                    </option>
-                                    <option value="LOC">
-                                        LOC (Localizada)
-                                    </option>
-                                </select>
-                            </label>
+                            <div className="hdDutyDetailTitle">{selectedDuty?.raw?.worker || selectedDuty?.title || "-"}</div>
 
-                            <label className="hdField">
-                                <span>Fecha</span>
-                                <input
-                                    type="date"
-                                    value={newDate}
-                                    onChange={(e) => setNewDate(e.target.value)}
-                                    className="hdControl"
-                                />
-                            </label>
+                            <div className="hdDutyDetailGrid">
+                                <div className="hdDutyRow">
+                                    <span className="hdDutyKey">Fecha</span>
+                                    <span className="hdDutyVal">{selectedDuty?.raw?.date || selectedDuty?.date || "-"}</span>
+                                </div>
 
-                            {/* NUEVO: selector de trabajador requerido por backend */}
-                            <label className="hdField">
-                                <span>Trabajador</span>
+                                <div className="hdDutyRow">
+                                    <span className="hdDutyKey">Tipo</span>
+                                    <span className="hdDutyVal">{dutyTypeLabel(selectedDuty?.raw?.duty_type || selectedDuty?.type)}</span>
+                                </div>
 
-                                {workersLoading ? (
-                                    <div className="hdControl">
-                                        Cargando trabajadores...
-                                    </div>
-                                ) : workersError ? (
-                                    <div className="hdControl">
-                                        {workersError}
-                                    </div>
-                                ) : (
-                                    <select
-                                        className="hdControl"
-                                        value={newWorkerId}
-                                        onChange={(e) =>
-                                            setNewWorkerId(e.target.value)
-                                        }
-                                    >
-                                        <option value="">
-                                            Selecciona un trabajador
-                                        </option>
-                                        {workers.map((w) => (
-                                            <option
-                                                key={w.id}
-                                                value={String(w.id)}
-                                            >
-                                                {w.name} (id: {w.id})
-                                            </option>
-                                        ))}
-                                    </select>
-                                )}
-                            </label>
+                                <div className="hdDutyRow">
+                                    <span className="hdDutyKey">Especialidad</span>
+                                    <span className="hdDutyVal">{selectedDuty?.raw?.speciality || "-"}</span>
+                                </div>
 
-                            <label className="hdField">
-                                <span>Especialidad</span>
-                                <select
-                                    className="hdControl"
-                                    value={newIdSpeciality}
-                                    onChange={(e) =>
-                                        setNewIdSpeciality(e.target.value)
-                                    }
-                                >
-                                    <option value="">
-                                        Selecciona una especialidad
-                                    </option>
-                                    {specialities.map((s) => (
-                                        <option key={s.id} value={String(s.id)}>
-                                            {s.name} (id: {s.id})
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
+                                <div className="hdDutyRow">
+                                    <span className="hdDutyKey">ID Especialidad</span>
+                                    <span className="hdDutyVal">{selectedDuty?.raw?.id_speciality ?? "-"}</span>
+                                </div>
 
-                            <label className="hdField">
-                                <span>Hora</span>
-                                <input
-                                    type="time"
-                                    value={newTime}
-                                    onChange={(e) => setNewTime(e.target.value)}
-                                    className="hdControl"
-                                />
-                            </label>
+                                <div className="hdDutyRow">
+                                    <span className="hdDutyKey">Trabajador</span>
+                                    <span className="hdDutyVal">{selectedDuty?.raw?.worker || "-"}</span>
+                                </div>
+
+                                <div className="hdDutyRow">
+                                    <span className="hdDutyKey">ID Trabajador</span>
+                                    <span className="hdDutyVal">{selectedDuty?.raw?.id_worker ?? "-"}</span>
+                                </div>
+
+                                <div className="hdDutyRow">
+                                    <span className="hdDutyKey">Jefe de guardia</span>
+                                    <span className="hdDutyVal">
+                                        {selectedDuty?.raw?.chief_worker
+                                            ? `${selectedDuty.raw.chief_worker} (id: ${selectedDuty.raw.id_chief_worker ?? "-"})`
+                                            : selectedDuty?.jefe
+                                                ? "Sí"
+                                                : "No"}
+                                    </span>
+                                </div>
+
+                                <div className="hdDutyRow">
+                                    <span className="hdDutyKey">ID Guardia</span>
+                                    <span className="hdDutyVal">{selectedDuty?.raw?.id ?? "-"}</span>
+                                </div>
+                            </div>
                         </div>
 
                         <div className="hdModalFooter">
-                            <button
-                                className="hdBtn light hdBtnSm"
-                                type="button"
-                                onClick={() => setNewOpen(false)}
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                className="hdBtn primary hdBtnSm"
-                                type="button"
-                                onClick={addGuardia}
-                            >
-                                Guardar
+                            <button className="hdBtn light hdBtnSm" type="button" onClick={closeDutyModal}>
+                                Cerrar
                             </button>
                         </div>
                     </div>

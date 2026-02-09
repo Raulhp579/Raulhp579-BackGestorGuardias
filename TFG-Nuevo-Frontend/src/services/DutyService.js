@@ -163,3 +163,39 @@ export async function createDuty(data) {
         throw error;
     }
 }
+
+
+export async function getDutiesLastUpdate(params = {}) {
+    try {
+        let url = `${endpoint}/duties/last-update`;
+
+        if (params && typeof params === "object") {
+            const qs = new URLSearchParams();
+            if (params.start) qs.set("start", params.start);
+            if (params.end) qs.set("end", params.end);
+            if (params.name) qs.set("name", params.name);
+
+            const q = qs.toString();
+            if (q) url += `?${q}`;
+        }
+
+        const response = await fetch(url, {
+            method: "GET",
+            headers: getAuthHeaders(),
+        });
+
+        if (!response.ok) {
+            let msg = `HTTP error! status: ${response.status}`;
+            try {
+                const err = await response.json();
+                msg = err?.message || err?.error || msg;
+            } catch (_) { }
+            throw new Error(msg);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error al obtener last-update:", error);
+        throw error;
+    }
+}
