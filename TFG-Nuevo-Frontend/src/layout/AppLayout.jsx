@@ -114,6 +114,34 @@ export default function AppLayout() {
 
                     <nav className="appNav">
                         <NavLink
+                            to="/guardias"
+                            onClick={closeMenu}
+                            className={({ isActive }) =>
+                                `appNavItem ${isActive ? "active" : ""}`
+                            }
+                        >
+                            <span className="material-icons-outlined">
+                                calendar_month
+                            </span>
+                            <span>Guardias</span>
+                        </NavLink>
+
+                        <NavLink
+                            to="/usuarios"
+                            onClick={closeMenu}
+                            className={({ isActive }) =>
+                                `appNavItem ${isActive ? "active" : ""}`
+                            }
+                        >
+                            <span className="material-icons-outlined">
+                                calculate
+                            </span>
+                            <span>Usuarios</span>
+                        </NavLink>
+
+                        <div className="appNavDivider" />
+
+                        <NavLink
                             to="/home"
                             onClick={closeMenu}
                             className={({ isActive }) =>
@@ -127,32 +155,30 @@ export default function AppLayout() {
                         </NavLink>
 
                         <NavLink
-                            to="/guardias"
+                            to="/perfil"
                             onClick={closeMenu}
                             className={({ isActive }) =>
                                 `appNavItem ${isActive ? "active" : ""}`
                             }
                         >
                             <span className="material-icons-outlined">
-                                calendar_month
+                                person
                             </span>
-                            <span>Gestión de Guardias</span>
+                            <span>Mi Perfil</span>
                         </NavLink>
 
                         <NavLink
-                            to="/usuarios"
+                            to="/mis-guardias"
                             onClick={closeMenu}
                             className={({ isActive }) =>
                                 `appNavItem ${isActive ? "active" : ""}`
                             }
                         >
                             <span className="material-icons-outlined">
-                                calculate
+                                event
                             </span>
-                            <span>Administrar usuarios</span>
+                            <span>Mis Guardias</span>
                         </NavLink>
-
-                        <div className="appNavDivider" />
 
                         <button
                             className="appNavItem danger"

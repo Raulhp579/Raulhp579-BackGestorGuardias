@@ -21,8 +21,10 @@ function normalizeList(payload) {
 // helper mínimo: normaliza respuestas tipo {} o {data: {}} o {duty: {}}
 function normalizeItem(payload) {
     if (payload && typeof payload === "object") {
-        if (payload.data && typeof payload.data === "object") return payload.data;
-        if (payload.duty && typeof payload.duty === "object") return payload.duty;
+        if (payload.data && typeof payload.data === "object")
+            return payload.data;
+        if (payload.duty && typeof payload.duty === "object")
+            return payload.duty;
     }
     return payload;
 }
@@ -100,14 +102,37 @@ export async function deleteDuty(id) {
     }
 }
 
-// Obtener guardias de un trabajador específico
+// Obtener guardias de un trabajador específico (Legado - devuelve todo)
 export async function getWorkerDuties(workerId) {
     try {
-        // ahora getDuties siempre devuelve array (por normalizeList)
         const allDuties = await getDuties();
         return allDuties.filter((duty) => duty.id_worker === workerId);
     } catch (error) {
         console.error("Error al obtener guardias del trabajador:", error);
+        throw error;
+    }
+}
+
+// NUEVO: Obtener guardias paginadas de un trabajador
+export async function getWorkerDutiesPaginated(workerId, page = 1, date = "") {
+    try {
+        let url = `${endpoint}/duties/worker/${workerId}?page=${page}`;
+        if (date) {
+            url += `&date=${date}`;
+        }
+
+        const response = await fetch(url, {
+            method: "GET",
+            headers: getAuthHeaders(),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return await response.json(); // Devuelve {data: [...], current_page, last_page, total, etc.}
+    } catch (error) {
+        console.error("Error al obtener guardias paginadas:", error);
         throw error;
     }
 }
@@ -126,7 +151,7 @@ export async function createDuty(data) {
             try {
                 const err = await response.json();
                 msg = err?.message || err?.error || msg;
-            } catch (_) { }
+            } catch (_) {}
             throw new Error(msg);
         }
 
@@ -135,42 +160,6 @@ export async function createDuty(data) {
         return normalizeItem(json);
     } catch (error) {
         console.error("Error al crear guardia:", error);
-        throw error;
-    }
-}
-
-
-export async function getDutiesLastUpdate(params = {}) {
-    try {
-        let url = `${endpoint}/duties/last-update`;
-
-        if (params && typeof params === "object") {
-            const qs = new URLSearchParams();
-            if (params.start) qs.set("start", params.start);
-            if (params.end) qs.set("end", params.end);
-            if (params.name) qs.set("name", params.name);
-
-            const q = qs.toString();
-            if (q) url += `?${q}`;
-        }
-
-        const response = await fetch(url, {
-            method: "GET",
-            headers: getAuthHeaders(),
-        });
-
-        if (!response.ok) {
-            let msg = `HTTP error! status: ${response.status}`;
-            try {
-                const err = await response.json();
-                msg = err?.message || err?.error || msg;
-            } catch (_) { }
-            throw new Error(msg);
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error("Error al obtener last-update:", error);
         throw error;
     }
 }

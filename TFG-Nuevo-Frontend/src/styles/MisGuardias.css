@@ -1,0 +1,514 @@
+/* MisGuardias.css */
+:root {
+    --mg-primary: #007041;
+    --mg-primary-dark: #00592e;
+    --mg-bg: #f8f9fa;
+    --mg-card-bg: #ffffff;
+    --mg-text: #1f2937;
+    --mg-text-muted: #6b7280;
+    --mg-border: #e5e7eb;
+    --mg-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08); /* Premium shadow */
+    --mg-radius: 20px;
+    --mg-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mgPage {
+    min-height: 100vh;
+    background-color: var(--mg-bg);
+    padding: 2rem;
+    font-family: "Inter", sans-serif;
+    color: var(--mg-text);
+}
+
+.mgContainer {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Header Section */
+.mgHeader {
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.mgTitle {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--mg-primary);
+    margin: 0;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--mg-primary) 0%, #00a86b 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.mgSubtitle {
+    font-size: 1rem;
+    color: var(--mg-text-muted);
+    margin-top: 0.5rem;
+    font-weight: 500;
+}
+
+/* Stats / Filter Bar */
+.mgActionsBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    background: var(--mg-card-bg);
+    padding: 1rem 1.5rem;
+    border-radius: var(--mg-radius);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.mgStats {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: var(--mg-text);
+    background: rgba(0, 112, 65, 0.08);
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    font-size: 0.9rem;
+}
+
+.mgStatsIcon {
+    font-size: 1.2rem;
+    color: var(--mg-primary);
+}
+
+.mgFilterGroup {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.mgDateInput {
+    padding: 0.75rem 1rem 0.75rem 2.5rem; /* Space for icon */
+    border: 1px solid var(--mg-border);
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    color: var(--mg-text);
+    background-color: #f9fafb;
+    transition: var(--mg-transition);
+    outline: none;
+    min-width: 200px;
+}
+
+.mgDateInput:focus {
+    border-color: var(--mg-primary);
+    background-color: #fff;
+    box-shadow: 0 0 0 4px rgba(0, 112, 65, 0.1);
+}
+
+.mgFilterIcon {
+    position: absolute;
+    left: 10px;
+    color: var(--mg-text-muted);
+    pointer-events: none;
+    font-size: 1.2rem;
+}
+
+.mgClearBtn {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--mg-text-muted);
+    padding: 2px;
+    display: flex;
+    align-items: center;
+}
+
+.mgClearBtn:hover {
+    color: var(--mg-primary);
+}
+
+/* Table Card */
+.mgCard {
+    background: var(--mg-card-bg);
+    border-radius: var(--mg-radius);
+    box-shadow: var(--mg-shadow);
+    overflow: hidden; /* For table header rounded corners */
+    border: 1px solid rgba(0, 0, 0, 0.02);
+}
+
+.mgTableContainer {
+    overflow-x: auto;
+}
+
+.mgTable {
+    width: 100%;
+    border-collapse: collapse;
+    white-space: nowrap;
+}
+
+.mgTable th {
+    background-color: #f9fafb;
+    color: var(--mg-text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    padding: 1.25rem 1.5rem;
+    text-align: left;
+    border-bottom: 1px solid var(--mg-border);
+}
+
+.mgTable td {
+    padding: 1.25rem 1.5rem;
+    color: var(--mg-text);
+    border-bottom: 1px solid var(--mg-border);
+    font-size: 0.95rem;
+    transition: background-color 0.2s;
+}
+
+.mgTable tr:last-child td {
+    border-bottom: none;
+}
+
+.mgTable tbody tr:hover td {
+    background-color: #f0fdf4; /* Very light green hint */
+}
+
+/* Date Cell Styling */
+.mgDateCell {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.2;
+}
+
+.mgDay {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--mg-text);
+}
+
+.mgMonthYear {
+    font-size: 0.8rem;
+    color: var(--mg-text-muted);
+    text-transform: capitalize;
+}
+
+/* Pills */
+.mgPill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+}
+
+.mgPill.ca {
+    background: rgba(0, 112, 65, 0.1);
+    color: var(--mg-primary);
+}
+.mgPill.pf {
+    background: rgba(59, 130, 246, 0.1);
+    color: #2563eb;
+}
+.mgPill.loc {
+    background: rgba(139, 92, 246, 0.1);
+    color: #7c3aed;
+}
+
+/* Chief Badge */
+.mgChiefBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: linear-gradient(135deg, #ffd700 0%, #fdb931 100%);
+    color: #92400e;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    box-shadow: 0 2px 4px rgba(251, 191, 36, 0.3);
+}
+
+.mgChiefBadge .material-icons {
+    font-size: 14px;
+}
+
+/* Action Button */
+.mgActionBtn {
+    background: #ffffff;
+    border: 1px solid var(--mg-border);
+    color: var(--mg-text-muted);
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.mgActionBtn:hover {
+    border-color: var(--mg-primary);
+    color: var(--mg-primary);
+    background: #f0fdf4;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* Pagination */
+.mgPagination {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 1.5rem;
+    gap: 1rem;
+    border-top: 1px solid var(--mg-border);
+}
+
+.mgPageBtn {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid var(--mg-border);
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--mg-text);
+    transition: all 0.2s;
+}
+
+.mgPageBtn:hover:not(:disabled) {
+    border-color: var(--mg-primary);
+    color: var(--mg-primary);
+    background: #f0fdf4;
+}
+
+.mgPageBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.mgPageInfo {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--mg-text-muted);
+}
+
+/* Empty State */
+.mgEmpty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    color: var(--mg-text-muted);
+}
+
+.mgEmptyIcon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #d1d5db;
+}
+
+/* Modal Styling - Overriding/Enhancing existing puModal logic if reusing class names, 
+   or we can define new ones. Let's use new ones to guarantee style. 
+   We will update JSX to use 'mgModal...' classes. 
+*/
+
+.mgModalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4); /* Darker backdrop */
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.mgModalCard {
+    background: #fff;
+    border-radius: 24px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mgModalHeader {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--mg-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+}
+
+.mgModalTitle {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--mg-text);
+    margin: 0;
+}
+
+.mgModalClose {
+    background: none;
+    border: none;
+    color: var(--mg-text-muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.mgModalClose:hover {
+    background: #f3f4f6;
+    color: var(--mg-text);
+}
+
+.mgModalBody {
+    padding: 2rem;
+}
+
+/* Modal Date Display */
+.mgModalDateDisplay {
+    background: rgba(0, 112, 65, 0.06);
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(0, 112, 65, 0.1);
+}
+
+.mgModalDateIcon {
+    font-size: 2rem;
+    color: var(--mg-primary);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.mgModalFullDate {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--mg-primary-dark);
+    display: block;
+    text-transform: capitalize;
+}
+
+/* Modal Grid */
+.mgModalGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.mgModalItem {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.mgModalLabel {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--mg-text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.mgModalLabel .material-icons {
+    font-size: 1rem;
+}
+
+.mgModalValue {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--mg-text);
+}
+
+.mgModalFooter {
+    padding: 1.5rem 2rem;
+    background: #f9fafb;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.mgBtn {
+    background: var(--mg-text); /* Black/Dark button */
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.mgBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+    .mgPage {
+        padding: 1rem;
+    }
+    .mgHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    .mgActionsBar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    .mgFilterGroup {
+        width: 100%;
+    }
+    .mgDateInput {
+        width: 100%;
+    }
+    .mgModalGrid {
+        grid-template-columns: 1fr;
+    }
+}

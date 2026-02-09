@@ -924,12 +924,10 @@ export default function GestionGuardias() {
                             <thead>
                                 <tr>
                                     <th className="ggColDate">FECHA</th>
-                                    <th className="ggColCenter">TIPO</th>
-                                    <th className="ggColCenter">
-                                        ESPECIALIDAD
-                                    </th>
-                                    <th className="ggColCenter">TRABAJADOR</th>
-                                    <th className="ggColCenter">JEFE</th>
+                                    <th className="ggColType">TIPO</th>
+                                    <th className="ggColSpec">ESPECIALIDAD</th>
+                                    <th className="ggColWorker">TRABAJADOR</th>
+                                    <th className="ggColChief">JEFE</th>
                                     {isAdmin && (
                                         <th className="ggColActions">
                                             ACCIONES
@@ -949,16 +947,16 @@ export default function GestionGuardias() {
                                                 <td className="ggColDate">
                                                     <div className="ggSk skMd" />
                                                 </td>
-                                                <td className="ggColCenter">
+                                                <td className="ggColType">
                                                     <div className="ggSk skXs" />
                                                 </td>
-                                                <td className="ggColCenter">
+                                                <td className="ggColSpec">
                                                     <div className="ggSk skLg" />
                                                 </td>
-                                                <td className="ggColCenter">
+                                                <td className="ggColWorker">
                                                     <div className="ggSk skLg" />
                                                 </td>
-                                                <td className="ggColCenter">
+                                                <td className="ggColChief">
                                                     <div className="ggSk skSm" />
                                                 </td>
                                                 {isAdmin && (
@@ -1002,7 +1000,7 @@ export default function GestionGuardias() {
                                                     : "-"}
                                             </td>
 
-                                            <td className="ggColCenter">
+                                            <td className="ggColType">
                                                 <span
                                                     className={`ggPill ${pillClass(g.duty_type)}`}
                                                 >
@@ -1010,13 +1008,13 @@ export default function GestionGuardias() {
                                                 </span>
                                             </td>
 
-                                            <td className="ggColCenter">
+                                            <td className="ggColSpec">
                                                 {g.speciality}
                                             </td>
-                                            <td className="ggColCenter">
+                                            <td className="ggColWorker">
                                                 {g.worker}
                                             </td>
-                                            <td className="ggColCenter">
+                                            <td className="ggColChief">
                                                 {g.chief_worker ?? "—"}
                                             </td>
 

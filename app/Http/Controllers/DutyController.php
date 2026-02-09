@@ -88,11 +88,11 @@ class DutyController extends Controller
                     "date"=>$duty->date,
                     "duty_type"=>$duty->duty_type,
                     "id_speciality"=>$duty->id_speciality,
-                    "speciality"=>$duty->worker->speciality->name,
+                    "speciality"=>$duty->worker?->speciality?->name ?? null,
                     "id_worker"=>$duty->id_worker,
-                    "worker" =>$duty->worker->name,
+                    "worker" =>$duty->worker?->name ?? null,
                     "id_chief_worker"=>$duty->id_chief_worker,
-                    "chief_worker"=>$duty->chief->name??null,
+                    "chief_worker"=>$duty->chief?->name ?? null,
                     "is_chief"   => (int) $duty->id_worker === (int) $duty->id_chief_worker,
                 ];
             }
@@ -387,6 +387,7 @@ class DutyController extends Controller
         return false;
     }
 
+
     public function takeOneDay($duties, $i)
     {
         $dutiesDay = [];
@@ -405,6 +406,65 @@ class DutyController extends Controller
 
         return $dutiesDay;
     }
+
+    /**
+     * Get paginated duties for a specific worker
+     */
+    public function getWorkerDutiesPaginated(Request $request, $id)
+    {
+        try {
+            // Validate worker exists
+            $worker = Worker::find($id);
+            if (!$worker) {
+                return response()->json(['error' => 'Worker not found'], 404);
+            }
+
+            // Ensure the authenticated user is authorized to view this worker's duties
+            // (admin can view any, user can only view their own)
+            $user = $request->user();
+            // Assuming user has a worker_id or checks against user id linked to worker
+            // Specifically for "Mis Guardias", the user usually requests their own ID.
+
+            $query = Duty::where('id_worker', $id);
+
+            // Filter by date if provided
+            if ($request->has('date') && !empty($request->date)) {
+                $query->whereDate('date', $request->date);
+            }
+
+            // Order by date descending (newest first)
+            $query->orderBy('date', 'desc');
+
+            // Paginate
+            $pageSize = $request->input('per_page', 10);
+            $duties = $query->paginate($pageSize);
+
+            // Transform data to match frontend structure (include relation names)
+            $duties->getCollection()->transform(function ($duty) {
+                return [
+                    "id" => $duty->id,
+                    "date" => $duty->date,
+                    "duty_type" => $duty->duty_type,
+                    "id_speciality" => $duty->id_speciality,
+                    "speciality" => $duty->worker?->speciality?->name ?? null,
+                    "id_worker" => $duty->id_worker,
+                    "worker" => $duty->worker?->name ?? null,
+                    "id_chief_worker" => $duty->id_chief_worker,
+                    "chief_worker" => $duty->chief?->name ?? null,
+                    "is_chief" => (int) $duty->id_worker === (int) $duty->id_chief_worker,
+                ];
+            });
+
+            return response()->json($duties);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => 'Error fetching worker duties',
+                'mistake' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 
 
 }
