@@ -10,6 +10,7 @@ use App\Http\Middleware\isAdmin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PdfController;
+use App\Http\Controllers\GoogleAuthController;
 
 use App\Http\Controllers\DutyMetaController;
 
@@ -77,6 +78,12 @@ Route::get('/duties/{id}', [DutyController::class, 'show']);
 Route::get('/duties/{id}', [DutyController::class, 'show']);
 Route::get('/duties/day/{date}', [DutyController::class, 'day']);
 Route::post('/login', [AuthController::class, 'login']);
+
+
+//////////////RUTAS DE GOOGLE NO SE DONDE PONERLO ///////////////////////
+
+Route::get('/google/connect', [GoogleAuthController::class, 'redirect']);
+Route::get('/google/callback', [GoogleAuthController::class, 'callback']);
 
 
 
