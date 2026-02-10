@@ -4,6 +4,7 @@ import "../styles/AppLayout.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { getProfile } from "../services/ProfileService";
+import { useAuth } from "../hooks/useAuth";
 
 export default function AppLayout() {
     const [open, setOpen] = useState(false);
@@ -12,6 +13,7 @@ export default function AppLayout() {
         email: "",
         avatarUrl: "",
     });
+    const { isAdmin } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const isHome = location.pathname === "/";
@@ -75,6 +77,11 @@ export default function AppLayout() {
     function logout() {
         localStorage.removeItem("token");
         localStorage.removeItem("auth");
+        sessionStorage.removeItem("roles");
+        
+        // Disparar evento personalizado para notificar cambios de autenticación
+        window.dispatchEvent(new CustomEvent("authChange", { detail: { roles: [] } }));
+        
         navigate("/login");
     }
 
@@ -113,33 +120,38 @@ export default function AppLayout() {
                     </div>
 
                     <nav className="appNav">
-                        <NavLink
-                            to="/guardias"
-                            onClick={closeMenu}
-                            className={({ isActive }) =>
-                                `appNavItem ${isActive ? "active" : ""}`
-                            }
-                        >
-                            <span className="material-icons-outlined">
-                                calendar_month
-                            </span>
-                            <span>Guardias</span>
-                        </NavLink>
+                        {/* SOLO MOSTRAR PARA ADMINS */}
+                        {isAdmin && (
+                            <>
+                                <NavLink
+                                    to="/guardias"
+                                    onClick={closeMenu}
+                                    className={({ isActive }) =>
+                                        `appNavItem ${isActive ? "active" : ""}`
+                                    }
+                                >
+                                    <span className="material-icons-outlined">
+                                        calendar_month
+                                    </span>
+                                    <span>Gestión de Guardias</span>
+                                </NavLink>
 
-                        <NavLink
-                            to="/usuarios"
-                            onClick={closeMenu}
-                            className={({ isActive }) =>
-                                `appNavItem ${isActive ? "active" : ""}`
-                            }
-                        >
-                            <span className="material-icons-outlined">
-                                calculate
-                            </span>
-                            <span>Usuarios</span>
-                        </NavLink>
+                                <NavLink
+                                    to="/usuarios"
+                                    onClick={closeMenu}
+                                    className={({ isActive }) =>
+                                        `appNavItem ${isActive ? "active" : ""}`
+                                    }
+                                >
+                                    <span className="material-icons-outlined">
+                                        group
+                                    </span>
+                                    <span>Administrar Usuarios</span>
+                                </NavLink>
 
-                        <div className="appNavDivider" />
+                                <div className="appNavDivider" />
+                            </>
+                        )}
 
                         <NavLink
                             to="/home"
