@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/GestionGuardias.css";
 import { getDuties, updateDuty, deleteDuty } from "../services/DutyService";
 import { assignChiefs, getWorkers, isUserAdmin } from "../services/userService";
@@ -10,6 +11,7 @@ import RowActions from "../components/RowActions/RowActions";
 import Joyride, { STATUS } from "react-joyride-react-19";
 
 export default function GestionGuardias() {
+    const navigate = useNavigate();
     const { addNotification } = useNotifications();
     const SKELETON_ROWS = 8;
 
@@ -120,39 +122,37 @@ export default function GestionGuardias() {
     const [runTour, setRunTour] = useState(false);
     const tourSteps = [
         {
-            target: ".tour-search-name",
-            content: "Busca guardias por el nombre del trabajador.",
+            target: ".tour-import-excel",
+            content:
+                "Paso 2: Importa guardias desde Excel. Recuerda seleccionar mes y especialidad.",
             disableBeacon: true,
-        },
-        {
-            target: ".tour-search-date",
-            content: "Filtra las guardias por una fecha específica.",
-        },
-        {
-            target: ".tour-create-guard",
-            content: "Crea una nueva guardia manualmente.",
         },
         {
             target: ".tour-assign-chief",
             content:
-                "Asigna automáticamente los jefes de guardia para un mes seleccionado.",
+                "Paso 3: Asigna automáticamente los jefes de guardia para el mes.",
+        },
+        {
+            target: ".tour-create-guard",
+            content: "Crea una nueva guardia manualmente si fuera necesario.",
         },
         {
             target: ".tour-generate-pdf",
             content: "Genera y descarga un PDF con la plantilla del día.",
         },
         {
-            target: ".tour-import-excel",
-            content:
-                "Importa guardias desde un archivo Excel. Asegúrate de seleccionar el mes, año y especialidad correctos.",
+            target: ".tour-search-name",
+            content: "Busca guardias por el nombre del trabajador.",
+        },
+        {
+            target: ".tour-search-date",
+            content: "Filtra las guardias por una fecha específica.",
         },
     ];
 
     useEffect(() => {
-        const tutorialDone = localStorage.getItem(
-            "gestionGuardiasTutorialDone",
-        );
-        if (!tutorialDone) {
+        const phase = localStorage.getItem("tutorial_phase");
+        if (phase === "PHASE_GUARDS") {
             setRunTour(true);
         }
     }, []);
@@ -162,8 +162,10 @@ export default function GestionGuardias() {
         const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
 
         if (finishedStatuses.includes(status)) {
-            localStorage.setItem("gestionGuardiasTutorialDone", "true");
+            // Pasamos a la fase 3: Home / Dashboard
+            localStorage.setItem("tutorial_phase", "PHASE_HOME");
             setRunTour(false);
+            navigate("/home");
         }
     };
 
@@ -922,12 +924,10 @@ export default function GestionGuardias() {
                             <thead>
                                 <tr>
                                     <th className="ggColDate">FECHA</th>
-                                    <th className="ggColCenter">TIPO</th>
-                                    <th className="ggColCenter">
-                                        ESPECIALIDAD
-                                    </th>
-                                    <th className="ggColCenter">TRABAJADOR</th>
-                                    <th className="ggColCenter">JEFE</th>
+                                    <th className="ggColType">TIPO</th>
+                                    <th className="ggColSpec">ESPECIALIDAD</th>
+                                    <th className="ggColWorker">TRABAJADOR</th>
+                                    <th className="ggColChief">JEFE</th>
                                     {isAdmin && (
                                         <th className="ggColActions">
                                             ACCIONES
@@ -947,16 +947,16 @@ export default function GestionGuardias() {
                                                 <td className="ggColDate">
                                                     <div className="ggSk skMd" />
                                                 </td>
-                                                <td className="ggColCenter">
+                                                <td className="ggColType">
                                                     <div className="ggSk skXs" />
                                                 </td>
-                                                <td className="ggColCenter">
+                                                <td className="ggColSpec">
                                                     <div className="ggSk skLg" />
                                                 </td>
-                                                <td className="ggColCenter">
+                                                <td className="ggColWorker">
                                                     <div className="ggSk skLg" />
                                                 </td>
-                                                <td className="ggColCenter">
+                                                <td className="ggColChief">
                                                     <div className="ggSk skSm" />
                                                 </td>
                                                 {isAdmin && (
@@ -1000,7 +1000,7 @@ export default function GestionGuardias() {
                                                     : "-"}
                                             </td>
 
-                                            <td className="ggColCenter">
+                                            <td className="ggColType">
                                                 <span
                                                     className={`ggPill ${pillClass(g.duty_type)}`}
                                                 >
@@ -1008,13 +1008,13 @@ export default function GestionGuardias() {
                                                 </span>
                                             </td>
 
-                                            <td className="ggColCenter">
+                                            <td className="ggColSpec">
                                                 {g.speciality}
                                             </td>
-                                            <td className="ggColCenter">
+                                            <td className="ggColWorker">
                                                 {g.worker}
                                             </td>
-                                            <td className="ggColCenter">
+                                            <td className="ggColChief">
                                                 {g.chief_worker ?? "—"}
                                             </td>
 
@@ -1196,11 +1196,7 @@ export default function GestionGuardias() {
 
             {/* MODAL IMPORTAR EXCEL */}
             {importOpen && (
-                <div
-                    className="modalOverlay"
-                    role="dialog"
-                    aria-modal="true"
-                >
+                <div className="modalOverlay" role="dialog" aria-modal="true">
                     <div className="modalSheet">
                         <div className="modalBody">
                             <div className="modalHeader">
@@ -1214,13 +1210,19 @@ export default function GestionGuardias() {
                                         Importar guardias desde Excel
                                     </div>
                                     <div className="modalSubtitle">
-                                        Aquí puedes importar las guardias desde un archivo Excel. Asegúrate de seleccionar el mes, año y especialidad correctos.
+                                        Aquí puedes importar las guardias desde
+                                        un archivo Excel. Asegúrate de
+                                        seleccionar el mes, año y especialidad
+                                        correctos.
                                     </div>
                                 </div>
                             </div>
 
                             <div className="formGrid">
-                                <label className="label" style={{ gridColumn: "1 / -1" }}>
+                                <label
+                                    className="label"
+                                    style={{ gridColumn: "1 / -1" }}
+                                >
                                     <span>Especialidad</span>
 
                                     {specialitiesLoading ? (
@@ -1236,22 +1238,19 @@ export default function GestionGuardias() {
                                             className="control"
                                             value={idSpeciality}
                                             onChange={(e) =>
-                                                setIdSpeciality(
-                                                    e.target.value,
-                                                )
+                                                setIdSpeciality(e.target.value)
                                             }
                                         >
                                             <option value="">
-                                                -- Selecciona una
-                                                especialidad --
+                                                -- Selecciona una especialidad
+                                                --
                                             </option>
                                             {specialities.map((s) => (
                                                 <option
                                                     key={s.id}
                                                     value={String(s.id)}
                                                 >
-                                                    {s.name} (id: {s.id}
-                                                    )
+                                                    {s.name} (id: {s.id})
                                                 </option>
                                             ))}
                                         </select>
@@ -1264,9 +1263,7 @@ export default function GestionGuardias() {
                                         className="control"
                                         value={importMonth}
                                         onChange={(e) =>
-                                            setImportMonth(
-                                                e.target.value,
-                                            )
+                                            setImportMonth(e.target.value)
                                         }
                                     >
                                         {months.map((m) => (
@@ -1274,8 +1271,7 @@ export default function GestionGuardias() {
                                                 key={m.value}
                                                 value={m.value}
                                             >
-                                                {m.label} ({m.value}
-                                                )
+                                                {m.label} ({m.value})
                                             </option>
                                         ))}
                                     </select>
@@ -1287,16 +1283,11 @@ export default function GestionGuardias() {
                                         className="control"
                                         value={importYear}
                                         onChange={(e) =>
-                                            setImportYear(
-                                                e.target.value,
-                                            )
+                                            setImportYear(e.target.value)
                                         }
                                     >
                                         {years.map((y) => (
-                                            <option
-                                                key={y}
-                                                value={y}
-                                            >
+                                            <option key={y} value={y}>
                                                 {y}
                                             </option>
                                         ))}
@@ -1331,8 +1322,7 @@ export default function GestionGuardias() {
                                     title="Arrastra Excel o haz clic para seleccionarlo"
                                 >
                                     <div style={{ fontWeight: 600 }}>
-                                        Arrastra aquí tu Excel (.xls /
-                                        .xlsx)
+                                        Arrastra aquí tu Excel (.xls / .xlsx)
                                     </div>
                                     <div
                                         style={{
@@ -1345,14 +1335,18 @@ export default function GestionGuardias() {
 
                                     {excelFile && (
                                         <div style={{ marginTop: 10 }}>
-                                            Archivo:{" "}
-                                            <b>{excelFile.name}</b>
+                                            Archivo: <b>{excelFile.name}</b>
                                         </div>
                                     )}
                                 </div>
 
                                 {importMsg && (
-                                    <div style={{ marginTop: 12, gridColumn: "1 / -1" }}>
+                                    <div
+                                        style={{
+                                            marginTop: 12,
+                                            gridColumn: "1 / -1",
+                                        }}
+                                    >
                                         {importMsg}
                                     </div>
                                 )}
@@ -1374,9 +1368,7 @@ export default function GestionGuardias() {
                                 disabled={importUploading}
                                 onClick={submitImport}
                             >
-                                {importUploading
-                                    ? "Subiendo..."
-                                    : "Importar"}
+                                {importUploading ? "Subiendo..." : "Importar"}
                             </button>
                         </div>
                     </div>
@@ -1861,7 +1853,7 @@ export default function GestionGuardias() {
                 run={runTour}
                 continuous
                 showProgress
-                showSkipButton
+                showSkipButton={true}
                 scrollOffset={150}
                 callback={handleJoyrideCallback}
                 styles={{
@@ -1873,9 +1865,9 @@ export default function GestionGuardias() {
                 locale={{
                     back: "Atrás",
                     close: "Cerrar",
-                    last: "Finalizar",
+                    last: "Siguiente: Dashboard",
                     next: "Siguiente",
-                    skip: "Saltar",
+                    skip: "Saltar tutorial",
                 }}
             />
         </div>
