@@ -1486,7 +1486,7 @@ export default function GestionGuardias() {
                                                     key={s.id}
                                                     value={String(s.id)}
                                                 >
-                                                    {s.name} (id: {s.id})
+                                                    {s.name}
                                                 </option>
                                             ))}
                                         </select>
