@@ -18,6 +18,7 @@ import {
     deleteWorker as deleteWorkerApi,
     updateWorker,
 } from "../services/workerService";
+import Button from "../components/Button/Button";
 
 export default function GestionUsuarios() {
     const navigate = useNavigate();
@@ -162,8 +163,8 @@ export default function GestionUsuarios() {
                 const arr = Array.isArray(data)
                     ? data
                     : Array.isArray(data?.data)
-                      ? data.data
-                      : [];
+                        ? data.data
+                        : [];
                 setSpecialities(arr);
             } catch (e) {
                 console.error("No se pudieron cargar las especialidades", e);
@@ -365,8 +366,8 @@ export default function GestionUsuarios() {
                         updated.speciality = spec
                             ? spec.name
                             : payload.id_speciality === null
-                              ? null
-                              : w.speciality;
+                                ? null
+                                : w.speciality;
                         return updated;
                     }),
                 );
@@ -437,8 +438,8 @@ export default function GestionUsuarios() {
             handleSuccessDelete(null);
             setDeleteError(
                 err?.response?.data?.error ||
-                    err?.message ||
-                    "No se pudo eliminar",
+                err?.message ||
+                "No se pudo eliminar",
             );
         } finally {
             setDeleteLoading(false);
@@ -610,21 +611,19 @@ export default function GestionUsuarios() {
         <div className="cdPage">
             <main className="cdMain">
                 <div className="cdToggle tour-view-toggle">
-                    <button
-                        className={workersBtnClass}
-                        type="button"
+                    <Button
+                        variant={view === "workers" ? "primary" : "secondary"}
                         onClick={() => setView("workers")}
                     >
                         Ver trabajadores
-                    </button>
+                    </Button>
 
-                    <button
-                        className={adminsBtnClass}
-                        type="button"
+                    <Button
+                        variant={view === "admins" ? "primary" : "secondary"}
                         onClick={() => setView("admins")}
                     >
                         Ver usuarios
-                    </button>
+                    </Button>
                 </div>
 
                 {/* Tabla Card */}
@@ -638,19 +637,17 @@ export default function GestionUsuarios() {
                                 style={{ display: "none" }}
                                 onChange={onPickExcel}
                             />
-                            <button
-                                className="cdBtnSecondary tour-import-users"
-                                type="button"
+
+                            <Button
+                                className="tour-import-users"
                                 disabled={importing}
                                 onClick={() => fileInputRef.current?.click()}
+                                icon="table_view"
                             >
-                                <span className="material-icons excel">
-                                    table_view
-                                </span>
                                 {importing
                                     ? "Importando..."
                                     : "Importar usuarios"}
-                            </button>
+                            </Button>
                             {/* TOAST de notificaciones */}
                             {toast.visible && (
                                 <div
@@ -698,15 +695,13 @@ export default function GestionUsuarios() {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                             {searchTerm && (
-                                <button
+                                <Button
+                                    variant="ghost"
                                     className="cdSearchClear"
                                     onClick={() => setSearchTerm("")}
                                     title="Limpiar búsqueda"
-                                >
-                                    <span className="material-icons">
-                                        close
-                                    </span>
-                                </button>
+                                    icon="close"
+                                />
                             )}
                         </div>
                     </div>
@@ -810,19 +805,19 @@ export default function GestionUsuarios() {
                                                     <td>
                                                         {row.registration_date
                                                             ? new Date(
-                                                                  row.registration_date,
-                                                              ).toLocaleDateString(
-                                                                  "es-ES",
-                                                              )
+                                                                row.registration_date,
+                                                            ).toLocaleDateString(
+                                                                "es-ES",
+                                                            )
                                                             : "-"}
                                                     </td>
                                                     <td>
                                                         {row.discharge_date
                                                             ? new Date(
-                                                                  row.discharge_date,
-                                                              ).toLocaleDateString(
-                                                                  "es-ES",
-                                                              )
+                                                                row.discharge_date,
+                                                            ).toLocaleDateString(
+                                                                "es-ES",
+                                                            )
                                                             : "-"}
                                                     </td>
                                                     <td>{row.speciality}</td>
@@ -881,17 +876,14 @@ export default function GestionUsuarios() {
 
                     {!loading && !adminsLoading && totalPages > 1 && (
                         <div className="cdPager">
-                            <button
-                                className="cdPagerBtn"
-                                type="button"
+                            <Button
+                                variant="ghost"
                                 onClick={goPrevPage}
                                 disabled={currentPage === 1 || loading}
+                                icon="chevron_left"
                             >
-                                <span className="material-icons-outlined">
-                                    chevron_left
-                                </span>
                                 Anterior
-                            </button>
+                            </Button>
 
                             <div className="cdPagerNums" aria-label="Páginas">
                                 {pageButtons.map((p, idx) =>
@@ -903,22 +895,22 @@ export default function GestionUsuarios() {
                                             …
                                         </span>
                                     ) : (
-                                        <button
+                                        <Button
                                             key={p}
-                                            type="button"
-                                            className={`cdPagerNum ${p === currentPage ? "active" : ""}`}
+                                            variant={p === currentPage ? "primary" : "ghost"}
+                                            className="cdPagerNum"
                                             onClick={() => setCurrentPage(p)}
                                             disabled={loading || adminsLoading}
+                                            style={{ minWidth: "40px", padding: "8px" }}
                                         >
                                             {p}
-                                        </button>
+                                        </Button>
                                     ),
                                 )}
                             </div>
 
-                            <button
-                                className="cdPagerBtn"
-                                type="button"
+                            <Button
+                                variant="ghost"
                                 onClick={goNextPage}
                                 disabled={
                                     currentPage === totalPages ||
@@ -930,7 +922,7 @@ export default function GestionUsuarios() {
                                 <span className="material-icons-outlined">
                                     chevron_right
                                 </span>
-                            </button>
+                            </Button>
                         </div>
                     )}
 
@@ -1132,18 +1124,17 @@ export default function GestionUsuarios() {
 
                                 <div className="modalFooter">
                                     <div style={{ display: "flex", gap: 10 }}>
-                                        <button
-                                            className="btnPrimary"
+                                        <Button
                                             type="submit"
                                             disabled={editSaving}
+                                            isLoading={editSaving}
                                         >
-                                            {editSaving
-                                                ? "Guardando..."
-                                                : "Guardar"}
-                                        </button>
-                                        <button
-                                            className="btnSecondary btnSecondary--destructive"
+                                            Guardar
+                                        </Button>
+                                        <Button
+                                            variant="secondary"
                                             type="button"
+                                            className="btnSecondary--destructive"
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 closeEdit();
@@ -1151,7 +1142,7 @@ export default function GestionUsuarios() {
                                             disabled={editSaving}
                                         >
                                             Cancelar
-                                        </button>
+                                        </Button>
                                     </div>
                                 </div>
                             </form>
@@ -1203,22 +1194,21 @@ export default function GestionUsuarios() {
                             </div>
                             <div className="modalFooter">
                                 <div style={{ display: "flex", gap: 10 }}>
-                                    <button
-                                        className="btnPrimary btnPrimary--destructive"
+                                    <Button
+                                        variant="danger"
                                         onClick={confirmDelete}
                                         disabled={deleteLoading}
+                                        isLoading={deleteLoading}
                                     >
-                                        {deleteLoading
-                                            ? "Eliminando..."
-                                            : "Eliminar"}
-                                    </button>
-                                    <button
-                                        className="btnSecondary"
+                                        Eliminar
+                                    </Button>
+                                    <Button
+                                        variant="secondary"
                                         onClick={cancelDelete}
                                         disabled={deleteLoading}
                                     >
                                         Cancelar
-                                    </button>
+                                    </Button>
                                 </div>
                             </div>
                         </div>

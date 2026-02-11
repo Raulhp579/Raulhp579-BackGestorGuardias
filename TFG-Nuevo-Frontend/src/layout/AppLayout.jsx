@@ -46,6 +46,7 @@ export default function AppLayout() {
     }, [navigate]);
 
     // Redirección forzada para el tutorial global
+    /*
     useEffect(() => {
         const globalDone = localStorage.getItem("global_tutorial_done");
 
@@ -72,16 +73,17 @@ export default function AppLayout() {
             }
         }
     }, [location.pathname, navigate]);
+    */
 
     // logout
     function logout() {
         localStorage.removeItem("token");
         localStorage.removeItem("auth");
         sessionStorage.removeItem("roles");
-        
+
         // Disparar evento personalizado para notificar cambios de autenticación
         window.dispatchEvent(new CustomEvent("authChange", { detail: { roles: [] } }));
-        
+
         navigate("/login");
     }
 

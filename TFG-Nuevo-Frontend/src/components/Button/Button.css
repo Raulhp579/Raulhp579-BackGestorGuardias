@@ -1,0 +1,127 @@
+/* Base Styles */
+.customBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    border-radius: 12px;
+    /* --r 12px en GestionUsuarios */
+    font-family: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 200ms ease;
+    outline: none;
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+}
+
+.customBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.customBtn .material-icons {
+    font-size: 1.25em;
+    /* Escala con el texto */
+}
+
+/* --- Variantes --- */
+
+/* Primary (Estilo .cdBtnSecondary de GestionUsuarios) */
+.customBtn--primary {
+    background: #00a652;
+    /* Verde principal */
+    color: #fff;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    /* --shadow-soft aprox */
+}
+
+.customBtn--primary:hover:not(:disabled) {
+    background: #005432;
+    /* Verde oscuro hover */
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 112, 65, .15);
+}
+
+.customBtn--primary:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+/* Secondary / Ghost (Estilo .cdBtnGhost) */
+.customBtn--secondary {
+    background: #FFFFFF;
+    /* --card */
+    border: 1px solid #E5E7EB;
+    /* --border */
+    color: #374151;
+    /* --text algo más suave */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .04);
+}
+
+.customBtn--secondary:hover:not(:disabled) {
+    background: #F9FAFB;
+}
+
+/* Danger (Para borrar o acciones destructivas) */
+.customBtn--danger {
+    background: #dc2626;
+    color: #fff;
+    box-shadow: 0 4px 6px rgba(220, 38, 38, 0.2);
+}
+
+.customBtn--danger:hover:not(:disabled) {
+    background: #b91c1c;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(220, 38, 38, 0.3);
+}
+
+/* Ghost (Sin borde ni fondo inicial, estilo enlace/botón sutil) */
+.customBtn--ghost {
+    background: transparent;
+    color: #6B7280;
+    /* --muted */
+    box-shadow: none;
+}
+
+.customBtn--ghost:hover:not(:disabled) {
+    background: rgba(0, 0, 0, 0.05);
+    color: #111827;
+}
+
+/* --- Tamaños --- */
+
+.customBtn--sm {
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: 8px;
+}
+
+.customBtn--md {
+    padding: 10px 16px;
+    /* Coincide con .cdBtnSecondary */
+    font-size: 14px;
+}
+
+.customBtn--lg {
+    padding: 14px 20px;
+    font-size: 16px;
+}
+
+/* Spin animation for loading icon */
+.customBtn .spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
