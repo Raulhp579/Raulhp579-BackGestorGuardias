@@ -4,6 +4,7 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { useNotifications } from "../context/NotificationsContext";
+import { useAuth } from "../hooks/useAuth";
 
 import { getDuties, createDuty, getDutiesLastUpdate } from "../services/DutyService";
 import { getSpecialities } from "../services/SpecialitiesService";
@@ -30,6 +31,7 @@ function getInitials(name) {
 
 export default function HomeDashboard() {
     const { addNotification } = useNotifications();
+    const { isAdmin } = useAuth();
 
     const [specialities, setSpecialities] = useState([]);
 
@@ -132,9 +134,17 @@ export default function HomeDashboard() {
         };
     }, []);
 
-    // NUEVO: cargar workers al montar (para id_worker)
+    // NUEVO: cargar workers al montar (para id_worker) - SOLO SI ES ADMIN
     useEffect(() => {
         let alive = true;
+
+        // Solo cargar workers si es admin
+        if (!isAdmin) {
+            setWorkers([]);
+            setWorkersError("");
+            setWorkersLoading(false);
+            return;
+        }
 
         (async () => {
             setWorkersLoading(true);
@@ -162,7 +172,7 @@ export default function HomeDashboard() {
         return () => {
             alive = false;
         };
-    }, []);
+    }, [isAdmin]);
 
     // Helpers Excel
     function isExcelFile(file) {
@@ -912,9 +922,12 @@ export default function HomeDashboard() {
                                     </div>
                                 );
                             }}
-                            dateClick={(info) =>
-                                openNewGuardiaModal(info.dateStr)
-                            }
+                            dateClick={(info) => {
+                                // Solo permitir crear guardia si es admin
+                                if (isAdmin) {
+                                    openNewGuardiaModal(info.dateStr);
+                                }
+                            }}
                             eventClick={(info) => {
                                 const raw = info.event.extendedProps?.raw || null;
 

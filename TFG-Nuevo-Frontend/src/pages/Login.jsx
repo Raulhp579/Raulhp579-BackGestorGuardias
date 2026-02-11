@@ -36,6 +36,9 @@ export default function Login() {
       sessionStorage.setItem("roles", JSON.stringify(response.auth.roles));
       localStorage.setItem("auth", JSON.stringify(authPayload));
 
+      // Disparar evento personalizado para notificar cambios de autenticación
+      window.dispatchEvent(new CustomEvent("authChange", { detail: { roles: response.auth.roles } }));
+
       navigate("/home");
     } catch (err) {
       console.error(err);
