@@ -11,6 +11,7 @@ import {
     deleteAdmin as deleteAdminApi,
 } from "../services/userService";
 import { getSpecialities } from "../services/SpecialitiesService";
+import { getProfile } from "../services/ProfileService";
 
 import RowActions from "../components/RowActions/RowActions";
 import Joyride, { STATUS } from "react-joyride-react-19";
@@ -44,6 +45,7 @@ export default function GestionUsuarios() {
     const [adminsError, setAdminsError] = useState("");
 
     const [specialities, setSpecialities] = useState([]);
+    const [currentUser, setCurrentUser] = useState(null);
 
     // Joyride Steps
     const [runTour, setRunTour] = useState(false);
@@ -62,6 +64,11 @@ export default function GestionUsuarios() {
         if (!globalDone) {
             setRunTour(true);
         }
+
+        // Obtener usuario actual para no mostrar botón borrar en sí mismo
+        getProfile()
+            .then((data) => setCurrentUser(data))
+            .catch((err) => console.error("Error loading profile:", err));
     }, []);
 
     const handleJoyrideCallback = (data) => {
@@ -857,7 +864,10 @@ export default function GestionUsuarios() {
                                                                     editAdmin
                                                                 }
                                                                 onDelete={
-                                                                    deleteAdmin
+                                                                    row.id ===
+                                                                        currentUser?.id
+                                                                        ? null
+                                                                        : deleteAdmin
                                                                 }
                                                                 disabled={
                                                                     adminsLoading
@@ -944,6 +954,11 @@ export default function GestionUsuarios() {
                         role="dialog"
                         aria-modal="true"
                         aria-label="Editar registro"
+                        onClick={(e) => {
+                            if (e.target.classList.contains("modalOverlay")) {
+                                closeEdit();
+                            }
+                        }}
                     >
                         <div className="modalSheet">
                             <form onSubmit={submitEdit}>
@@ -993,6 +1008,7 @@ export default function GestionUsuarios() {
                                                             onEditFieldChange
                                                         }
                                                         required
+                                                        disabled
                                                     />
                                                 </label>
 
@@ -1084,6 +1100,7 @@ export default function GestionUsuarios() {
                                                         onChange={
                                                             onEditFieldChange
                                                         }
+                                                        disabled
                                                     >
                                                         <option value="">
                                                             -- Ninguna --
@@ -1157,6 +1174,11 @@ export default function GestionUsuarios() {
                         role="dialog"
                         aria-modal="true"
                         aria-label="Confirmar eliminación"
+                        onClick={(e) => {
+                            if (e.target.classList.contains("modalOverlay")) {
+                                cancelDelete();
+                            }
+                        }}
                     >
                         <div className="modalSheet">
                             <div className="modalBody">

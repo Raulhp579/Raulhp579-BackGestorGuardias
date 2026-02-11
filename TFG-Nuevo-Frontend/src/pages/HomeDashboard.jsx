@@ -1,5 +1,7 @@
 import { useMemo, useRef, useState, useEffect, useCallback } from "react";
+
 import "../styles/HomeDashboard.css";
+import Button from "../components/Button/Button";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -120,8 +122,8 @@ export default function HomeDashboard() {
                 const arr = Array.isArray(data)
                     ? data
                     : Array.isArray(data?.data)
-                      ? data.data
-                      : [];
+                        ? data.data
+                        : [];
                 if (alive) setSpecialities(arr);
             } catch (e) {
                 console.error(e);
@@ -155,8 +157,8 @@ export default function HomeDashboard() {
                 const arr = Array.isArray(data)
                     ? data
                     : Array.isArray(data?.data)
-                      ? data.data
-                      : [];
+                        ? data.data
+                        : [];
                 if (alive) setWorkers(arr);
             } catch (e) {
                 console.error(e);
@@ -382,8 +384,8 @@ export default function HomeDashboard() {
     function mapDutyToEvent(d) {
         const id = String(
             d.id ??
-                d.uuid ??
-                (crypto?.randomUUID ? crypto.randomUUID() : Date.now()),
+            d.uuid ??
+            (crypto?.randomUUID ? crypto.randomUUID() : Date.now()),
         );
 
         const date = String(d.date ?? "");
@@ -444,8 +446,8 @@ export default function HomeDashboard() {
             const arr = Array.isArray(data)
                 ? data
                 : Array.isArray(data?.data)
-                  ? data.data
-                  : [];
+                    ? data.data
+                    : [];
             setEvents(arr.map(mapDutyToEvent));
 
             try {
@@ -601,8 +603,8 @@ export default function HomeDashboard() {
             const arr = Array.isArray(data)
                 ? data
                 : Array.isArray(data?.data)
-                  ? data.data
-                  : [];
+                    ? data.data
+                    : [];
             setSpecialities(arr);
         } catch (e) {
             console.error(e);
@@ -787,17 +789,16 @@ export default function HomeDashboard() {
 
                     <div className="hdActions" style={{ position: "relative" }}>
                         {/* FILTROS */}
-                        <button
+                        {/* FILTROS */}
+                        <Button
+                            variant="secondary"
                             className="hdBtn light hdBtnSm tour-filters"
-                            type="button"
                             onClick={() => setFilterOpen((v) => !v)}
                             aria-expanded={filterOpen}
+                            icon="filter_list"
                         >
-                            <span className="material-icons-outlined">
-                                filter_list
-                            </span>
                             Filtros
-                        </button>
+                        </Button>
 
                         {filterOpen && (
                             <div className="hdFilterMenu" role="menu">
@@ -1025,9 +1026,9 @@ export default function HomeDashboard() {
                         </div>
 
                         <div className="hdModalFooter">
-                            <button className="hdBtn light hdBtnSm" type="button" onClick={closeDutyModal}>
+                            <Button variant="secondary" onClick={closeDutyModal} size="sm">
                                 Cerrar
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>

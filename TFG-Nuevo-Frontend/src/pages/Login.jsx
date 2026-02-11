@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import "../styles/Login.css";
 import { useNavigate } from "react-router-dom";
 import { login } from "../services/AuthService";
+import Button from "../components/Button/Button";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -174,9 +175,15 @@ export default function Login() {
               />
             </div>
 
-            <button type="submit" className="submitBtn" disabled={loading}>
-              {loading ? "Accediendo..." : "Iniciar Sesión"}
-            </button>
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={loading}
+              isLoading={loading}
+              style={{ width: "100%", marginTop: "8px" }}
+            >
+              Iniciar Sesión
+            </Button>
           </form>
         </section>
       </div>

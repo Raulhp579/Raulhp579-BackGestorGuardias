@@ -20,15 +20,17 @@ export default function RowActions({
                 <span className="material-icons-outlined">edit</span>
             </button>
 
-            <button
-                type="button"
-                className="raIconBtn raDanger"
-                onClick={() => onDelete?.(row)}
-                disabled={disabled}
-                title={deleteTitle}
-            >
-                <span className="material-icons-outlined">delete</span>
-            </button>
+            {onDelete && (
+                <button
+                    type="button"
+                    className="raIconBtn raDanger"
+                    onClick={() => onDelete?.(row)}
+                    disabled={disabled}
+                    title={deleteTitle}
+                >
+                    <span className="material-icons-outlined">delete</span>
+                </button>
+            )}
         </div>
     );
 }

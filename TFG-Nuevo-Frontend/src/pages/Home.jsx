@@ -1,6 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+
 import "../styles/Home.css";
+import Button from "../components/Button/Button";
 
 export default function Home() {
     const navigate = useNavigate();
@@ -25,19 +27,19 @@ export default function Home() {
                     </div>
                     <div className="homeNavLinks">
                         {isLoggedIn ? (
-                            <button 
-                                className="homeNavButton homeNavButtonPrimary"
+                            <Button
+                                variant="primary"
                                 onClick={() => navigate("/home")}
                             >
                                 Ir al Dashboard
-                            </button>
+                            </Button>
                         ) : (
-                            <button 
-                                className="homeNavButton homeNavButtonPrimary"
+                            <Button
+                                variant="primary"
                                 onClick={() => navigate("/login")}
                             >
                                 Iniciar Sesión
-                            </button>
+                            </Button>
                         )}
                     </div>
                 </div>
@@ -49,27 +51,27 @@ export default function Home() {
                     <div className="homeHeroText">
                         <h1 className="homeHeroTitle">Gestión de Guardias Simplificada</h1>
                         <p className="homeHeroSubtitle">
-                            Planifica, organiza y controla los turnos de guardias de tu equipo 
+                            Planifica, organiza y controla los turnos de guardias de tu equipo
                             con una plataforma moderna y fácil de usar.
                         </p>
                         <div className="homeHeroButtons">
                             {isLoggedIn ? (
-                                <button 
-                                    className="homeHeroButton homeHeroButtonPrimary"
+                                <Button
+                                    variant="primary"
                                     onClick={() => navigate("/home")}
+                                    icon="dashboard"
                                 >
-                                    <span className="material-icons">dashboard</span>
                                     Acceder al Sistema
-                                </button>
+                                </Button>
                             ) : (
                                 <>
-                                    <button 
-                                        className="homeHeroButton homeHeroButtonPrimary"
+                                    <Button
+                                        variant="primary"
                                         onClick={() => navigate("/login")}
+                                        icon="login"
                                     >
-                                        <span className="material-icons">login</span>
                                         Acceder al Sistema
-                                    </button>
+                                    </Button>
                                 </>
                             )}
                         </div>
@@ -111,11 +113,11 @@ export default function Home() {
                             </div>
                             <h3 className="homeResourceTitle">Tutorial Interactivo</h3>
                             <p className="homeResourceText">
-                                Aprende a usar GuardiApp con nuestro tutorial interactivo integrado en la aplicación. 
-                                Guía paso a paso directamente donde necesitas, con explicaciones contextuales 
+                                Aprende a usar GuardiApp con nuestro tutorial interactivo integrado en la aplicación.
+                                Guía paso a paso directamente donde necesitas, con explicaciones contextuales
                                 y demostraciones en tiempo real. Acceso completo desde tu cuenta.
                             </p>
-                            <button className="homeResourceButton">Acceder a Tutorial</button>
+                            <Button>Acceder a Tutorial</Button>
                         </div>
 
                         {/* Excel Template Resource */}
@@ -125,11 +127,11 @@ export default function Home() {
                             </div>
                             <h3 className="homeResourceTitle">Plantilla Excel</h3>
                             <p className="homeResourceText">
-                                Descarga plantillas Excel profesionales para gestionar guardias manualmente. 
-                                Perfecta para transiciones o respaldos. Fácilmente importable a GuardiApp 
+                                Descarga plantillas Excel profesionales para gestionar guardias manualmente.
+                                Perfecta para transiciones o respaldos. Fácilmente importable a GuardiApp
                                 cuando estés listo para migrar.
                             </p>
-                            <button className="homeResourceButton">Descargar</button>
+                            <Button>Descargar</Button>
                         </div>
                     </div>
                 </div>
@@ -150,8 +152,8 @@ export default function Home() {
                         </div>
                         <h3 className="homeFeatureTitle">Planificación Inteligente</h3>
                         <p className="homeFeatureText">
-                            Visualiza tus turnos en un calendario interactivo. Crea nuevas guardias, 
-                            asigna trabajadores y modifica fechas con solo unos clics. Sistema intuitivo 
+                            Visualiza tus turnos en un calendario interactivo. Crea nuevas guardias,
+                            asigna trabajadores y modifica fechas con solo unos clics. Sistema intuitivo
                             que ahorra horas de planificación manual.
                         </p>
                     </div>
@@ -163,8 +165,8 @@ export default function Home() {
                         </div>
                         <h3 className="homeFeatureTitle">Gestión de Equipo</h3>
                         <p className="homeFeatureText">
-                            Administra trabajadores, sus especialidades y disponibilidades. Asigna 
-                            permisos por rol y controla quién puede ver, editar o eliminar guardias. 
+                            Administra trabajadores, sus especialidades y disponibilidades. Asigna
+                            permisos por rol y controla quién puede ver, editar o eliminar guardias.
                             Control total y centralizado de tu equipo.
                         </p>
                     </div>
@@ -176,8 +178,8 @@ export default function Home() {
                         </div>
                         <h3 className="homeFeatureTitle">Reportes en PDF</h3>
                         <p className="homeFeatureText">
-                            Genera reportes profesionales de guardias por día, mes o período. 
-                            Descarga en PDF listos para imprimir, compartir con tu equipo o archivar. 
+                            Genera reportes profesionales de guardias por día, mes o período.
+                            Descarga en PDF listos para imprimir, compartir con tu equipo o archivar.
                             Información siempre a mano.
                         </p>
                     </div>
@@ -189,8 +191,8 @@ export default function Home() {
                         </div>
                         <h3 className="homeFeatureTitle">Filtros y Búsqueda</h3>
                         <p className="homeFeatureText">
-                            Encuentra guardias al instante usando múltiples filtros. Busca por nombre 
-                            de trabajador, fecha, tipo de guardia. Ordena por fecha o tipo en cualquier 
+                            Encuentra guardias al instante usando múltiples filtros. Busca por nombre
+                            de trabajador, fecha, tipo de guardia. Ordena por fecha o tipo en cualquier
                             dirección que necesites.
                         </p>
                     </div>
@@ -202,8 +204,8 @@ export default function Home() {
                         </div>
                         <h3 className="homeFeatureTitle">Seguridad</h3>
                         <p className="homeFeatureText">
-                            Autenticación segura con tokens de acceso. Control granular de permisos 
-                            por usuario. Solo acceden a lo que necesitan. Datos encriptados y respaldos 
+                            Autenticación segura con tokens de acceso. Control granular de permisos
+                            por usuario. Solo acceden a lo que necesitan. Datos encriptados y respaldos
                             automáticos.
                         </p>
                     </div>
@@ -215,8 +217,8 @@ export default function Home() {
                         </div>
                         <h3 className="homeFeatureTitle">Responsivo</h3>
                         <p className="homeFeatureText">
-                            Funciona perfectamente en desktop, tablet y móvil. Accede desde la oficina, 
-                            en casa o en ruta. Interfaz adaptable que se ajusta a cualquier pantalla 
+                            Funciona perfectamente en desktop, tablet y móvil. Accede desde la oficina,
+                            en casa o en ruta. Interfaz adaptable que se ajusta a cualquier pantalla
                             sin perder funcionalidad.
                         </p>
                     </div>
@@ -286,13 +288,14 @@ export default function Home() {
                         Simplifica la gestión de guardias de tu equipo hoy mismo
                     </p>
                     {isLoggedIn && (
-                        <button 
-                            className="homeCTAButton"
+                        <Button
+                            variant="secondary"
                             onClick={() => navigate("/home")}
+                            style={{ color: "#2e7d4d", borderColor: "white" }}
+                            icon="dashboard"
                         >
-                            <span className="material-icons">dashboard</span>
                             Ir al Dashboard
-                        </button>
+                        </Button>
                     )}
                 </div>
             </section>
