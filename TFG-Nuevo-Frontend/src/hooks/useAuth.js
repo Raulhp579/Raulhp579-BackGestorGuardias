@@ -15,5 +15,5 @@ export function useAuth() {
         roles,
         isAuthenticated,
         isAdmin,
-    };
+    }; 
 }
