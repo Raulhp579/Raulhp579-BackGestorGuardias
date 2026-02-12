@@ -369,14 +369,14 @@ export default function HomeDashboard() {
             {
                 title: "Continuidad Asistida",
                 value: String(continuidadVisible),
-                note: "En el mes visible",
+                note: "En la semana visible",
                 icon: "people",
                 accent: "blue",
             },
             {
                 title: "Total Guardias",
                 value: String(totalVisible),
-                note: "En el mes visible",
+                note: "En la semana visible",
                 icon: "bar_chart",
                 accent: "green",
             },
