@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Worker;
 use App\Models\Speciality;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 
@@ -130,6 +132,17 @@ class WorkerController extends Controller
             $worker->discharge_date = $request->discharge_date;
             $worker->id_speciality = $request->id_speciality;
             $worker->save();
+
+            // Create User automatically
+            $user = new User;
+            $user->name = $request->name;
+            // Generate email: name.surname@alu.medac.es (simplified logic based on ImportExcelsController)
+            // ImportExcelsController uses: strtolower(str_replace(' ', '', $persons[$i])).'@alu.medac.es';
+            $user->email = strtolower(str_replace(' ', '', $request->name)).'@alu.medac.es';
+            $password = $request->password ? $request->password : "password";
+            $user->password = Hash::make($password);
+            $user->worker_id = $worker->id;
+            $user->save();
 
             return response()->json([
                 'success' => 'El trabajador ha sido creado correctamente',

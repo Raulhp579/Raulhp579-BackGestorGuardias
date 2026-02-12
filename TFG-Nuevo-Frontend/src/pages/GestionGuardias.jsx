@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/GestionGuardias.css";
-import { getDuties, updateDuty, deleteDuty } from "../services/DutyService";
+import {
+    getDuties,
+    updateDuty,
+    deleteDuty,
+    createDuty,
+} from "../services/DutyService";
 import { assignChiefs, getWorkers, isUserAdmin } from "../services/userService";
 import { getSpecialities } from "../services/SpecialitiesService";
 import { importExcel } from "../services/importExcelService";
@@ -656,28 +661,19 @@ export default function GestionGuardias() {
         try {
             if (isCreating) {
                 // Crear nueva guardia
-                const response = await (async () => {
-                    const res = await fetch("/api/duties", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
-                        },
-                        body: JSON.stringify(payload),
-                    });
-                    if (!res.ok) throw new Error("Error al crear la guardia");
-                    return res.json();
-                })();
+                // Crear nueva guardia
+                const response = await createDuty(payload);
 
                 setGuardias((prev) => [response.data || response, ...prev]);
             } else {
                 // Editar guardia existente
                 if (!editRowId) return;
-                await updateDuty(editRowId, payload);
+                const response = await updateDuty(editRowId, payload);
+                // Extraer el objeto actualizado (según tu servicio, puede venir en response.data o response directo)
+                const updatedDuty = response.data || response;
+
                 setGuardias((prev) =>
-                    prev.map((g) =>
-                        g.id === editRowId ? { ...g, ...payload } : g,
-                    ),
+                    prev.map((g) => (g.id === editRowId ? updatedDuty : g)),
                 );
 
                 setUpdatedRowId(editRowId);

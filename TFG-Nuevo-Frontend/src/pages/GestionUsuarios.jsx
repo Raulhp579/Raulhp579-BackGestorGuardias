@@ -17,6 +17,7 @@ import Joyride, { STATUS } from "react-joyride-react-19";
 import {
     deleteWorker as deleteWorkerApi,
     updateWorker,
+    createWorker,
 } from "../services/workerService";
 
 export default function GestionUsuarios() {
@@ -206,6 +207,24 @@ export default function GestionUsuarios() {
     // Trabajadores disponibles para asociar al usuario
     const [availableWorkers, setAvailableWorkers] = useState([]);
     const [loadingWorkers, setLoadingWorkers] = useState(false);
+    const [isCreating, setIsCreating] = useState(false);
+
+    function handleCreateWorker() {
+        setEditType("worker");
+        setIsCreating(true);
+        setEditError("");
+        setEditForm({
+            name: "",
+            rank: "",
+            registration_date: "",
+            discharge_date: "",
+            id_speciality: "",
+            email: "",
+            password: "",
+            worker_id: "",
+        });
+        setEditOpen(true);
+    }
 
     function openEdit(row, type) {
         setEditType(type);
@@ -265,6 +284,7 @@ export default function GestionUsuarios() {
         setEditType(null);
         setEditSaving(false);
         setEditError("");
+        setIsCreating(false);
     }
 
     const [deleteOpen, setDeleteOpen] = useState(false);
@@ -333,7 +353,7 @@ export default function GestionUsuarios() {
     // Submit edited data from modal
     async function submitEdit(e) {
         e.preventDefault();
-        if (!editRow) return;
+        if (!editRow && !isCreating) return;
         setEditError("");
         setEditSaving(true);
         try {
@@ -353,23 +373,46 @@ export default function GestionUsuarios() {
                     payload.password = editForm.password;
                 }
 
-                await updateWorker(editRow.id, payload);
-                setWorkers((prev) =>
-                    prev.map((w) => {
-                        if (w.id !== editRow.id) return w;
-                        const updated = { ...w, ...payload };
-                        const spec = specialities.find(
-                            (s) =>
-                                String(s.id) === String(payload.id_speciality),
-                        );
-                        updated.speciality = spec
-                            ? spec.name
-                            : payload.id_speciality === null
-                              ? null
-                              : w.speciality;
-                        return updated;
-                    }),
-                );
+                if (isCreating) {
+                    const response = await createWorker(payload);
+                    const newWorker =
+                        response.worker || response.data || response;
+
+                    // Añadir speciality name si viene populado o buscarlo
+                    const spec = specialities.find(
+                        (s) => String(s.id) === String(payload.id_speciality),
+                    );
+                    newWorker.speciality = spec ? spec.name : null;
+
+                    setWorkers((prev) => [newWorker, ...prev]);
+                    showToast(
+                        "Trabajador creado (y usuario generado)",
+                        "success",
+                    );
+                } else {
+                    await updateWorker(editRow.id, payload);
+                    setWorkers((prev) =>
+                        prev.map((w) => {
+                            if (w.id !== editRow.id) return w;
+                            const updated = { ...w, ...payload };
+                            const spec = specialities.find(
+                                (s) =>
+                                    String(s.id) ===
+                                    String(payload.id_speciality),
+                            );
+                            updated.speciality = spec
+                                ? spec.name
+                                : payload.id_speciality === null
+                                  ? null
+                                  : w.speciality;
+                            return updated;
+                        }),
+                    );
+                    showToast(
+                        "Trabajador actualizado correctamente",
+                        "success",
+                    );
+                }
             } else if (editType === "admin") {
                 const payload = {
                     name: editForm.name,
@@ -651,6 +694,22 @@ export default function GestionUsuarios() {
                                     ? "Importando..."
                                     : "Importar usuarios"}
                             </button>
+
+                            {/* Botón CREAR TRABAJADOR (solo en vista workers) */}
+                            {view === "workers" && (
+                                <button
+                                    className="cdBtnSecondary"
+                                    type="button"
+                                    onClick={handleCreateWorker}
+                                    style={{ marginLeft: "10px" }}
+                                >
+                                    <span className="material-icons">
+                                        add_circle
+                                    </span>
+                                    Crear trabajador
+                                </button>
+                            )}
+
                             {/* TOAST de notificaciones */}
                             {toast.visible && (
                                 <div
@@ -1111,7 +1170,8 @@ export default function GestionUsuarios() {
 
                                                 <label className="label">
                                                     Contraseña (dejar vacío si
-                                                    no deseas cambiarla)
+                                                    no deseas cambiarla o usar
+                                                    por defecto "password")
                                                     <input
                                                         name="password"
                                                         type="password"
@@ -1122,7 +1182,11 @@ export default function GestionUsuarios() {
                                                         onChange={
                                                             onEditFieldChange
                                                         }
-                                                        placeholder="Nueva contraseña"
+                                                        placeholder={
+                                                            isCreating
+                                                                ? "Contraseña (opcional)"
+                                                                : "Nueva contraseña"
+                                                        }
                                                     />
                                                 </label>
                                             </>

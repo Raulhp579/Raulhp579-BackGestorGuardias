@@ -2,17 +2,16 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DutyController;
+use App\Http\Controllers\DutyMetaController;
+use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\ImportExcelsController;
+use App\Http\Controllers\PdfController;
 use App\Http\Controllers\SpecialityController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WorkerController;
 use App\Http\Middleware\isAdmin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\PdfController;
-use App\Http\Controllers\GoogleAuthController;
-
-use App\Http\Controllers\DutyMetaController;
 
 // Preflight CORS para /api/*
 Route::options('/{any}', function (Request $request) {
@@ -38,7 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/profile', [UserController::class, 'update']); // POST para FormData con archivos importante
     Route::post('/change-password', [UserController::class, 'changePassword']);
     Route::delete('/profile', [UserController::class, 'destroy']);
-    //este hay que crear por tipos y los get deberian verse para los autenticados lo demas va para admin
+    // este hay que crear por tipos y los get deberian verse para los autenticados lo demas va para admin
     Route::apiResource('/speciality', SpecialityController::class);
 });
 
@@ -64,7 +63,7 @@ Route::middleware(['auth:sanctum', isAdmin::class])->group(function () {
 
     Route::get('/assingChiefs', [DutyController::class, 'assignChief']);
 
-    Route::get('/plantilla-dia-pdf', [PdfController::class,'generarPdfDia']); 
+    Route::get('/plantilla-dia-pdf', [PdfController::class, 'generarPdfDia']);
 });
 
 // ---------------------Duties routes-----------------------------
@@ -78,13 +77,11 @@ Route::get('/duties/{id}', [DutyController::class, 'show']);
 Route::get('/duties/{id}', [DutyController::class, 'show']);
 Route::get('/duties/day/{date}', [DutyController::class, 'day']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/login', function () {
+    return response()->json(['error' => 'Unauthenticated.'], 401);
+})->name('login');
 
-
-//////////////RUTAS DE GOOGLE NO SE DONDE PONERLO ///////////////////////
+// ////////////RUTAS DE GOOGLE NO SE DONDE PONERLO ///////////////////////
 
 Route::get('/google/connect', [GoogleAuthController::class, 'redirect']);
 Route::get('/google/callback', [GoogleAuthController::class, 'callback']);
-
-
-
-

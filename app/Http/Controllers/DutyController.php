@@ -3,14 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Duty;
+use App\Models\User;
 use App\Models\Worker;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use App\Http\Controllers\Controller;
-use App\Models\User;
 
 class DutyController extends Controller
 {
@@ -52,48 +50,48 @@ class DutyController extends Controller
     public function index(Request $request)
     {
         try {
-            //duties by name user and date
-            if(isset($request->name)){
-                if(isset($request->date)){
-                    $users = Worker::where("name",'LIKE',"%{$request->name}%")->get();
+            // duties by name user and date
+            if (isset($request->name)) {
+                if (isset($request->date)) {
+                    $users = Worker::where('name', 'LIKE', "%{$request->name}%")->get();
                     $allDuties = [];
 
-                    foreach($users as $user){
-                        $allDutiesUser = Duty::where("id_worker",$user->id)->where("date",$request->date)->get();   
-                        foreach($allDutiesUser as $duty){
-                            $allDuties[]=$duty;
+                    foreach ($users as $user) {
+                        $allDutiesUser = Duty::where('id_worker', $user->id)->where('date', $request->date)->get();
+                        foreach ($allDutiesUser as $duty) {
+                            $allDuties[] = $duty;
                         }
                     }
-                }else{
-                    $users = Worker::where("name",'LIKE',"%{$request->name}%")->get();
+                } else {
+                    $users = Worker::where('name', 'LIKE', "%{$request->name}%")->get();
                     $allDuties = [];
 
-                    foreach($users as $user){
-                        $allDutiesUser = Duty::where("id_worker",$user->id)->get();   
-                        foreach($allDutiesUser as $duty){
-                            $allDuties[]=$duty;
+                    foreach ($users as $user) {
+                        $allDutiesUser = Duty::where('id_worker', $user->id)->get();
+                        foreach ($allDutiesUser as $duty) {
+                            $allDuties[] = $duty;
                         }
                     }
                 }
-            }else if(isset($request->date)){
-                $allDuties = Duty::where("date",$request->date)->get();             
-            }else{
+            } elseif (isset($request->date)) {
+                $allDuties = Duty::where('date', $request->date)->get();
+            } else {
                 $allDuties = Duty::all();
             }
-     
+
             $duties = [];
-            foreach($allDuties as $duty){
+            foreach ($allDuties as $duty) {
                 $duties[] = [
-                    "id"=>$duty->id,
-                    "date"=>$duty->date,
-                    "duty_type"=>$duty->duty_type,
-                    "id_speciality"=>$duty->id_speciality,
-                    "speciality"=>$duty->worker?->speciality?->name ?? null,
-                    "id_worker"=>$duty->id_worker,
-                    "worker" =>$duty->worker?->name ?? null,
-                    "id_chief_worker"=>$duty->id_chief_worker,
-                    "chief_worker"=>$duty->chief?->name ?? null,
-                    "is_chief"   => (int) $duty->id_worker === (int) $duty->id_chief_worker,
+                    'id' => $duty->id,
+                    'date' => $duty->date,
+                    'duty_type' => $duty->duty_type,
+                    'id_speciality' => $duty->id_speciality,
+                    'speciality' => $duty->speciality?->name ?? null,
+                    'id_worker' => $duty->id_worker,
+                    'worker' => $duty->worker?->name ?? null,
+                    'id_chief_worker' => $duty->id_chief_worker,
+                    'chief_worker' => $duty->chief?->name ?? null,
+                    'is_chief' => (int) $duty->id_worker === (int) $duty->id_chief_worker,
                 ];
             }
 
@@ -110,6 +108,7 @@ class DutyController extends Controller
      * Create a new duty
      */
     public function store(Request $request)
+
     {
         try {
             $validate = Validator::make(
@@ -145,9 +144,11 @@ class DutyController extends Controller
             $duty->id_worker = $request->id_worker;
             $duty->save();
 
-            return response()->json([
-                'success' => 'the duty has been created',
-            ]);
+            // Load relationships for formatting
+            $duty->load(['worker', 'worker.speciality', 'chief']);
+
+            return response()->json($this->formatDuty($duty));
+
         } catch (Exception $e) {
             return response()->json([
                 'error' => 'there is a problem creating the duty',
@@ -229,9 +230,10 @@ class DutyController extends Controller
             $duty->id_chief_worker = $request->id_chief_worker;
             $duty->save();
 
-            return response()->json([
-                'success' => 'the duty has been updated',
-            ]);
+            // Load relationships for formatting
+            $duty->load(['worker', 'worker.speciality', 'chief']);
+
+            return response()->json($this->formatDuty($duty));
 
         } catch (Exception $e) {
             return response()->json([
@@ -239,6 +241,25 @@ class DutyController extends Controller
                 'mistake' => $e->getMessage(),
             ]);
         }
+    }
+
+    /**
+     * Format duty object for frontend
+     */
+    private function formatDuty($duty)
+    {
+        return [
+            'id' => $duty->id,
+            'date' => $duty->date,
+            'duty_type' => $duty->duty_type,
+            'id_speciality' => $duty->id_speciality,
+            'speciality' => $duty->speciality?->name ?? null,
+            'id_worker' => $duty->id_worker,
+            'worker' => $duty->worker?->name ?? null,
+            'id_chief_worker' => $duty->id_chief_worker,
+            'chief_worker' => $duty->chief?->name ?? null,
+            'is_chief' => (int) $duty->id_worker === (int) $duty->id_chief_worker,
+        ];
     }
 
     /**
@@ -308,10 +329,9 @@ class DutyController extends Controller
             $duties = Duty::whereMonth('date', $request->month)->whereYear('date', $request->year)->get();
             $workers = Worker::orderBy('registration_date', 'ASC')->get();
 
-            
             for ($i = 1; $i <= 31; $i++) {
                 $allWorkers = clone $workers;
-                
+
                 // iterate the duties and group it with the same day
                 $dutiesDay = $this->takeOneDay($duties, $i);
 
@@ -387,7 +407,6 @@ class DutyController extends Controller
         return false;
     }
 
-
     public function takeOneDay($duties, $i)
     {
         $dutiesDay = [];
@@ -415,7 +434,7 @@ class DutyController extends Controller
         try {
             // Validate worker exists
             $worker = Worker::find($id);
-            if (!$worker) {
+            if (! $worker) {
                 return response()->json(['error' => 'Worker not found'], 404);
             }
 
@@ -428,7 +447,7 @@ class DutyController extends Controller
             $query = Duty::where('id_worker', $id);
 
             // Filter by date if provided
-            if ($request->has('date') && !empty($request->date)) {
+            if ($request->has('date') && ! empty($request->date)) {
                 $query->whereDate('date', $request->date);
             }
 
@@ -442,16 +461,16 @@ class DutyController extends Controller
             // Transform data to match frontend structure (include relation names)
             $duties->getCollection()->transform(function ($duty) {
                 return [
-                    "id" => $duty->id,
-                    "date" => $duty->date,
-                    "duty_type" => $duty->duty_type,
-                    "id_speciality" => $duty->id_speciality,
-                    "speciality" => $duty->worker?->speciality?->name ?? null,
-                    "id_worker" => $duty->id_worker,
-                    "worker" => $duty->worker?->name ?? null,
-                    "id_chief_worker" => $duty->id_chief_worker,
-                    "chief_worker" => $duty->chief?->name ?? null,
-                    "is_chief" => (int) $duty->id_worker === (int) $duty->id_chief_worker,
+                    'id' => $duty->id,
+                    'date' => $duty->date,
+                    'duty_type' => $duty->duty_type,
+                    'id_speciality' => $duty->id_speciality,
+                    'speciality' => $duty->speciality?->name ?? null,
+                    'id_worker' => $duty->id_worker,
+                    'worker' => $duty->worker?->name ?? null,
+                    'id_chief_worker' => $duty->id_chief_worker,
+                    'chief_worker' => $duty->chief?->name ?? null,
+                    'is_chief' => (int) $duty->id_worker === (int) $duty->id_chief_worker,
                 ];
             });
 
@@ -460,11 +479,8 @@ class DutyController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'error' => 'Error fetching worker duties',
-                'mistake' => $e->getMessage()
+                'mistake' => $e->getMessage(),
             ], 500);
         }
     }
-
-
-
 }

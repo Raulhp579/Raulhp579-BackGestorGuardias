@@ -39,4 +39,9 @@ class Duty extends Model
     {
         return $this->belongsTo(Worker::class, 'id_chief_worker');
     }
+
+    public function speciality()
+    {
+        return $this->belongsTo(Speciality::class, 'id_speciality');
+    }
 }
