@@ -78,10 +78,12 @@ export default function AppLayout() {
         localStorage.removeItem("token");
         localStorage.removeItem("auth");
         sessionStorage.removeItem("roles");
-        
+
         // Disparar evento personalizado para notificar cambios de autenticación
-        window.dispatchEvent(new CustomEvent("authChange", { detail: { roles: [] } }));
-        
+        window.dispatchEvent(
+            new CustomEvent("authChange", { detail: { roles: [] } }),
+        );
+
         navigate("/login");
     }
 
@@ -133,7 +135,7 @@ export default function AppLayout() {
                                     <span className="material-icons-outlined">
                                         calendar_month
                                     </span>
-                                    <span>Gestión de Guardias</span>
+                                    <span>Guardias</span>
                                 </NavLink>
 
                                 <NavLink
@@ -146,7 +148,7 @@ export default function AppLayout() {
                                     <span className="material-icons-outlined">
                                         group
                                     </span>
-                                    <span>Administrar Usuarios</span>
+                                    <span>Usuarios</span>
                                 </NavLink>
 
                                 <div className="appNavDivider" />
@@ -161,9 +163,9 @@ export default function AppLayout() {
                             }
                         >
                             <span className="material-icons-outlined">
-                                home
+                                calendar_today
                             </span>
-                            <span>Inicio</span>
+                            <span>Calendario</span>
                         </NavLink>
 
                         <NavLink

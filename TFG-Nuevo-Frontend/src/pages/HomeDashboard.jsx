@@ -6,7 +6,11 @@ import interactionPlugin from "@fullcalendar/interaction";
 import { useNotifications } from "../context/NotificationsContext";
 import { useAuth } from "../hooks/useAuth";
 
-import { getDuties, createDuty, getDutiesLastUpdate } from "../services/DutyService";
+import {
+    getDuties,
+    createDuty,
+    getDutiesLastUpdate,
+} from "../services/DutyService";
 import { getSpecialities } from "../services/SpecialitiesService";
 import { importExcel } from "../services/importExcelService";
 import { getWorkers } from "../services/workerService";
@@ -282,8 +286,13 @@ export default function HomeDashboard() {
             unit = "year";
         }
 
-        if (typeof Intl !== "undefined" && typeof Intl.RelativeTimeFormat === "function") {
-            const rtf = new Intl.RelativeTimeFormat("es", { numeric: "always" });
+        if (
+            typeof Intl !== "undefined" &&
+            typeof Intl.RelativeTimeFormat === "function"
+        ) {
+            const rtf = new Intl.RelativeTimeFormat("es", {
+                numeric: "always",
+            });
             return rtf.format(value, unit);
         }
 
@@ -321,6 +330,7 @@ export default function HomeDashboard() {
     // ✅ NUEVO: modal de detalle de guardia
     const [dutyOpen, setDutyOpen] = useState(false);
     const [selectedDuty, setSelectedDuty] = useState(null);
+    const [hoverPos, setHoverPos] = useState({ top: 0, left: 0 });
 
     function closeDutyModal() {
         setDutyOpen(false);
@@ -351,7 +361,9 @@ export default function HomeDashboard() {
     // ✅ STATS (incluye lastUpdateNowTick para que "hace X" se actualice)
     const stats = useMemo(() => {
         const totalVisible = eventsInView.length;
-        const continuidadVisible = eventsInView.filter((e) => e.extendedProps?.type === "CA").length;
+        const continuidadVisible = eventsInView.filter(
+            (e) => e.extendedProps?.type === "CA",
+        ).length;
 
         return [
             {
@@ -370,7 +382,9 @@ export default function HomeDashboard() {
             },
             {
                 title: "Última actualización",
-                value: lastUpdateISO ? formatTimeAgo(lastUpdateISO) : "Sin datos",
+                value: lastUpdateISO
+                    ? formatTimeAgo(lastUpdateISO)
+                    : "Sin datos",
                 note: "Sincronización con el servidor",
                 icon: "sync",
                 accent: "blue",
@@ -449,7 +463,11 @@ export default function HomeDashboard() {
             setEvents(arr.map(mapDutyToEvent));
 
             try {
-                const meta = await getDutiesLastUpdate({ start, end, name: debouncedName });
+                const meta = await getDutiesLastUpdate({
+                    start,
+                    end,
+                    name: debouncedName,
+                });
                 setLastUpdateISO(meta?.last_update ?? null);
             } catch (e) {
                 console.error("last-update error:", e);
@@ -752,7 +770,11 @@ export default function HomeDashboard() {
                     </div>
 
                     {/* INPUT CENTRADO */}
-                    <div className="hdSearchWrap" role="search" aria-label="Buscar por nombre">
+                    <div
+                        className="hdSearchWrap"
+                        role="search"
+                        aria-label="Buscar por nombre"
+                    >
                         <div className="hdSearch">
                             <span
                                 className="material-icons-outlined hdSearchIcon"
@@ -868,7 +890,7 @@ export default function HomeDashboard() {
                         <FullCalendar
                             ref={calendarRef}
                             plugins={[dayGridPlugin, interactionPlugin]}
-                            initialView="dayGridMonth"
+                            initialView="dayGridWeek"
                             initialDate={new Date()}
                             firstDay={1}
                             height="auto"
@@ -884,38 +906,67 @@ export default function HomeDashboard() {
                                 arg.isToday ? ["hdTodayCell"] : []
                             }
                             eventContent={(arg) => {
-                                const type = String(arg.event.extendedProps?.type || "").toUpperCase();
-                                const jefe = Boolean(arg.event.extendedProps?.jefe);
+                                const type = String(
+                                    arg.event.extendedProps?.type || "",
+                                ).toUpperCase();
+                                const jefe = Boolean(
+                                    arg.event.extendedProps?.jefe,
+                                );
                                 const fullText = arg.event.title;
 
                                 const dotClass =
-                                    type === "CA" ? "ca" : type === "PF" ? "pf" : type === "LOC" ? "loc" : "loc";
+                                    type === "CA"
+                                        ? "ca"
+                                        : type === "PF"
+                                          ? "pf"
+                                          : type === "LOC"
+                                            ? "loc"
+                                            : "loc";
 
                                 // ✅ En móvil: letra corta (C/P/L) y si es jefe, mostramos SOLO el escudo
                                 const label = isMobile
                                     ? type === "CA"
                                         ? "C"
                                         : type === "PF"
-                                            ? "P"
-                                            : type === "LOC"
-                                                ? "L"
-                                                : "-"
+                                          ? "P"
+                                          : type === "LOC"
+                                            ? "L"
+                                            : "-"
                                     : fullText;
 
                                 return (
-                                    <div className={`hdFcChip ${type || ""} ${jefe ? "hasChief" : ""}`}>
+                                    <div
+                                        className={`hdFcChip ${type || ""} ${jefe ? "hasChief" : ""}`}
+                                    >
                                         {/* Desktop: dot + texto completo */}
-                                        {!isMobile && dotClass && <span className={`dot ${dotClass}`} title={type} />}
+                                        {!isMobile && dotClass && (
+                                            <span
+                                                className={`dot ${dotClass}`}
+                                                title={type}
+                                            />
+                                        )}
 
                                         {/* Mobile: dot solo si NO es jefe */}
-                                        {isMobile && !jefe && dotClass && <span className={`dot ${dotClass}`} title={type} />}
+                                        {isMobile && !jefe && dotClass && (
+                                            <span
+                                                className={`dot ${dotClass}`}
+                                                title={type}
+                                            />
+                                        )}
 
-                                        <span className="hdFcChipText" title={fullText}>
+                                        <span
+                                            className="hdFcChipText"
+                                            title={fullText}
+                                        >
                                             {label}
                                         </span>
 
                                         {jefe && (
-                                            <span className="material-icons-outlined hdFcJefe" title="Jefe de Guardia" aria-label="Jefe de Guardia">
+                                            <span
+                                                className="material-icons-outlined hdFcJefe"
+                                                title="Jefe de Guardia"
+                                                aria-label="Jefe de Guardia"
+                                            >
                                                 local_police
                                             </span>
                                         )}
@@ -928,18 +979,40 @@ export default function HomeDashboard() {
                                     openNewGuardiaModal(info.dateStr);
                                 }
                             }}
-                            eventClick={(info) => {
-                                const raw = info.event.extendedProps?.raw || null;
+                            eventMouseEnter={(info) => {
+                                const raw =
+                                    info.event.extendedProps?.raw || null;
+
+                                // Smart positioning
+                                const rect = info.el.getBoundingClientRect();
+                                const viewportWidth = window.innerWidth;
+                                const cardWidth = 340; // 320px + margins
+                                const gap = 10;
+
+                                let top = rect.top;
+                                let left = rect.right + gap;
+
+                                // If overflowing right, flip to left
+                                if (left + cardWidth > viewportWidth) {
+                                    left = rect.left - cardWidth + 20; // Adjust for width difference
+                                }
+
+                                setHoverPos({ top, left });
 
                                 setSelectedDuty({
                                     title: info.event.title,
-                                    date: info.event.startStr?.slice(0, 10) || "",
+                                    date:
+                                        info.event.startStr?.slice(0, 10) || "",
                                     type: info.event.extendedProps?.type || "",
-                                    jefe: Boolean(info.event.extendedProps?.jefe),
+                                    jefe: Boolean(
+                                        info.event.extendedProps?.jefe,
+                                    ),
                                     raw,
                                 });
-
                                 setDutyOpen(true);
+                            }}
+                            eventMouseLeave={() => {
+                                setDutyOpen(false);
                             }}
                         />
                     </div>
@@ -947,91 +1020,78 @@ export default function HomeDashboard() {
             </section>
 
             {/* ✅ MODAL DETALLE GUARDIA */}
-            {dutyOpen && (
-                <div
-                    className="hdModalOverlay"
-                    role="dialog"
-                    aria-modal="true"
-                    onMouseDown={(e) => {
-                        if (e.target === e.currentTarget) closeDutyModal();
-                    }}
-                >
-                    <div
-                        className={`hdModalCard hdDutyModalCard ${(
-                            selectedDuty?.raw?.duty_type ||
-                            selectedDuty?.type ||
-                            ""
-                        )
-                            .toString()
-                            .toUpperCase()}`}
-                    >
-                        <div className="hdModalHead">
-                            <div className="hdModalTitle">Detalle de guardia</div>
-                            <button className="hdModalClose" type="button" onClick={closeDutyModal} aria-label="Cerrar">
-                                <span className="material-icons-outlined">close</span>
-                            </button>
+            {/* ✅ HOVER CARD DETAIL (Fixed Position) */}
+            <div
+                className={`hdDutyModalCard ${dutyOpen ? "show" : ""} ${(selectedDuty?.raw?.duty_type || selectedDuty?.type || "").toString().toUpperCase()}`}
+                style={{ top: hoverPos.top, left: hoverPos.left }}
+            >
+                <div className="hdModalHead">
+                    <div className="hdModalTitle">Detalle de guardia</div>
+
+                    {selectedDuty?.jefe && (
+                        <span
+                            className="material-icons-outlined hdCardJefeIcon"
+                            title="Jefe de guardia"
+                        >
+                            local_police
+                        </span>
+                    )}
+                </div>
+
+                <div className="hdModalBody">
+                    <div className="hdDutyDetailTitle">
+                        {selectedDuty?.raw?.worker ||
+                            selectedDuty?.title ||
+                            "-"}
+                    </div>
+
+                    <div className="hdDutyDetailGrid">
+                        <div className="hdDutyRow">
+                            <span className="hdDutyKey">Fecha</span>
+                            <span className="hdDutyVal">
+                                {selectedDuty?.raw?.date ||
+                                    selectedDuty?.date ||
+                                    "-"}
+                            </span>
                         </div>
 
-                        <div className="hdModalBody">
-                            <div className="hdDutyDetailTitle">{selectedDuty?.raw?.worker || selectedDuty?.title || "-"}</div>
-
-                            <div className="hdDutyDetailGrid">
-                                <div className="hdDutyRow">
-                                    <span className="hdDutyKey">Fecha</span>
-                                    <span className="hdDutyVal">{selectedDuty?.raw?.date || selectedDuty?.date || "-"}</span>
-                                </div>
-
-                                <div className="hdDutyRow">
-                                    <span className="hdDutyKey">Tipo</span>
-                                    <span className="hdDutyVal">{dutyTypeLabel(selectedDuty?.raw?.duty_type || selectedDuty?.type)}</span>
-                                </div>
-
-                                <div className="hdDutyRow">
-                                    <span className="hdDutyKey">Especialidad</span>
-                                    <span className="hdDutyVal">{selectedDuty?.raw?.speciality || "-"}</span>
-                                </div>
-
-                                <div className="hdDutyRow">
-                                    <span className="hdDutyKey">ID Especialidad</span>
-                                    <span className="hdDutyVal">{selectedDuty?.raw?.id_speciality ?? "-"}</span>
-                                </div>
-
-                                <div className="hdDutyRow">
-                                    <span className="hdDutyKey">Trabajador</span>
-                                    <span className="hdDutyVal">{selectedDuty?.raw?.worker || "-"}</span>
-                                </div>
-
-                                <div className="hdDutyRow">
-                                    <span className="hdDutyKey">ID Trabajador</span>
-                                    <span className="hdDutyVal">{selectedDuty?.raw?.id_worker ?? "-"}</span>
-                                </div>
-
-                                <div className="hdDutyRow">
-                                    <span className="hdDutyKey">Jefe de guardia</span>
-                                    <span className="hdDutyVal">
-                                        {selectedDuty?.raw?.chief_worker
-                                            ? `${selectedDuty.raw.chief_worker} (id: ${selectedDuty.raw.id_chief_worker ?? "-"})`
-                                            : selectedDuty?.jefe
-                                                ? "Sí"
-                                                : "No"}
-                                    </span>
-                                </div>
-
-                                <div className="hdDutyRow">
-                                    <span className="hdDutyKey">ID Guardia</span>
-                                    <span className="hdDutyVal">{selectedDuty?.raw?.id ?? "-"}</span>
-                                </div>
-                            </div>
+                        <div className="hdDutyRow">
+                            <span className="hdDutyKey">Tipo</span>
+                            <span className="hdDutyVal">
+                                {dutyTypeLabel(
+                                    selectedDuty?.raw?.duty_type ||
+                                        selectedDuty?.type,
+                                )}
+                            </span>
                         </div>
 
-                        <div className="hdModalFooter">
-                            <button className="hdBtn light hdBtnSm" type="button" onClick={closeDutyModal}>
-                                Cerrar
-                            </button>
+                        <div className="hdDutyRow">
+                            <span className="hdDutyKey">Especialidad</span>
+                            <span className="hdDutyVal">
+                                {selectedDuty?.raw?.speciality || "-"}
+                            </span>
+                        </div>
+
+                        <div className="hdDutyRow">
+                            <span className="hdDutyKey">Trabajador</span>
+                            <span className="hdDutyVal">
+                                {selectedDuty?.raw?.worker || "-"}
+                            </span>
+                        </div>
+
+                        <div className="hdDutyRow">
+                            <span className="hdDutyKey">Jefe de guardia</span>
+                            <span className="hdDutyVal">
+                                {selectedDuty?.raw?.chief_worker
+                                    ? selectedDuty.raw.chief_worker
+                                    : selectedDuty?.jefe
+                                      ? "Sí"
+                                      : "No"}
+                            </span>
                         </div>
                     </div>
                 </div>
-            )}
+            </div>
 
             {/* Legend */}
             <section className="hdLegendCard">
