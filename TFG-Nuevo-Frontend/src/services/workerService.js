@@ -49,3 +49,22 @@ export async function getWorkers() {
 
     return await response.json();
 }
+
+export async function createWorker(payload) {
+    const response = await fetch(`${API_BASE_URL}/workers`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+        let msg = "Error al crear el trabajador";
+        try {
+            const err = await response.json();
+            msg = err?.error || msg;
+        } catch (e) {}
+        throw new Error(msg);
+    }
+
+    return await response.json();
+}

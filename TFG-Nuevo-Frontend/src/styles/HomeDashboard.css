@@ -1773,3 +1773,139 @@ body {
     margin-left: 50% !important;
   }
 }
+/*  Text Wrapping for Calendar Events */
+.hdFcChip {
+    white-space: normal !important;
+    height: auto !important;
+    min-height: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    line-height: 1.2;
+    padding: 4px 6px;
+    width: 100%;
+}
+
+.hdFcChipText {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    display: block;
+    width: 100%;
+}
+
+.fc-daygrid-event {
+    white-space: normal !important;
+    height: auto !important;
+}
+
+.fc-daygrid-dot-event {
+    display: block !important; /* Force block to allow wrapping */
+}
+
+
+/*  Hover Card Detail (Floating) */
+.hdDutyModalCard {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 320px;
+    max-width: 90vw;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(10px);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    display: block; 
+}
+
+.hdDutyModalCard.show {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+/* Header adjustments for hover card */
+.hdDutyModalCard .hdModalHead {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: #f9fafb;
+    border-radius: var(--r) var(--r) 0 0;
+}
+
+.hdDutyModalCard .hdModalTitle {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.hdDutyModalCard .hdModalBody {
+    padding: 16px;
+}
+
+/* Type-based coloring for header/border */
+.hdDutyModalCard.CA { border-left: 6px solid #16A34A; }
+.hdDutyModalCard.PF { border-left: 6px solid var(--primary); }
+.hdDutyModalCard.LOC { border-left: 6px solid #9CA3AF; }
+
+/* Hide overlay entirely */
+.hdModalOverlay {
+    display: none !important; 
+}
+
+
+/*  Dynamic Positioning & Color Fixes */
+.hdDutyModalCard {
+    /* Remove fixed bottom/right, rely on inline styles for top/left */
+    bottom: auto !important;
+    right: auto !important; 
+    transition: opacity 0.2s ease, transform 0.1s ease !important; /* Faster transform for following */
+}
+
+/* User Requested Colors */
+/* CA (Continuidad) -> VERDE */
+.dot.ca {
+    background: #BBF7D0;
+    border-color: #16A34A;
+}
+.hdDutyModalCard.CA {
+    border-left-color: #16A34A !important;
+}
+
+/* PF (Presencia Física) -> AZUL */
+.dot.pf {
+    background: #BFDBFE; /* light blue */
+    border-color: #2563EB; /* blue-600 */
+}
+.hdDutyModalCard.PF {
+    border-left-color: #2563EB !important;
+}
+
+/* LOC (Localizada) -> MORADO */
+.dot.loc {
+    background: #E9D5FF; /* light purple */
+    border-color: #9333EA; /* purple-600 */
+}
+.hdDutyModalCard.LOC {
+    border-left-color: #9333EA !important;
+}
+
+
+/* Chief Icon in Hover Card */
+.hdModalHead {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.hdCardJefeIcon {
+    color: #F59E0B; /* Amber */
+    font-size: 20px;
+}
+

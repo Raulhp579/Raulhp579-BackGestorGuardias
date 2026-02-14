@@ -28,8 +28,24 @@ export default function AppRouter() {
                 <Route path="/home" element={<HomeDashboard />} />
                 <Route path="/perfil" element={<PerfilUsuario />} />
                 <Route path="/mis-guardias" element={<MisGuardias />} />
-                <Route path="/guardias" element={<Guardias />} />
-                <Route path="/usuarios" element={<GestionUsuarios />} />
+                
+                {/* SOLO ADMIN - Protegido con ProtectedRoute */}
+                <Route 
+                    path="/guardias" 
+                    element={
+                        <ProtectedRoute requireAdmin={true}>
+                            <Guardias />
+                        </ProtectedRoute>
+                    } 
+                />
+                <Route 
+                    path="/usuarios" 
+                    element={
+                        <ProtectedRoute requireAdmin={true}>
+                            <GestionUsuarios />
+                        </ProtectedRoute>
+                    } 
+                />
 
                 {/* Legales (también dentro del layout para mantener header/sidebar) */}
                 <Route path="/aviso-legal" element={<AvisoLegal />} />
