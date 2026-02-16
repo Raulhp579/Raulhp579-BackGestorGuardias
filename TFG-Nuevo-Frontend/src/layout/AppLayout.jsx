@@ -195,7 +195,7 @@ export default function AppLayout() {
                         </NavLink>
 
                         <button
-                            className="appNavItem danger"
+                            className="appNavItem "
                             onClick={() => {
                                 closeMenu();
                                 logout();
