@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { getProfile } from "../services/ProfileService";
 import { getWorkerDutiesPaginated } from "../services/DutyService";
 import "../styles/MisGuardias.css";
+import Button from "../components/Button/Button";
 
 export default function MisGuardias() {
     const [duties, setDuties] = useState([]);
@@ -143,6 +144,7 @@ export default function MisGuardias() {
                                     setPage(1);
                                 }}
                                 title="Limpiar filtro"
+                                style={{ background: "none", border: "none", cursor: "pointer" }}
                             >
                                 <span className="material-icons">close</span>
                             </button>
@@ -265,24 +267,20 @@ export default function MisGuardias() {
                                 {page} / {totalPages}
                             </span>
                             <div style={{ display: "flex", gap: "8px" }}>
-                                <button
-                                    className="mgPageBtn"
+                                <Button
+                                    variant="secondary"
                                     onClick={handlePrevPage}
                                     disabled={page === 1}
-                                >
-                                    <span className="material-icons">
-                                        chevron_left
-                                    </span>
-                                </button>
-                                <button
-                                    className="mgPageBtn"
+                                    size="sm"
+                                    icon="chevron_left"
+                                />
+                                <Button
+                                    variant="secondary"
                                     onClick={handleNextPage}
                                     disabled={page === totalPages}
-                                >
-                                    <span className="material-icons">
-                                        chevron_right
-                                    </span>
-                                </button>
+                                    size="sm"
+                                    icon="chevron_right"
+                                />
                             </div>
                         </div>
                     )}
@@ -383,9 +381,9 @@ export default function MisGuardias() {
                         </div>
 
                         <div className="mgModalFooter">
-                            <button className="mgBtn" onClick={closeModal}>
+                            <Button variant="primary" onClick={closeModal}>
                                 Cerrar
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>

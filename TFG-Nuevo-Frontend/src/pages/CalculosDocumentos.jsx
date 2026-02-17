@@ -7,6 +7,7 @@ import { getWorkers, getAdmins, updateAdmin, deleteAdmin as deleteAdminApi } fro
 import { getSpecialities } from "../services/SpecialitiesService";
 import RowActions from "../components/RowActions/RowActions";
 import { deleteWorker as deleteWorkerApi, updateWorker, createWorker } from "../services/workerService";
+import Button from "../components/Button/Button";
 
 export default function CalculosDocumentos() {
     const SKELETON_ROWS = 8;
@@ -518,10 +519,14 @@ export default function CalculosDocumentos() {
                     <div className="cdTableCardTop">
                         <div>
                             {view === "workers" && (
-                                <button className="cdBtnSecondary" type="button" onClick={openCreate} style={{ marginRight: 10 }}>
-                                    <span className="material-icons">add</span>
+                                <Button
+                                    variant="secondary"
+                                    onClick={openCreate}
+                                    style={{ marginRight: 10 }}
+                                    icon="add"
+                                >
                                     Crear trabajador
-                                </button>
+                                </Button>
                             )}
                             <input
                                 ref={fileInputRef}
@@ -530,15 +535,14 @@ export default function CalculosDocumentos() {
                                 style={{ display: "none" }}
                                 onChange={onPickExcel}
                             />
-                            <button
-                                className="cdBtnSecondary"
-                                type="button"
+                            <Button
+                                variant="secondary"
                                 disabled={importing}
                                 onClick={() => fileInputRef.current?.click()}
+                                icon="table_view"
                             >
-                                <span className="material-icons excel">table_view</span>
                                 {importing ? "Importando..." : "Importar trabajadores"}
-                            </button>
+                            </Button>
                             {importMsg && <p className="cdInfo" style={{ margin: 0 }}>{importMsg}</p>}
                         </div>
                         {/* Search Input */}
@@ -697,138 +701,170 @@ export default function CalculosDocumentos() {
                 </div>
 
                 {/* Edit modal */}
-                {editOpen && (
-                    <div
-                        className="modalOverlay centered"
-                        role="dialog"
-                        aria-modal="true"
-                        aria-label="Editar registro"
-                        onClick={(e) => {
-                            if (e.target === e.currentTarget && !editSaving) closeEdit();
-                        }}
-                    >
-                        <div className="modalSheet">
-                            <form onSubmit={submitEdit}>
+                {
+                    editOpen && (
+                        <div
+                            className="modalOverlay centered"
+                            role="dialog"
+                            aria-modal="true"
+                            aria-label="Editar registro"
+                            onClick={(e) => {
+                                if (e.target === e.currentTarget && !editSaving) closeEdit();
+                            }}
+                        >
+                            <div className="modalSheet">
+                                <form onSubmit={submitEdit}>
+                                    <div className="modalBody">
+                                        <div className="modalHeader">
+                                            <div className="modalIcon">
+                                                <span className="material-icons">edit</span>
+                                            </div>
+                                            <div>
+                                                <div>
+                                                    <div className="modalTitle">
+                                                        {isCreation ? "Crear Nuevo Trabajador" :
+                                                            `Editar ${editType === "worker" ? "Trabajador" : "Administrador"}`
+                                                        }
+                                                    </div>
+                                                    <div className="modalSubtitle">
+                                                        {isCreation ? "Rellena los datos para crear un nuevo trabajador." : "Modifica los campos y guarda los cambios."}
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                        <div className="formGrid">
+                                            <label className="label">
+                                                Nombre
+                                                <input name="name" className="control" value={editForm.name} onChange={onEditFieldChange} required />
+                                            </label>
+
+                                            {editType === "admin" ? (
+                                                <label className="label">
+                                                    Email
+                                                    <input name="email" type="email" className="control" value={editForm.email} onChange={onEditFieldChange} required />
+                                                </label>
+                                            ) : (
+                                                <>
+                                                    <label className="label">
+                                                        Rango
+                                                        <input name="rank" className="control" value={editForm.rank} onChange={onEditFieldChange} />
+                                                    </label>
+
+                                                    <label className="label">
+                                                        Alta
+                                                        <input name="registration_date" type="date" className="control" value={editForm.registration_date} onChange={onEditFieldChange} />
+                                                    </label>
+
+                                                    <label className="label">
+                                                        Baja
+                                                        <input name="discharge_date" type="date" className="control" value={editForm.discharge_date} onChange={onEditFieldChange} />
+                                                    </label>
+
+                                                    <label className="label">
+                                                        Especialidad
+                                                        <select name="id_speciality" className="control" value={editForm.id_speciality} onChange={onEditFieldChange}>
+                                                            <option value="">-- Ninguna --</option>
+                                                            {specialities.map((s) => (
+                                                                <option key={s.id} value={s.id}>{s.name}</option>
+                                                            ))}
+                                                        </select>
+                                                    </label>
+
+                                                    <label className="label">
+                                                        Contraseña (dejar vacío si no deseas cambiarla)
+                                                        <input name="password" type="password" className="control" value={editForm.password} onChange={onEditFieldChange} placeholder="Nueva contraseña" />
+                                                        {passwordError && <span style={{ color: "red", fontSize: "0.85rem", marginTop: "4px", display: "block" }}>{passwordError}</span>}
+                                                    </label>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="modalFooter">
+                                        <div style={{ display: 'flex', gap: 10 }}>
+                                            <Button
+                                                variant="primary"
+                                                type="submit"
+                                                disabled={editSaving}
+                                                isLoading={editSaving}
+                                            >
+                                                {editSaving ? 'Guardando...' : 'Guardar'}
+                                            </Button>
+                                            <Button
+                                                variant="secondary"
+                                                onClick={() => closeEdit()}
+                                                disabled={editSaving}
+                                            >
+                                                Cancelar
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )
+                }
+
+                {/* Delete modal */}
+                {
+                    deleteOpen && (
+                        <div
+                            className="modalOverlay centered"
+                            role="dialog"
+                            aria-modal="true"
+                            aria-label="Confirmar eliminación"
+                            onClick={(e) => {
+                                if (e.target === e.currentTarget && !deleteLoading) cancelDelete();
+                            }}
+                        >
+                            <div className="modalSheet">
                                 <div className="modalBody">
                                     <div className="modalHeader">
                                         <div className="modalIcon">
-                                            <span className="material-icons">edit</span>
+                                            <span className="material-icons">delete</span>
                                         </div>
                                         <div>
-                                            <div>
-                                                <div className="modalTitle">
-                                                    {isCreation ? "Crear Nuevo Trabajador" :
-                                                        `Editar ${editType === "worker" ? "Trabajador" : "Administrador"}`
-                                                    }
-                                                </div>
-                                                <div className="modalSubtitle">
-                                                    {isCreation ? "Rellena los datos para crear un nuevo trabajador." : "Modifica los campos y guarda los cambios."}
-                                                </div>
-                                            </div>
-
+                                            <div className="modalTitle">Eliminar {deleteType === 'worker' ? 'Trabajador' : 'Administrador'}</div>
+                                            <div className="modalSubtitle">¿Seguro que quieres eliminar a <strong>{deleteRow?.name}</strong>? Esta acción no se puede deshacer.</div>
+                                            {deleteError && <div style={{ marginTop: 8, color: '#b91c1c', fontWeight: 700 }}>{deleteError}</div>}
                                         </div>
                                     </div>
-
-                                    <div className="formGrid">
-                                        <label className="label">
-                                            Nombre
-                                            <input name="name" className="control" value={editForm.name} onChange={onEditFieldChange} required />
-                                        </label>
-
-                                        {editType === "admin" ? (
-                                            <label className="label">
-                                                Email
-                                                <input name="email" type="email" className="control" value={editForm.email} onChange={onEditFieldChange} required />
-                                            </label>
-                                        ) : (
-                                            <>
-                                                <label className="label">
-                                                    Rango
-                                                    <input name="rank" className="control" value={editForm.rank} onChange={onEditFieldChange} />
-                                                </label>
-
-                                                <label className="label">
-                                                    Alta
-                                                    <input name="registration_date" type="date" className="control" value={editForm.registration_date} onChange={onEditFieldChange} />
-                                                </label>
-
-                                                <label className="label">
-                                                    Baja
-                                                    <input name="discharge_date" type="date" className="control" value={editForm.discharge_date} onChange={onEditFieldChange} />
-                                                </label>
-
-                                                <label className="label">
-                                                    Especialidad
-                                                    <select name="id_speciality" className="control" value={editForm.id_speciality} onChange={onEditFieldChange}>
-                                                        <option value="">-- Ninguna --</option>
-                                                        {specialities.map((s) => (
-                                                            <option key={s.id} value={s.id}>{s.name}</option>
-                                                        ))}
-                                                    </select>
-                                                </label>
-
-                                                <label className="label">
-                                                    Contraseña (dejar vacío si no deseas cambiarla)
-                                                    <input name="password" type="password" className="control" value={editForm.password} onChange={onEditFieldChange} placeholder="Nueva contraseña" />
-                                                    {passwordError && <span style={{ color: "red", fontSize: "0.85rem", marginTop: "4px", display: "block" }}>{passwordError}</span>}
-                                                </label>
-                                            </>
-                                        )}
-                                    </div>
                                 </div>
-
                                 <div className="modalFooter">
                                     <div style={{ display: 'flex', gap: 10 }}>
-                                        <button className="btnPrimary" type="submit" disabled={editSaving}>{editSaving ? 'Guardando...' : 'Guardar'}</button>
-                                        <button className="btnSecondary btnSecondary--destructive" type="button" onClick={(e) => { e.preventDefault(); closeEdit(); }} disabled={editSaving}>Cancelar</button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                )}
-
-                {/* Delete modal */}
-                {deleteOpen && (
-                    <div
-                        className="modalOverlay centered"
-                        role="dialog"
-                        aria-modal="true"
-                        aria-label="Confirmar eliminación"
-                        onClick={(e) => {
-                            if (e.target === e.currentTarget && !deleteLoading) cancelDelete();
-                        }}
-                    >
-                        <div className="modalSheet">
-                            <div className="modalBody">
-                                <div className="modalHeader">
-                                    <div className="modalIcon">
-                                        <span className="material-icons">delete</span>
-                                    </div>
-                                    <div>
-                                        <div className="modalTitle">Eliminar {deleteType === 'worker' ? 'Trabajador' : 'Administrador'}</div>
-                                        <div className="modalSubtitle">¿Seguro que quieres eliminar a <strong>{deleteRow?.name}</strong>? Esta acción no se puede deshacer.</div>
-                                        {deleteError && <div style={{ marginTop: 8, color: '#b91c1c', fontWeight: 700 }}>{deleteError}</div>}
+                                        <Button
+                                            variant="danger"
+                                            onClick={confirmDelete}
+                                            disabled={deleteLoading}
+                                            isLoading={deleteLoading}
+                                        >
+                                            {deleteLoading ? "Eliminando..." : "Eliminar"}
+                                        </Button>
+                                        <Button
+                                            variant="secondary"
+                                            onClick={cancelDelete}
+                                            disabled={deleteLoading}
+                                        >
+                                            Cancelar
+                                        </Button>
                                     </div>
                                 </div>
                             </div>
-                            <div className="modalFooter">
-                                <div style={{ display: 'flex', gap: 10 }}>
-                                    <button className="btnPrimary btnPrimary--destructive" onClick={confirmDelete} disabled={deleteLoading}>{deleteLoading ? 'Eliminando...' : 'Eliminar'}</button>
-                                    <button className="btnSecondary" onClick={cancelDelete} disabled={deleteLoading}>Cancelar</button>
-                                </div>
-                            </div>
                         </div>
-                    </div>
-                )}
+                    )
+                }
 
-                {toast.visible && (
-                    <div className={`toast ${toast.type === 'success' ? 'toast--success' : 'toast--error'}`} role="status" aria-live="polite">
-                        {toast.message}
-                    </div>
-                )}
+                {
+                    toast.visible && (
+                        <div className={`toast ${toast.type === 'success' ? 'toast--success' : 'toast--error'}`} role="status" aria-live="polite">
+                            {toast.message}
+                        </div>
+                    )
+                }
 
-            </main>
-        </div>
+            </main >
+        </div >
     );
 }

@@ -9,6 +9,7 @@ import { useNotifications } from "../context/NotificationsContext";
 
 import RowActions from "../components/RowActions/RowActions";
 import Joyride, { STATUS } from "react-joyride-react-19";
+import Button from "../components/Button/Button";
 
 export default function GestionGuardias() {
     const navigate = useNavigate();
@@ -231,8 +232,8 @@ export default function GestionGuardias() {
             const arr = Array.isArray(data)
                 ? data
                 : Array.isArray(data?.data)
-                  ? data.data
-                  : [];
+                    ? data.data
+                    : [];
             setSpecialities(arr);
         } catch (e) {
             console.error(e);
@@ -344,8 +345,8 @@ export default function GestionGuardias() {
             const arr = Array.isArray(data)
                 ? data
                 : Array.isArray(data?.data)
-                  ? data.data
-                  : [];
+                    ? data.data
+                    : [];
             setGuardias(arr);
             setPage(1);
         } catch (e) {
@@ -376,8 +377,8 @@ export default function GestionGuardias() {
                 const arr = Array.isArray(w)
                     ? w
                     : Array.isArray(w?.data)
-                      ? w.data
-                      : [];
+                        ? w.data
+                        : [];
                 setWorkers(arr);
             } catch {
                 setWorkers([]);
@@ -387,8 +388,8 @@ export default function GestionGuardias() {
                 const arr = Array.isArray(s)
                     ? s
                     : Array.isArray(s?.data)
-                      ? s.data
-                      : [];
+                        ? s.data
+                        : [];
                 setSpecialities(arr);
             } catch {
                 setSpecialities([]);
@@ -528,7 +529,7 @@ export default function GestionGuardias() {
             id_worker: row.id_worker ? String(row.id_worker) : "",
             id_chief_worker:
                 row.id_chief_worker === null ||
-                row.id_chief_worker === undefined
+                    row.id_chief_worker === undefined
                     ? ""
                     : String(row.id_chief_worker),
         });
@@ -596,7 +597,7 @@ export default function GestionGuardias() {
                 try {
                     const errorData = await response.json();
                     errorMsg = errorData.error || errorMsg;
-                } catch (e) {}
+                } catch (e) { }
                 throw new Error(errorMsg);
             }
 
@@ -993,10 +994,10 @@ export default function GestionGuardias() {
                                             <td className="ggColDate">
                                                 {g.date
                                                     ? new Date(
-                                                          g.date,
-                                                      ).toLocaleDateString(
-                                                          "es-ES",
-                                                      )
+                                                        g.date,
+                                                    ).toLocaleDateString(
+                                                        "es-ES",
+                                                    )
                                                     : "-"}
                                             </td>
 
@@ -1038,17 +1039,42 @@ export default function GestionGuardias() {
                     </div>
 
                     <div className="ggPager">
-                        <button
-                            className="ggPagerBtn"
-                            type="button"
-                            onClick={goPrev}
-                            disabled={page === 1 || loading}
+                        <Button
+                            variant="secondary"
+                            onClick={() => setIsAssignOpen(true)}
+                            className="tour-generate"
+                            icon="auto_awesome"
                         >
-                            <span className="material-icons-outlined">
-                                chevron_left
-                            </span>
-                            Anterior
-                        </button>
+                            Generar Cuadrante
+                        </Button>
+
+                        <Button
+                            variant="primary"
+                            onClick={handlePublishToggle}
+                            className="tour-publish"
+                            icon={published ? "unpublished" : "publish"}
+                        >
+                            {published ? "Despublicar Mes" : "Publicar Mes"}
+                        </Button>
+
+                        <Button
+                            variant="secondary"
+                            onClick={() => setPdfOpen(true)}
+                            className="tour-export"
+                            icon="picture_as_pdf"
+                        >
+                            Exportar
+                        </Button>
+
+                        <Button
+                            variant="secondary"
+                            onClick={() => setImportOpen(true)}
+                            className="tour-import"
+                            style={{ backgroundColor: "#2f4a40", color: "#fff" }}
+                            icon="upload_file"
+                        >
+                            Importar Excel
+                        </Button>
 
                         <div className="ggPagerNums" aria-label="Páginas">
                             {pageButtons.map((p, idx) =>
@@ -1171,24 +1197,21 @@ export default function GestionGuardias() {
                         </div>
 
                         <div className="modalFooter">
-                            <button
-                                className="btnPrimary"
-                                onClick={handleAssignChiefs}
-                                type="button"
-                                disabled={assignLoading}
-                            >
-                                {assignLoading
-                                    ? "Asignando..."
-                                    : "Asignar automáticamente"}
-                            </button>
-                            <button
-                                className="btnSecondary"
+                            <Button
+                                variant="secondary"
                                 onClick={() => setIsAssignOpen(false)}
-                                type="button"
                                 disabled={assignLoading}
                             >
                                 Cancelar
-                            </button>
+                            </Button>
+                            <Button
+                                variant="primary"
+                                onClick={handleAssignChiefs}
+                                disabled={assignLoading}
+                                isLoading={assignLoading}
+                            >
+                                {assignLoading ? "Generando..." : "Confirmar y Generar"}
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -1354,22 +1377,21 @@ export default function GestionGuardias() {
                         </div>
 
                         <div className="modalFooter">
-                            <button
-                                className="btnSecondary"
-                                type="button"
+                            <Button
+                                variant="secondary"
                                 onClick={closeImportModal}
+                                disabled={importUploading}
                             >
                                 Cancelar
-                            </button>
-
-                            <button
-                                className="btnPrimary"
-                                type="button"
-                                disabled={importUploading}
-                                onClick={submitImport}
+                            </Button>
+                            <Button
+                                variant="primary"
+                                onClick={handleImportExcel}
+                                disabled={!excelFile || importUploading}
+                                isLoading={importUploading}
                             >
-                                {importUploading ? "Subiendo..." : "Importar"}
-                            </button>
+                                {importUploading ? "Importando..." : "Importar"}
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -1555,8 +1577,8 @@ export default function GestionGuardias() {
                                             ? "Creando..."
                                             : "Guardando..."
                                         : isCreating
-                                          ? "Crear"
-                                          : "Guardar"}
+                                            ? "Crear"
+                                            : "Guardar"}
                                 </button>
                                 <button
                                     className="btnSecondary"
@@ -1665,23 +1687,21 @@ export default function GestionGuardias() {
                         </div>
 
                         <div className="modalFooter">
-                            <button
-                                type="button"
-                                onClick={confirmDelete}
-                                className="btnPrimary"
-                                style={{ background: "#b91c1c" }}
-                                disabled={deleteLoading}
-                            >
-                                {deleteLoading ? "Eliminando..." : "Eliminar"}
-                            </button>
-                            <button
-                                type="button"
+                            <Button
+                                variant="secondary"
                                 onClick={cancelDelete}
-                                className="btnSecondary"
                                 disabled={deleteLoading}
                             >
                                 Cancelar
-                            </button>
+                            </Button>
+                            <Button
+                                variant="danger"
+                                onClick={confirmDelete}
+                                disabled={deleteLoading}
+                                isLoading={deleteLoading}
+                            >
+                                {deleteLoading ? "Eliminando..." : "Eliminar"}
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -1827,27 +1847,26 @@ export default function GestionGuardias() {
                         </div>
 
                         <div className="modalFooter">
-                            <button
-                                type="button"
-                                onClick={confirmGeneratePdf}
-                                className="btnPrimary"
-                                style={{ background: "#b91c1c" }}
-                                disabled={pdfLoading}
-                            >
-                                {pdfLoading ? "Generando..." : "Generar PDF"}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={cancelPdf}
-                                className="btnSecondary"
+                            <Button
+                                variant="secondary"
+                                onClick={() => setPdfOpen(false)}
                                 disabled={pdfLoading}
                             >
                                 Cancelar
-                            </button>
+                            </Button>
+                            <Button
+                                variant="primary"
+                                onClick={handleGeneratePdf}
+                                disabled={pdfLoading}
+                                isLoading={pdfLoading}
+                            >
+                                {pdfLoading ? "Generando..." : "Generar PDF"}
+                            </Button>
                         </div>
                     </div>
                 </div>
             )}
+            {/* 
             <Joyride
                 steps={tourSteps}
                 run={runTour}
@@ -1869,7 +1888,8 @@ export default function GestionGuardias() {
                     next: "Siguiente",
                     skip: "Saltar tutorial",
                 }}
-            />
+            /> 
+            */}
         </div>
     );
 }

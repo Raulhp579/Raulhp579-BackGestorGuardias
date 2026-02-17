@@ -5,6 +5,7 @@ import {
     changePassword,
 } from "../services/ProfileService";
 import "../styles/PerfilUsuario.css";
+import Button from "../components/Button/Button";
 
 export default function PerfilUsuario() {
     const [user, setUser] = useState(null);
@@ -257,9 +258,9 @@ export default function PerfilUsuario() {
                 <div className="puError">
                     <span className="material-icons-outlined">error</span>
                     <span>{error}</span>
-                    <button className="puBtn primary" onClick={loadProfile}>
+                    <Button variant="primary" onClick={loadProfile}>
                         Reintentar
-                    </button>
+                    </Button>
                 </div>
             </div>
         );
@@ -311,15 +312,14 @@ export default function PerfilUsuario() {
                             onChange={handleAvatarChange}
                         />
                         {!editMode && (
-                            <button
-                                className="puBtn primary puEditBtn"
+                            <Button
+                                variant="primary"
+                                className="puEditBtn"
                                 onClick={startEdit}
+                                icon="edit"
                             >
-                                <span className="material-icons-outlined">
-                                    edit
-                                </span>
                                 Editar Perfil
-                            </button>
+                            </Button>
                         )}
                     </div>
 
@@ -366,12 +366,12 @@ export default function PerfilUsuario() {
                                 <span className="puInfoValue">
                                     {user?.created_at
                                         ? new Date(
-                                              user.created_at,
-                                          ).toLocaleDateString("es-ES", {
-                                              year: "numeric",
-                                              month: "long",
-                                              day: "numeric",
-                                          })
+                                            user.created_at,
+                                        ).toLocaleDateString("es-ES", {
+                                            year: "numeric",
+                                            month: "long",
+                                            day: "numeric",
+                                        })
                                         : "-"}
                                 </span>
                             </div>
@@ -391,20 +391,22 @@ export default function PerfilUsuario() {
                 {/* Botones de edición */}
                 {editMode && (
                     <div className="puEditActions">
-                        <button
+                        <Button
+                            variant="secondary"
                             className="puBtn light"
                             onClick={cancelEdit}
                             disabled={saving}
                         >
                             Cancelar
-                        </button>
-                        <button
-                            className="puBtn primary"
+                        </Button>
+                        <Button
+                            variant="primary"
                             onClick={saveProfile}
                             disabled={saving}
+                            isLoading={saving}
                         >
                             {saving ? "Guardando..." : "Guardar Cambios"}
-                        </button>
+                        </Button>
                     </div>
                 )}
             </section>
@@ -413,10 +415,14 @@ export default function PerfilUsuario() {
             <section className="puCard puActionsCard">
                 <h4 className="puCardTitle">Acciones de Cuenta</h4>
                 <div className="puActionsGrid">
-                    <button className="puActionBtn" onClick={openPasswordModal}>
-                        <span className="material-icons-outlined">lock</span>
-                        <span>Cambiar Contraseña</span>
-                    </button>
+                    <Button
+                        variant="secondary"
+                        className="puActionBtn"
+                        onClick={openPasswordModal}
+                        icon="lock"
+                    >
+                        Cambiar Contraseña
+                    </Button>
                 </div>
             </section>
 
@@ -491,24 +497,24 @@ export default function PerfilUsuario() {
                         </div>
 
                         <div className="puModalFooter">
-                            <button
+                            <Button
+                                variant="secondary"
                                 className="puBtn light"
-                                type="button"
                                 onClick={closePasswordModal}
                                 disabled={changingPassword}
                             >
                                 Cancelar
-                            </button>
-                            <button
-                                className="puBtn primary"
-                                type="button"
+                            </Button>
+                            <Button
+                                variant="primary"
                                 onClick={handleChangePassword}
                                 disabled={changingPassword}
+                                isLoading={changingPassword}
                             >
                                 {changingPassword
                                     ? "Cambiando..."
                                     : "Cambiar Contraseña"}
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -626,16 +632,15 @@ export default function PerfilUsuario() {
                         </div>
 
                         <div className="puModalFooter">
-                            <button
-                                className="puBtn primary"
-                                type="button"
+                            <Button
+                                variant="primary"
                                 onClick={() => {
                                     setDutyModalOpen(false);
                                     setSelectedDuty(null);
                                 }}
                             >
                                 Cerrar
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>

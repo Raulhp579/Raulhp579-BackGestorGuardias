@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Contact.css";
+import Button from "../components/Button/Button";
 
 export default function Contact() {
     const navigate = useNavigate();
@@ -12,7 +13,7 @@ export default function Contact() {
 
     function enviarFormulario(e) {
         e.preventDefault();
-        
+
         if (nombre === "" || email === "" || telefono === "" || empresa === "" || mensaje === "") {
             alert("Por favor rellena todos los campos");
             return;
@@ -20,7 +21,7 @@ export default function Contact() {
 
         console.log("Datos:", { nombre, email, telefono, empresa, mensaje });
         alert("¡Gracias! Nos pondremos en contacto pronto.");
-        
+
         setNombre("");
         setEmail("");
         setTelefono("");
@@ -91,9 +92,9 @@ export default function Contact() {
                         ></textarea>
                     </div>
 
-                    <button type="submit" className="submitButton">
+                    <Button variant="primary" type="submit" className="submitButton">
                         Enviar
-                    </button>
+                    </Button>
                 </form>
             </div>
         </div>
