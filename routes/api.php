@@ -3,7 +3,6 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DutyController;
 use App\Http\Controllers\DutyMetaController;
-use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\GoogleCalendarController;
 use App\Http\Controllers\ImportExcelsController;
 use App\Http\Controllers\PdfController;

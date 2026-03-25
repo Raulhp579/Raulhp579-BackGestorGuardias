@@ -8,7 +8,6 @@ use Google\Service\Calendar;
 use Google\Service\Calendar\Event;
 use Google\Service\Calendar\EventDateTime;
 use Illuminate\Http\Request;
-
 class GoogleCalendarController extends Controller
 {
     private function getGoogleClient()
