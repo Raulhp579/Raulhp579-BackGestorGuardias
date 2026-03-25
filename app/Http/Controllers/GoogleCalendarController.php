@@ -100,10 +100,8 @@ class GoogleCalendarController extends Controller
         if (str_starts_with($state, 'all:')) {
             // Exportación masiva
             $workerId = str_replace('all:', '', $state);
-            // Exportamos desde hoy en adelante
             $duties = Duty::with(['worker', 'speciality', 'chief'])
                 ->where('id_worker', $workerId)
-                ->where('date', '>=', now()->toDateString())
                 ->get();
 
             foreach ($duties as $duty) {
