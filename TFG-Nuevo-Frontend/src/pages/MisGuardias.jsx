@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { getProfile } from "../services/ProfileService";
 import { getWorkerDutiesPaginated } from "../services/DutyService";
 import "../styles/MisGuardias.css";
@@ -7,6 +8,8 @@ export default function MisGuardias() {
     const [duties, setDuties] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [toast, setToast] = useState(null); // { type: 'success' | 'error', message: string }
+    const [searchParams, setSearchParams] = useSearchParams();
 
     // Pagination state
     const [page, setPage] = useState(1);
@@ -22,6 +25,26 @@ export default function MisGuardias() {
     // Modal state
     const [selectedDuty, setSelectedDuty] = useState(null);
     const [dutyModalOpen, setDutyModalOpen] = useState(false);
+
+    // Leer ?status= al volver del callback de Google
+    useEffect(() => {
+        const status = searchParams.get("status");
+        if (status === "success") {
+            setToast({ type: "success", message: "¡Guardia exportada a Google Calendar!" });
+            setSearchParams({}, { replace: true });
+        } else if (status === "error") {
+            const msg = searchParams.get("message") || "Error al exportar a Google Calendar";
+            setToast({ type: "error", message: decodeURIComponent(msg) });
+            setSearchParams({}, { replace: true });
+        }
+    }, []);
+
+    // Auto-cerrar toast tras 4 segundos
+    useEffect(() => {
+        if (!toast) return;
+        const t = setTimeout(() => setToast(null), 4000);
+        return () => clearTimeout(t);
+    }, [toast]);
 
     useEffect(() => {
         // Load user profile to get worker_id
@@ -102,8 +125,28 @@ export default function MisGuardias() {
         setSelectedDuty(null);
     }
 
+    const handleExportAll = () => {
+        if (!workerId) return;
+        window.location.href = `/api/google/redirect?duty_id=all&worker_id=${workerId}`;
+    };
+
+    const handleExportOne = (dutyId) => {
+        window.location.href = `/api/google/redirect?duty_id=${dutyId}`;
+    };
+
     return (
         <div className="mgPage">
+            {toast && (
+                <div className={`mgToast mgToast--${toast.type}`}>
+                    <span className="material-icons-outlined">
+                        {toast.type === "success" ? "check_circle" : "error"}
+                    </span>
+                    <span>{toast.message}</span>
+                    <button className="mgToastClose" onClick={() => setToast(null)}>
+                        <span className="material-icons">close</span>
+                    </button>
+                </div>
+            )}
             <div className="mgContainer">
                 {/* Header Section */}
                 <div className="mgHeader">
@@ -123,6 +166,11 @@ export default function MisGuardias() {
                         </span>
                         <span>{totalRecords} Registros</span>
                     </div>
+
+                    <button className="mgExportAllBtn" onClick={handleExportAll}>
+                        <span className="material-icons-outlined">calendar_today</span>
+                        <span>Exportar a Google Calendar</span>
+                    </button>
 
                     <div className="mgFilterGroup">
                         <span className="material-icons-outlined mgFilterIcon">
@@ -248,6 +296,17 @@ export default function MisGuardias() {
                                                 >
                                                     <span className="material-icons-outlined">
                                                         visibility
+                                                    </span>
+                                                </button>
+                                                <button
+                                                    className="mgActionBtn mgExportRowBtn"
+                                                    onClick={() =>
+                                                        handleExportOne(duty.id)
+                                                    }
+                                                    title="Exportar a Google Calendar"
+                                                >
+                                                    <span className="material-icons-outlined">
+                                                        event
                                                     </span>
                                                 </button>
                                             </td>

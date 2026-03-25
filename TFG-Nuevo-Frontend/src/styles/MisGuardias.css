@@ -41,6 +41,7 @@
     letter-spacing: -0.02em;
     background: linear-gradient(135deg, var(--mg-primary) 0%, #00a86b 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -79,6 +80,36 @@
 .mgStatsIcon {
     font-size: 1.2rem;
     color: var(--mg-primary);
+}
+
+.mgExportAllBtn {
+    background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    cursor: pointer;
+    transition: var(--mg-transition);
+    box-shadow: 0 4px 12px rgba(66, 133, 244, 0.2);
+    margin: 0 auto; /* Center in the middle of space-between if it stretches */
+    white-space: nowrap;
+    width: fit-content;
+}
+
+.mgExportAllBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(66, 133, 244, 0.3);
+    filter: brightness(1.05);
+}
+
+.mgExportAllBtn .material-icons-outlined {
+    font-size: 1.1rem;
 }
 
 .mgFilterGroup {
@@ -260,6 +291,25 @@
     background: #f0fdf4;
     transform: translateY(-2px);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.mgExportRowBtn:hover {
+    border-color: #4285f4;
+    color: #4285f4;
+    background: rgba(66, 133, 244, 0.05);
+}
+
+.mgTable td {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.mgTable td:last-child {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--mg-border);
+    height: 100%;
 }
 
 /* Pagination */
@@ -511,4 +561,58 @@
     .mgModalGrid {
         grid-template-columns: 1fr;
     }
+}
+
+/* ── Toast notification ─────────────────────────────────────── */
+.mgToast {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    animation: mgToastIn 0.3s ease;
+    max-width: 360px;
+}
+
+.mgToast--success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #6ee7b7;
+}
+
+.mgToast--error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+.mgToast .material-icons-outlined {
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.mgToastClose {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-left: auto;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    opacity: 0.7;
+}
+
+.mgToastClose:hover { opacity: 1; }
+
+@keyframes mgToastIn {
+    from { opacity: 0; transform: translateY(-12px); }
+    to   { opacity: 1; transform: translateY(0); }
 }

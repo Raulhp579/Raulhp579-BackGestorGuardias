@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DutyController;
 use App\Http\Controllers\DutyMetaController;
 use App\Http\Controllers\GoogleAuthController;
+use App\Http\Controllers\GoogleCalendarController;
 use App\Http\Controllers\ImportExcelsController;
 use App\Http\Controllers\PdfController;
 use App\Http\Controllers\SpecialityController;
@@ -83,5 +84,5 @@ Route::get('/login', function () {
 
 // ////////////RUTAS DE GOOGLE NO SE DONDE PONERLO ///////////////////////
 
-Route::get('/google/connect', [GoogleAuthController::class, 'redirect']);
-Route::get('/google/callback', [GoogleAuthController::class, 'callback']);
+Route::get('/google/redirect', [GoogleCalendarController::class, 'redirectToGoogle']);
+Route::get('/google/callback', [GoogleCalendarController::class, 'handleGoogleCallback']);
