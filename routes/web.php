@@ -5,13 +5,13 @@ use App\Http\Controllers\PdfController;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 
-/* Route::get('/app', fn () => redirect('/app/')); mirar si da error en produccion*/
+Route::get('/app', fn () => redirect('/app/')); 
 
 Route::get('/app/{any?}', function () {
     return File::get(public_path('app/index.html'));
 })->where('any', '.*');
 
-Route::get('/', fn () => redirect('/app'));
+/* Route::get('/', fn () => redirect('/app')); */
 
 // Ruta para ver la plantilla del PDF de guardias
 Route::get('/plantilla-dia-pdf', [PdfController::class, 'generarPdfDia']);
