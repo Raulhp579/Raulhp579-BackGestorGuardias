@@ -14,7 +14,6 @@ class GoogleCalendarController extends Controller
     {
         $client = new Client();
         $client->setAuthConfig(storage_path('app/google/client_secret_1084350902397-a38r7fa52dd47gckha50ltv8a7hgdd94.apps.googleusercontent.com.json'));
-        return response()->json($client);
         $client->addScope(Calendar::CALENDAR_EVENTS);   
         
         // Usar la URL de la aplicación si está definida, sino la hardcoded
@@ -60,6 +59,10 @@ class GoogleCalendarController extends Controller
         }
 
         $client = $this->getGoogleClient();
+
+        if ($client instanceof \Illuminate\Http\JsonResponse) {
+            return $client; 
+        }
         // Pasamos la info en el state de OAuth
         $client->setState($state);
         $authUrl = $client->createAuthUrl();
