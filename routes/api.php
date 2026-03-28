@@ -66,7 +66,9 @@ Route::middleware(['auth:sanctum', isAdmin::class])->group(function () {
 
     Route::get('/plantilla-dia-pdf', [PdfController::class, 'generarPdfDia']);
 
-    Route::apiResource('/fichajes', FichajeController::class);
+    Route::prefix('admin')->group(function () {
+        Route::apiResource('/fichajes', FichajeController::class);
+    });
 });
 
 // ---------------------Duties routes-----------------------------

@@ -15,10 +15,11 @@ class FichajeController extends Controller
      */
     public function index()
     {
-        try{
-            $fichajes = Fichaje::all();
+        try {
+            // Se cargan relaciones: worker (con user para el nombre) y duty
+            $fichajes = Fichaje::with(['worker.user', 'duty'])->get();
             return response()->json($fichajes);
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return response()->json([
                 "message" => "Error al obtener los fichajes",
                 "error" => $e->getMessage()

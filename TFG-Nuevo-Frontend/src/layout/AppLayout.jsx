@@ -150,6 +150,19 @@ export default function AppLayout() {
                                     </span>
                                     <span>Usuarios</span>
                                 </NavLink>
+                                
+                                <NavLink
+                                    to="/fichajes"
+                                    onClick={closeMenu}
+                                    className={({ isActive }) =>
+                                        `appNavItem ${isActive ? "active" : ""}`
+                                    }
+                                >
+                                    <span className="material-icons-outlined">
+                                        history_toggle_off
+                                    </span>
+                                    <span>Fichajes</span>
+                                </NavLink>
 
                                 <div className="appNavDivider" />
                             </>

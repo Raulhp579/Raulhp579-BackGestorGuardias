@@ -6,6 +6,7 @@ import Home from "../pages/Home";
 import Login from "../pages/Login";
 import HomeDashboard from "../pages/HomeDashboard";
 import Guardias from "../pages/GestionGuardias";
+import GestionFichajes from "../pages/GestionFichajes";
 import GestionUsuarios from "../pages/GestionUsuarios";
 import PerfilUsuario from "../pages/PerfilUsuario";
 import MisGuardias from "../pages/MisGuardias";
@@ -35,6 +36,14 @@ export default function AppRouter() {
                     element={
                         <ProtectedRoute requireAdmin={true}>
                             <Guardias />
+                        </ProtectedRoute>
+                    } 
+                />
+                <Route 
+                    path="/fichajes" 
+                    element={
+                        <ProtectedRoute requireAdmin={true}>
+                            <GestionFichajes />
                         </ProtectedRoute>
                     } 
                 />
