@@ -1,0 +1,200 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Duty;
+use App\Models\Fichaje;
+use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class FichajeController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        try{
+            $fichajes = Fichaje::all();
+            return response()->json($fichajes);
+        }catch(Exception $e){
+            return response()->json([
+                "message" => "Error al obtener los fichajes",
+                "error" => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        try{
+            $fichaje = new Fichaje();
+            $fichaje->date_time = $request->date_time;
+            $fichaje->type = $request->type;
+            $fichaje->worker_id = $request->worker_id;
+            $fichaje->id_duty = $request->id_duty;
+            $fichaje->save();
+            return response()->json($fichaje);
+        }catch(Exception $e){
+            return response()->json([
+                "message" => "Error al crear el fichaje",
+                "error" => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        try{
+            $fichaje = Fichaje::find($id);
+            return response()->json($fichaje);
+        }catch(Exception $e){
+            return response()->json([
+                "message" => "Error al obtener el fichaje",
+                "error" => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        try{
+            $fichaje = Fichaje::find($id);
+            if(!$fichaje){
+                return response()->json([
+                    "message" => "El fichaje no existe",
+                ], 404);
+            }
+            
+            $fichaje->date_time = $request->date_time;
+            $fichaje->type = $request->type;
+            $fichaje->worker_id = $request->worker_id;
+            $fichaje->id_duty = $request->id_duty;
+            $fichaje->save();
+            return response()->json($fichaje);
+        }catch(Exception $e){
+            return response()->json([
+                "message" => "Error al actualizar el fichaje",
+                "error" => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        try{
+            $fichaje = Fichaje::find($id);
+            if(!$fichaje){
+                return response()->json([
+                    "message" => "El fichaje no existe",
+                ], 404);
+            }
+            $fichaje->delete();
+            return response()->json([
+                "message" => "Fichaje eliminado correctamente",
+            ]);
+        }catch(Exception $e){
+            return response()->json([
+                "message" => "Error al eliminar el fichaje",
+                "error" => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+    public function obtenerFichajesPorGuardia(string $id_duty){
+        try{
+            $fichajes = Fichaje::where('id_duty', $id_duty)->get();
+            return response()->json($fichajes);
+        }catch(Exception $e){
+            return response()->json([
+                "message" => "Error al obtener los fichajes",
+                "error" => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function obtenerFichajesPorTrabajador(string $worker_id){
+        try{
+            $fichajes = Fichaje::where('worker_id', $worker_id)->get();
+            return response()->json($fichajes);
+        }catch(Exception $e){
+            return response()->json([
+                "message" => "Error al obtener los fichajes",
+                "error" => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function fichar(){
+        try{
+            $worker = Auth::user()->worker;
+            if(!$worker){
+                return response()->json([
+                    "message" => "El trabajador no existe",
+                ], 404);
+            }
+            $duty = Duty::where('id_worker', $worker->id)->where('date', date('Y-m-d'))->first();
+            if(!$duty){
+                return response()->json([
+                    "message" => "Hoy no tienes turno de guardia",
+                ], 404);
+            }
+
+            $ultimoFichaje = Fichaje::where('worker_id', $worker->id)->where('id_duty', $duty->id)->latest()->first();
+
+            
+
+            $fichaje = new Fichaje();
+            $fichaje->date_time = date('Y-m-d H:i:s');
+            if(!$ultimoFichaje || $ultimoFichaje->type == 1){
+                $fichaje->type = 0; //entrada
+            }else{
+                $fichaje->type = 1; //salida
+            }
+            $fichaje->worker_id = $worker->id;
+            $fichaje->id_duty = $duty->id;
+            $fichaje->save();
+            return response()->json($fichaje);
+
+
+
+        }catch(Exception $e){
+            return response()->json([
+                "message" => "Error al fichar",
+                "error" => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function misUltimosTresFicahjes(){
+        try{
+            $worker = Auth::user()->worker;
+            if(!$worker){
+                return response()->json([
+                    "message" => "El trabajador no existe",
+                ], 404);
+            }
+            $fichajes = Fichaje::where('worker_id', $worker->id)->latest()->take(3)->get();
+            return response()->json($fichajes);
+        }catch(Exception $e){
+            return response()->json([
+                "message" => "Error al obtener los fichajes",
+                "error" => $e->getMessage()
+            ], 500);
+        }
+    }
+}
