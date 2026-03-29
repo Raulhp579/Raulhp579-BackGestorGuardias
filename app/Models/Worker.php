@@ -32,4 +32,9 @@ class Worker extends Model
     {
         return $this->hasMany(Fichaje::class, 'worker_id');
     }
+
+    public function user()
+    {
+        return $this->hasOne(User::class, 'worker_id');
+    }
 }

@@ -558,6 +558,8 @@ select.ggSearchInput {
     justify-content: center;
     z-index: 999;
     padding: 16px;
+    overflow-y: auto;
+    scrollbar-width: thin;
 }
 
 .modalOverlay.centered {
@@ -569,13 +571,14 @@ select.ggSearchInput {
     border-radius: 16px 16px 0 0;
     max-width: 600px;
     width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
+    margin: auto 0 0 0;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    overflow: visible;
 }
 
 .modalOverlay.centered .modalSheet {
     border-radius: 16px;
+    margin: auto;
 }
 
 .modalBody {

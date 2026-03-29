@@ -10,6 +10,9 @@
     opacity: 0.5;
     pointer-events: none;
 }
+.s2--open {
+    z-index: 100;
+}
 
 /* Control (trigger button) */
 .s2__control {
@@ -75,11 +78,6 @@
 
 /* Dropdown */
 .s2__dropdown {
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 0;
-    right: 0;
-    z-index: 10001;
     background: rgba(255, 255, 255, 0.98);
     border: 1px solid var(--border);
     border-radius: 14px;

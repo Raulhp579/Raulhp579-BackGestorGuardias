@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import "./Select2.css";
 
 export default function Select2({
@@ -11,6 +12,7 @@ export default function Select2({
 }) {
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState("");
+    const [dropdownStyle, setDropdownStyle] = useState({});
     const containerRef = useRef(null);
     const searchRef = useRef(null);
 
@@ -20,10 +22,36 @@ export default function Select2({
         o.label.toLowerCase().includes(search.toLowerCase())
     );
 
+    // Calculate dropdown position based on trigger rect
+    const updateDropdownPosition = () => {
+        if (!containerRef.current) return;
+        const rect = containerRef.current.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        const dropdownHeight = Math.min(310, window.innerHeight * 0.4);
+
+        const openUpward = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+
+        setDropdownStyle({
+            position: "fixed",
+            left: rect.left,
+            width: rect.width,
+            zIndex: 99999,
+            ...(openUpward
+                ? { bottom: window.innerHeight - rect.top + 4 }
+                : { top: rect.bottom + 4 }
+            ),
+        });
+    };
+
     // Close on outside click
     useEffect(() => {
         const handler = (e) => {
-            if (containerRef.current && !containerRef.current.contains(e.target)) {
+            if (
+                containerRef.current &&
+                !containerRef.current.contains(e.target) &&
+                !e.target.closest(".s2__dropdown-portal")
+            ) {
                 setOpen(false);
                 setSearch("");
             }
@@ -38,6 +66,24 @@ export default function Select2({
             searchRef.current.focus();
         }
     }, [open]);
+
+    // Recalculate position on scroll/resize while open
+    useEffect(() => {
+        if (!open) return;
+        const handler = () => updateDropdownPosition();
+        window.addEventListener("scroll", handler, true);
+        window.addEventListener("resize", handler);
+        return () => {
+            window.removeEventListener("scroll", handler, true);
+            window.removeEventListener("resize", handler);
+        };
+    }, [open]);
+
+    const handleOpen = () => {
+        if (disabled) return;
+        if (!open) updateDropdownPosition();
+        setOpen(o => !o);
+    };
 
     const handleSelect = (val) => {
         onChange?.(val);
@@ -59,7 +105,7 @@ export default function Select2({
             {/* Trigger */}
             <div
                 className="s2__control"
-                onClick={() => { if (!disabled) setOpen(o => !o); }}
+                onClick={handleOpen}
             >
                 <span className={`s2__value ${!selected ? "s2__placeholder" : ""}`}>
                     {selected ? selected.label : placeholder}
@@ -72,9 +118,9 @@ export default function Select2({
                 </span>
             </div>
 
-            {/* Dropdown */}
-            {open && (
-                <div className="s2__dropdown">
+            {/* Dropdown via portal to escape overflow:hidden parents */}
+            {open && createPortal(
+                <div className="s2__dropdown s2__dropdown-portal" style={dropdownStyle}>
                     <div className="s2__search-wrap">
                         <input
                             ref={searchRef}
@@ -101,7 +147,8 @@ export default function Select2({
                             <li className="s2__option s2__option--empty">Sin resultados</li>
                         )}
                     </ul>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );

@@ -107,3 +107,43 @@ export async function deleteFichaje(id) {
         throw error;
     }
 }
+
+// User Endpoints
+export async function punchClock() {
+    try {
+        const response = await fetch('/api/fichajes', {
+            method: 'POST',
+            headers: getAuthHeaders(),
+        });
+        
+        if (!response.ok) {
+            let msg = `HTTP error! status: ${response.status}`;
+            try {
+                const err = await response.json();
+                msg = err?.message || err?.error || msg;
+            } catch (_) {}
+            throw new Error(msg);
+        }
+        return await response.json();
+    } catch (error) {
+        throw error;
+    }
+}
+
+export async function getLastThreePunches() {
+    try {
+        const response = await fetch('/api/fichajes/mis-ultimos-tres', {
+            method: 'GET',
+            headers: getAuthHeaders(),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const json = await response.json();
+        return normalizeList(json);
+    } catch (error) {
+        throw error;
+    }
+}
