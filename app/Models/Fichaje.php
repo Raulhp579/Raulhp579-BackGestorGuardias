@@ -13,6 +13,8 @@ class Fichaje extends Model
         "type",
         "worker_id",
         "id_duty",
+        "latitude",
+        "longitude",
     ];
 
     public function worker()

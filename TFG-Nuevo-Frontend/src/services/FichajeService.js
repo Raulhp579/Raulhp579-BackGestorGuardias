@@ -109,11 +109,12 @@ export async function deleteFichaje(id) {
 }
 
 // User Endpoints
-export async function punchClock() {
+export async function punchClock(coordinates = null) {
     try {
         const response = await fetch('/api/fichajes', {
             method: 'POST',
             headers: getAuthHeaders(),
+            body: coordinates ? JSON.stringify(coordinates) : undefined,
         });
         
         if (!response.ok) {

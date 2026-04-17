@@ -1,9 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { getProfile } from "../services/ProfileService";
 import { getWorkerDutiesPaginated } from "../services/DutyService";
 import { punchClock, getLastThreePunches } from "../services/FichajeService";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import "../styles/MisGuardias.css";
+
+// Fix leaflet icon default behavior
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
+});
 
 export default function MisGuardias() {
     const [duties, setDuties] = useState([]);
@@ -18,6 +28,13 @@ export default function MisGuardias() {
     const [recentPunches, setRecentPunches] = useState([]);
     const [isPunching, setIsPunching] = useState(false);
     const [currentTime, setCurrentTime] = useState(new Date());
+
+    // Map & Location State
+    const [userLocation, setUserLocation] = useState(null);
+    const [locationError, setLocationError] = useState("");
+    const mapRef = useRef(null);
+    const userMarkerRef = useRef(null);
+    const mapContainerRef = useRef(null);
 
 
     // Pagination state
@@ -123,14 +140,82 @@ export default function MisGuardias() {
         if (page < totalPages) setPage((p) => p + 1);
     }
 
-    // Fichar logics
+    // Fichar logics & Map initialization
     useEffect(() => {
         let timer;
+        let watchId;
         if (activeView === 'fichar') {
             loadRecentPunches();
             timer = setInterval(() => setCurrentTime(new Date()), 1000);
+
+            // Re-init map if container exists
+            setTimeout(() => {
+                if (mapContainerRef.current && !mapRef.current) {
+                    const map = L.map(mapContainerRef.current).setView([37.876, -4.814], 16);
+                    
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '© OpenStreetMap'
+                    }).addTo(map);
+
+                    L.circle([37.876, -4.814], {
+                        color: '#3b82f6',
+                        fillColor: '#3b82f6',
+                        fillOpacity: 0.2,
+                        radius: 200
+                    }).addTo(map).bindPopup("MEDAC Arena (Área de Fichaje)").openPopup();
+
+                    mapRef.current = map;
+                }
+            }, 100);
+
+            // Get Geolocation
+            if ("geolocation" in navigator) {
+                watchId = navigator.geolocation.watchPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        setUserLocation({ lat, lng });
+                        setLocationError("");
+
+                        // Update Marker
+                        if (mapRef.current) {
+                            if (userMarkerRef.current) {
+                                userMarkerRef.current.setLatLng([lat, lng]);
+                            } else {
+                                userMarkerRef.current = L.circleMarker([lat, lng], {
+                                    radius: 8,
+                                    fillColor: "#22c55e",
+                                    color: "#fff",
+                                    weight: 2,
+                                    opacity: 1,
+                                    fillOpacity: 1
+                                }).addTo(mapRef.current).bindPopup("Tu ubicación actual");
+                            }
+                        }
+                    },
+                    (error) => {
+                        console.error("Error obteniendo ubicación:", error);
+                        setLocationError("No pudimos obtener tu ubicación. Por favor, asegúrate de dar permisos de GPS al navegador.");
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            } else {
+                setLocationError("Tu navegador no soporta geolocalización.");
+            }
         }
-        return () => clearInterval(timer);
+
+        return () => {
+            clearInterval(timer);
+            if (watchId !== undefined && "geolocation" in navigator) {
+                navigator.geolocation.clearWatch(watchId);
+            }
+            if (activeView !== 'fichar' && mapRef.current) {
+                mapRef.current.remove();
+                mapRef.current = null;
+                userMarkerRef.current = null;
+            }
+        };
     }, [activeView]);
 
     const loadRecentPunches = async () => {
@@ -143,9 +228,14 @@ export default function MisGuardias() {
     };
 
     const handlePunch = async () => {
+        if (!userLocation) {
+            setToast({ type: "error", message: "Necesitamos conocer tu ubicación exacta para poder fichar. Asegúrate de permitir el acceso GPS." });
+            return;
+        }
+
         setIsPunching(true);
         try {
-            await punchClock();
+            await punchClock({ latitude: userLocation.lat, longitude: userLocation.lng });
             setToast({ type: "success", message: "Fichaje registrado correctamente." });
             loadRecentPunches();
         } catch (error) {
@@ -192,9 +282,9 @@ export default function MisGuardias() {
                 {/* Header Section */}
                 <div className="mgHeader">
                     <div>
-                        <h1 className="mgTitle">Mis Guardias</h1>
+                        <h1 className="mgTitle">Control de Guardia</h1>
                         <div className="mgSubtitle">
-                            Historial y próximas asignaciones
+                            Gestión de turnos y registro de jornada
                         </div>
                     </div>
                 </div>
@@ -468,12 +558,25 @@ export default function MisGuardias() {
                             </div>
                         </div>
 
-                        <div className="mgMapPlaceholder">
-                            <div className="mgMapIconWrap">
-                                <span className="material-icons-outlined mgMapIcon">map</span>
-                            </div>
-                            <h3>El mapa se mostrará aquí</h3>
-                            <p>En este espacio insertaremos tu mapa próximamente para validación de ubicación.</p>
+                        <div className="mgMapPlaceholder" style={{ padding: 0, overflow: 'hidden', position: 'relative' }}>
+                            {locationError ? (
+                                <div style={{ padding: 40, textAlign: 'center', color: '#b91c1c' }}>
+                                    <span className="material-icons-outlined" style={{ fontSize: 48, marginBottom: 15 }}>location_off</span>
+                                    <h3>Error de Ubicación</h3>
+                                    <p>{locationError}</p>
+                                </div>
+                            ) : (
+                                <>
+                                    <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }}></div>
+                                    {!userLocation && (
+                                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.85)', zIndex: 1000}}>
+                                            <span className="material-icons-outlined mgMapIcon" style={{ animation: 'spin 1.5s linear infinite'}}>my_location</span>
+                                            <h3 style={{ marginTop: 15, fontWeight: 600 }}>Calculando tu ubicación...</h3>
+                                            <p style={{ marginTop: 5, color: 'var(--muted)'}}>Por favor espera mientras el GPS establece tu posición exacta.</p>
+                                        </div>
+                                    )}
+                                </>
+                            )}
                         </div>
                     </div>
                 )}

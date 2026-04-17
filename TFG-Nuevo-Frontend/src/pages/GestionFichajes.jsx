@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import "../styles/GestionGuardias.css"; 
 import {
     getFichajes,
@@ -11,6 +11,16 @@ import { getDuties } from "../services/DutyService";
 import { useNotifications } from "../context/NotificationsContext";
 import RowActions from "../components/RowActions/RowActions";
 import Select2 from "../components/Select2/Select2";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+
+// Fix leaflet icon default behavior
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
+});
 
 export default function GestionFichajes() {
     const { addNotification } = useNotifications();
@@ -48,6 +58,47 @@ export default function GestionFichajes() {
     // Animations
     const [updatedRowId, setUpdatedRowId] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
+
+    // Map Modal Admin
+    const [mapOpen, setMapOpen] = useState(false);
+    const [mapRow, setMapRow] = useState(null);
+    const adminMapRef = useRef(null);
+    const adminMapContainerRef = useRef(null);
+
+    useEffect(() => {
+        if (mapOpen && mapRow && mapRow.latitude && mapRow.longitude) {
+            setTimeout(() => {
+                if (adminMapContainerRef.current && !adminMapRef.current) {
+                    const map = L.map(adminMapContainerRef.current).setView([37.876, -4.814], 16);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '© OpenStreetMap'
+                    }).addTo(map);
+
+                    // Medac Arena
+                    L.circle([37.876, -4.814], {
+                        color: '#3b82f6',
+                        fillColor: '#3b82f6',
+                        fillOpacity: 0.2,
+                        radius: 200
+                    }).addTo(map).bindPopup("MEDAC Arena");
+
+                    // Employee Location
+                    L.marker([mapRow.latitude, mapRow.longitude]).addTo(map)
+                        .bindPopup(`<b>${mapRow.worker?.user?.name || 'Empleado'}</b><br>Fichaje: ${formatDateTime(mapRow.date_time)}`).openPopup();
+                    
+                    adminMapRef.current = map;
+                }
+            }, 100);
+        }
+
+        return () => {
+            if (!mapOpen && adminMapRef.current) {
+                adminMapRef.current.remove();
+                adminMapRef.current = null;
+            }
+        };
+    }, [mapOpen, mapRow]);
 
     const reloadData = async () => {
         setLoading(true);
@@ -312,10 +363,25 @@ export default function GestionFichajes() {
                                             <td className="ggMono">{f.id_duty || "—"}</td>
                                             {isAdmin && (
                                                 <td className="ggColActions">
-                                                    <RowActions 
-                                                        onEdit={() => handleEdit(f)}
-                                                        onDelete={() => handleDelete(f)}
-                                                    />
+                                                    <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
+                                                        <button 
+                                                            className="ggActionBtn" 
+                                                            title="Ver en mapa" 
+                                                            style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: '4px' }}
+                                                            onClick={() => {
+                                                                if(f.latitude && f.longitude) {
+                                                                    setMapRow(f); setMapOpen(true);
+                                                                } else {
+                                                                    addNotification("Este fichaje no tiene ubicación GPS guardada.", "error");
+                                                                }
+                                                            }}>
+                                                            <span className="material-icons-outlined" style={{color: f.latitude ? '#3b82f6' : '#cbd5e1', fontSize: '20px'}}>map</span>
+                                                        </button>
+                                                        <RowActions 
+                                                            onEdit={() => handleEdit(f)}
+                                                            onDelete={() => handleDelete(f)}
+                                                        />
+                                                    </div>
                                                 </td>
                                             )}
                                         </tr>
@@ -478,6 +544,31 @@ export default function GestionFichajes() {
                             <button className="btnSecondary" onClick={() => setDeleteOpen(false)} disabled={deleteLoading}>
                                 Cancelar
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Mapa Fichaje */}
+            {mapOpen && mapRow && (
+                <div className="modalOverlay centered" onClick={() => setMapOpen(false)} style={{zIndex: 2000}}>
+                    <div className="modalSheet" onClick={(e) => e.stopPropagation()} style={{ width: '800px', maxWidth: '95vw', height: '600px', display: 'flex', flexDirection: 'column' }}>
+                        <div className="modalBody" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                            <div className="modalHeader" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '15px' }}>
+                                <div className="modalIcon" style={{ background: "rgba(59, 130, 246, 0.1)", color: "#3b82f6" }}>
+                                    <span className="material-icons">map</span>
+                                </div>
+                                <div>
+                                    <div className="modalTitle">Ubicación GPS del Fichaje</div>
+                                    <div className="modalSubtitle">{mapRow.worker?.user?.name} · {formatDateTime(mapRow.date_time)}</div>
+                                </div>
+                                <button type="button" onClick={() => setMapOpen(false)} style={{marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: '#64748b'}}>
+                                    <span className="material-icons">close</span>
+                                </button>
+                            </div>
+                            <div style={{ flex: 1, position: 'relative', marginTop: 15, borderRadius: 8, overflow: 'hidden', border: '1px solid #e2e8f0' }}>
+                                <div ref={adminMapContainerRef} style={{ width: '100%', height: '100%' }}></div>
+                            </div>
                         </div>
                     </div>
                 </div>

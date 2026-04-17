@@ -140,7 +140,7 @@ class FichajeController extends Controller
         }
     }
 
-    public function fichar(){
+    public function fichar(Request $request){
         try{
             $worker = Auth::user()->worker;
             if(!$worker){
@@ -155,9 +155,37 @@ class FichajeController extends Controller
                 ], 404);
             }
 
-            $ultimoFichaje = Fichaje::where('worker_id', $worker->id)->where('id_duty', $duty->id)->latest()->first();
+            // Validación de Ubicación (Medac Arena Córdoba: 37.876, -4.814)
+            $medacLat = 37.876;
+            $medacLng = -4.814;
+            $userLat = $request->latitude;
+            $userLng = $request->longitude;
 
-            
+            if(!$userLat || !$userLng){
+                return response()->json([
+                    "message" => "Es necesario proporcionar tu ubicación GPS para fichar.",
+                ], 422);
+            }
+
+            $earthRadius = 6371000; // Radio de la tierra en metros
+            $latFrom = deg2rad($medacLat);
+            $lonFrom = deg2rad($medacLng);
+            $latTo = deg2rad($userLat);
+            $lonTo = deg2rad($userLng);
+
+            $latDelta = $latTo - $latFrom;
+            $lonDelta = $lonTo - $lonFrom;
+
+            $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) + cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
+            $distance = $angle * $earthRadius;
+
+            if ($distance > 200) {
+                return response()->json([
+                    "message" => "Estás demasiado lejos del Medac Arena para fichar. Distancia aproximada: " . round($distance) . " metros.",
+                ], 422);
+            }
+
+            $ultimoFichaje = Fichaje::where('worker_id', $worker->id)->where('id_duty', $duty->id)->latest()->first();
 
             $fichaje = new Fichaje();
             $fichaje->date_time = date('Y-m-d H:i:s');
@@ -168,10 +196,10 @@ class FichajeController extends Controller
             }
             $fichaje->worker_id = $worker->id;
             $fichaje->id_duty = $duty->id;
+            $fichaje->latitude = $userLat;
+            $fichaje->longitude = $userLng;
             $fichaje->save();
             return response()->json($fichaje);
-
-
 
         }catch(Exception $e){
             return response()->json([

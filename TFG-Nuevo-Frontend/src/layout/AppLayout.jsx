@@ -202,9 +202,9 @@ export default function AppLayout() {
                             }
                         >
                             <span className="material-icons-outlined">
-                                event
+                                history_toggle_off
                             </span>
-                            <span>Mis Guardias</span>
+                            <span>Control de Guardia</span>
                         </NavLink>
 
                         <button
