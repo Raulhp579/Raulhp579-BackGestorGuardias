@@ -72,7 +72,7 @@ export default function AppLayout() {
     }, [navigate, loadNotifications]);
 
     // Echo WebSocket: escucha notificaciones en tiempo real
-    useEffect(() => {
+useEffect(() => {
         if (!userId) return;
 
         const token = localStorage.getItem("token");
@@ -85,7 +85,8 @@ export default function AppLayout() {
 
         const echo = new Echo({
             broadcaster: "reverb",
-            key: import.meta.env.VITE_REVERB_APP_KEY,
+            // PONEMOS LA CLAVE DIRECTAMENTE AQUÍ PARA PROBAR
+            key: "rdyiluxskpz4fxphbl3v", 
             wsHost,
             wsPort,
             wssPort: wsPort,
