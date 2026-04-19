@@ -182,19 +182,6 @@ export default function AppLayout() {
                         </NavLink>
 
                         <NavLink
-                            to="/perfil"
-                            onClick={closeMenu}
-                            className={({ isActive }) =>
-                                `appNavItem ${isActive ? "active" : ""}`
-                            }
-                        >
-                            <span className="material-icons-outlined">
-                                person
-                            </span>
-                            <span>Mi Perfil</span>
-                        </NavLink>
-
-                        <NavLink
                             to="/mis-guardias"
                             onClick={closeMenu}
                             className={({ isActive }) =>
@@ -207,19 +194,20 @@ export default function AppLayout() {
                             <span>Control de Guardia</span>
                         </NavLink>
 
-                        <button
-                            className="appNavItem "
-                            onClick={() => {
+                        <a
+                            href="#"
+                            className="appNavItem"
+                            onClick={(e) => {
+                                e.preventDefault();
                                 closeMenu();
                                 logout();
                             }}
-                            type="button"
                         >
                             <span className="material-icons-outlined">
                                 logout
                             </span>
                             <span>Cerrar Sesión</span>
-                        </button>
+                        </a>
                     </nav>
 
                     <div className="appSidebarFooter">
