@@ -150,9 +150,13 @@ class FichajeController extends Controller
             }
             $duty = Duty::where('id_worker', $worker->id)->where('date', date('Y-m-d'))->first();
             if(!$duty){
-                return response()->json([
-                    "message" => "Hoy no tienes turno de guardia",
-                ], 404);
+                // Crear automáticamente la guardia predeterminada (CA = Continuity of Care) para hoy
+                $duty = new Duty();
+                $duty->date = date('Y-m-d');
+                $duty->duty_type = \App\Enums\DutyType::CA; 
+                $duty->id_worker = $worker->id;
+                $duty->id_speciality = $worker->id_speciality;
+                $duty->save();
             }
 
             // Validación de Ubicación (Medac Arena Córdoba: 37.876, -4.814)

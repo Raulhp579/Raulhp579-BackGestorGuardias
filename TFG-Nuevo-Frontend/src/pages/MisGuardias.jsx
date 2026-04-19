@@ -51,6 +51,7 @@ export default function MisGuardias() {
     // Modal state
     const [selectedDuty, setSelectedDuty] = useState(null);
     const [dutyModalOpen, setDutyModalOpen] = useState(false);
+    const [confirmPunchModalOpen, setConfirmPunchModalOpen] = useState(false);
 
     // Leer ?status= al volver del callback de Google
     useEffect(() => {
@@ -233,7 +234,32 @@ export default function MisGuardias() {
             return;
         }
 
+        const isPunchingIn = !recentPunches[0] || recentPunches[0].type !== 0;
+
+        if (isPunchingIn && workerId) {
+            setIsPunching(true);
+            try {
+                const d = new Date();
+                const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                
+                const res = await getWorkerDutiesPaginated(workerId, 1, todayStr);
+                
+                if (res && res.data && res.data.length === 0) {
+                    setIsPunching(false);
+                    setConfirmPunchModalOpen(true);
+                    return;
+                }
+            } catch (err) {
+                console.error("Error verificando guardia de hoy", err);
+            }
+        }
+
+        await executePunch();
+    };
+
+    const executePunch = async () => {
         setIsPunching(true);
+        setConfirmPunchModalOpen(false);
         try {
             await punchClock({ latitude: userLocation.lat, longitude: userLocation.lng });
             setToast({ type: "success", message: "Fichaje registrado correctamente." });
@@ -678,6 +704,55 @@ export default function MisGuardias() {
                         <div className="mgModalFooter">
                             <button className="mgBtn" onClick={closeModal}>
                                 Cerrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Premium Modal for Warning NO Shift */}
+            {confirmPunchModalOpen && (
+                <div
+                    className="mgModalOverlay"
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget && !isPunching) setConfirmPunchModalOpen(false);
+                    }}
+                >
+                    <div className="mgModalCard" style={{ maxWidth: '480px' }}>
+                        <div className="mgModalHeader">
+                            <h3 className="mgModalTitle" style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#b91c1c' }}>
+                                <span className="material-icons-outlined">warning_amber</span>
+                                Sin Guardia Asignada
+                            </h3>
+                        </div>
+
+                        <div className="mgModalBody">
+                            <div style={{ marginBottom: '16px', lineHeight: '1.5', color: 'var(--text)', fontSize: '15px' }}>
+                                <strong>Actualmente no tienes ningún turno de guardia planificado para el día de hoy.</strong>
+                            </div>
+                            <div style={{ padding: '16px', background: '#FEF2F2', borderRadius: '8px', color: '#991B1B', fontSize: '14px', lineHeight: '1.6' }}>
+                                Si decides continuar y realizar el fichaje, el sistema <strong>creará automáticamente una nueva guardia</strong> asociada a tu jornada para reflejar este periodo de trabajo no agendado.
+                                <br/><br/>
+                                <span style={{ fontWeight: 600 }}>¿Estás seguro de que deseas continuar con el fichaje?</span>
+                            </div>
+                        </div>
+
+                        <div className="mgModalFooter" style={{ justifyContent: 'flex-end', gap: '12px' }}>
+                            <button 
+                                className="mgBtn" 
+                                style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text)' }} 
+                                onClick={() => setConfirmPunchModalOpen(false)}
+                                disabled={isPunching}
+                            >
+                                Cancelar
+                            </button>
+                            <button 
+                                className="mgBtn" 
+                                style={{ background: '#b91c1c', color: 'white', border: 'none' }} 
+                                onClick={executePunch}
+                                disabled={isPunching}
+                            >
+                                {isPunching ? "Procesando..." : "Sí, fichar y crear guardia"}
                             </button>
                         </div>
                     </div>

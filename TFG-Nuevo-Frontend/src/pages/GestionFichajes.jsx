@@ -283,40 +283,36 @@ export default function GestionFichajes() {
         <div className="ggPage">
             <main className="ggMain">
                 <div className="ggTableCard">
-                    <div className="ggTableCardTop">
-                        <div>
+                    <div className="ggTableCardTop" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <h2 className="ggTableCardTitle">Gestión de Fichajes</h2>
+                            <div className="ggTableCount">
+                                {loading ? "Cargando..." : `${filteredData.length} registros`}
+                            </div>
                         </div>
-                        <div className="ggTableCount">
-                            {loading ? "Cargando..." : `${filteredData.length} registros`}
-                        </div>
-                    </div>
 
-                    {isAdmin && (
-                        <div className="ggButtonsContainer">
-                            <button className="ggCtaBtn" onClick={handleCreate} disabled={loading}>
-                                <span className="material-icons">add_circle_outline</span>
-                                <span>Nuevo Fichaje</span>
-                            </button>
-                        </div>
-                    )}
-
-                    <div className="ggFilterContainer">
-                        <div className="ggFilterGroup">
-                            <label className="ggFilterLabel">
-                                <span className="material-icons">search</span>
-                                Buscar Trabajador
-                            </label>
-                            <input
-                                className="ggSearchInput"
-                                type="text"
-                                placeholder="Nombre o email..."
-                                value={searchTerm}
-                                onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
-                            />
-                            {searchTerm && (
-                                <button className="ggSearchClear" onClick={() => { setSearchTerm(""); setPage(1); }}>
-                                    <span className="material-icons">close</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                            <div className="ggSearchContainer" style={{ position: 'relative', width: '260px' }}>
+                                <span className="material-icons" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF', fontSize: '18px' }}>search</span>
+                                <input
+                                    className="ggSearchInput"
+                                    type="text"
+                                    placeholder="Buscar trabajador o email..."
+                                    style={{ paddingLeft: '34px', paddingRight: '30px', margin: 0, width: '100%', height: '38px' }}
+                                    value={searchTerm}
+                                    onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
+                                />
+                                {searchTerm && (
+                                    <button className="ggSearchClear" onClick={() => { setSearchTerm(""); setPage(1); }} style={{ position: 'absolute', right: '6px', top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                                        <span className="material-icons" style={{ fontSize: '16px', color: '#9CA3AF' }}>close</span>
+                                    </button>
+                                )}
+                            </div>
+                            
+                            {isAdmin && (
+                                <button className="ggCtaBtn" onClick={handleCreate} disabled={loading} style={{ width: 'auto', padding: '0 20px', height: '38px', borderRadius: '8px', margin: 0 }}>
+                                    <span className="material-icons" style={{ fontSize: '18px' }}>add_circle_outline</span>
+                                    <span>Nuevo Fichaje</span>
                                 </button>
                             )}
                         </div>
@@ -328,16 +324,15 @@ export default function GestionFichajes() {
                                 <tr>
                                     <th className="ggColDate">Fecha y Hora</th>
                                     <th className="ggColWorker">Trabajador</th>
-                                    <th className="ggColType">Tipo</th>
-                                    <th>Guardia ID</th>
-                                    {isAdmin && <th className="ggColActions">Acciones</th>}
+                                    <th className="ggColType" style={{ textAlign: 'center' }}>Tipo</th>
+                                    {isAdmin && <th className="ggColActions" style={{ textAlign: 'center' }}>Acciones</th>}
                                 </tr>
                             </thead>
                             <tbody>
                                 {loading ? (
                                     Array.from({ length: 8 }).map((_, i) => (
                                         <tr key={i} className="ggSkRow">
-                                            <td colSpan={isAdmin ? 5 : 4}>
+                                            <td colSpan={isAdmin ? 4 : 3}>
                                                 <div className="ggSk skLg"></div>
                                             </td>
                                         </tr>
@@ -355,15 +350,14 @@ export default function GestionFichajes() {
                                                     <span style={{ fontSize: "11px", color: "var(--muted)" }}>{f.worker?.user?.email}</span>
                                                 </div>
                                             </td>
-                                            <td className="ggColType">
+                                            <td className="ggColType" style={{ textAlign: 'center' }}>
                                                 <span className={`ggPill ${f.type === 0 ? "ca" : "loc"}`}>
                                                     {f.type === 0 ? "ENTRADA" : "SALIDA"}
                                                 </span>
                                             </td>
-                                            <td className="ggMono">{f.id_duty || "—"}</td>
                                             {isAdmin && (
                                                 <td className="ggColActions">
-                                                    <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
+                                                    <div style={{ display: 'flex', gap: '5px', alignItems: 'center', justifyContent: 'center' }}>
                                                         <button 
                                                             className="ggActionBtn" 
                                                             title="Ver en mapa" 
@@ -388,7 +382,7 @@ export default function GestionFichajes() {
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan={isAdmin ? 5 : 4} className="ggTableEmpty">
+                                        <td colSpan={isAdmin ? 4 : 3} className="ggTableEmpty">
                                             No se encontraron fichajes.
                                         </td>
                                     </tr>
@@ -397,33 +391,34 @@ export default function GestionFichajes() {
                         </table>
                     </div>
 
-                    {totalPages > 1 && (
-                        <div className="ggPager">
-                            <button className="ggPagerBtn" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>
-                                <span className="material-icons">chevron_left</span>
-                                Anterior
-                            </button>
-                            <div className="ggPagerNums">
-                                {pageButtons.map((n, i) => (
-                                    n === "..." ? (
-                                        <span key={`el-${i}`} className="ggPagerEllipsis">...</span>
-                                    ) : (
-                                        <button 
-                                            key={`pg-${n}`}
-                                            className={`ggPagerNum ${page === n ? "active" : ""}`}
-                                            onClick={() => setPage(n)}
-                                        >
-                                            {n}
-                                        </button>
-                                    )
-                                ))}
-                            </div>
-                            <button className="ggPagerBtn" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>
-                                Siguiente
-                                <span className="material-icons">chevron_right</span>
-                            </button>
+                    {/* Mostrar paginador siempre visible para asentar el layout */}
+                    <div className="ggPager">
+                        <button className="ggPagerBtn" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>
+                            <span className="material-icons">chevron_left</span>
+                            Anterior
+                        </button>
+                        <div className="ggPagerNums">
+                            {totalPages > 0 ? pageButtons.map((n, i) => (
+                                n === "..." ? (
+                                    <span key={`el-${i}`} className="ggPagerEllipsis">...</span>
+                                ) : (
+                                    <button 
+                                        key={`pg-${n}`}
+                                        className={`ggPagerNum ${page === n ? "active" : ""}`}
+                                        onClick={() => setPage(n)}
+                                    >
+                                        {n}
+                                    </button>
+                                )
+                            )) : (
+                                <button className="ggPagerNum active">1</button>
+                            )}
                         </div>
-                    )}
+                        <button className="ggPagerBtn" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
+                            Siguiente
+                            <span className="material-icons">chevron_right</span>
+                        </button>
+                    </div>
                 </div>
             </main>
 
