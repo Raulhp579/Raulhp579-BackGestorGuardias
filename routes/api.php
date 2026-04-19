@@ -12,6 +12,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\WorkerController;
 use App\Http\Middleware\isAdmin;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
 // Preflight CORS para /api/*
@@ -42,6 +43,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/speciality', SpecialityController::class);
 });
 
+Route::middleware('auth:sanctum')->get('/workers/{id}/duties', [WorkerController::class, 'getDuties']);
+Route::middleware('auth:sanctum')->get('/workers/speciality/{idSpeciality}', [WorkerController::class, 'getBySpeciality']);
+
 // Admin routes (requiere autenticación y rol de admin)
 Route::middleware(['auth:sanctum', isAdmin::class])->group(function () {
     Route::get('/users', [UserController::class, 'index']);
@@ -56,7 +60,6 @@ Route::middleware(['auth:sanctum', isAdmin::class])->group(function () {
 
     // Additional filter routes for workers
     Route::get('/workers/active/list', [WorkerController::class, 'getActive']);
-    Route::get('/workers/speciality/{idSpeciality}', [WorkerController::class, 'getBySpeciality']);
 
     Route::post('/duties', [DutyController::class, 'store']);
     Route::put('/duties/{id}', [DutyController::class, 'update']);
@@ -80,7 +83,27 @@ Route::middleware('auth:sanctum')->get('/duties/worker/{id}', [DutyController::c
 
 Route::get('/duties/{id}', [DutyController::class, 'show']);
 Route::get('/duties/{id}', [DutyController::class, 'show']);
-Route::get('/duties/day/{date}', [DutyController::class, 'day']);
+    Route::get('/duties/day/{date}', [DutyController::class, 'day']);
+
+    // ---------------------Duty Swaps routes-----------------------------
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/duty-swaps', [App\Http\Controllers\DutySwapController::class, 'index']);
+        Route::post('/duty-swaps', [App\Http\Controllers\DutySwapController::class, 'store']);
+        Route::put('/duty-swaps/{dutySwap}/accept', [App\Http\Controllers\DutySwapController::class, 'accept']);
+        Route::put('/duty-swaps/{dutySwap}/reject', [App\Http\Controllers\DutySwapController::class, 'reject']);
+        Route::put('/duty-swaps/{dutySwap}/approve', [App\Http\Controllers\DutySwapController::class, 'approve']);
+        Route::put('/duty-swaps/{dutySwap}/decline', [App\Http\Controllers\DutySwapController::class, 'decline']);
+
+        Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index']);
+        Route::put('/notifications/{id}/read', [App\Http\Controllers\NotificationController::class, 'markAsRead']);
+        Route::put('/notifications/read-all', [App\Http\Controllers\NotificationController::class, 'markAllAsRead']);
+    });
+
+    // Broadcasting auth con Sanctum para el SPA React
+Route::middleware('auth:sanctum')->post('/broadcasting/auth', function (Request $request) {
+    return Broadcast::auth($request);
+});
+
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/login', function () {
     return response()->json(['error' => 'Unauthenticated.'], 401);

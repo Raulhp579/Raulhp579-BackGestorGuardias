@@ -102,14 +102,22 @@ export async function deleteDuty(id) {
     }
 }
 
-// Obtener guardias de un trabajador específico (Legado - devuelve todo)
+// Obtener guardias de un trabajador específico (NUEVO - usa endpoint especializado)
 export async function getWorkerDuties(workerId) {
     try {
-        const allDuties = await getDuties();
-        return allDuties.filter((duty) => duty.id_worker === workerId);
+        const response = await fetch(`${endpoint}/workers/${workerId}/duties`, {
+            method: "GET",
+            headers: getAuthHeaders(),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return await response.json();
     } catch (error) {
         console.error("Error al obtener guardias del trabajador:", error);
-        throw error;
+        return [];
     }
 }
 
@@ -151,7 +159,7 @@ export async function createDuty(data) {
             try {
                 const err = await response.json();
                 msg = err?.message || err?.error || msg;
-            } catch (_) {}
+            } catch (_) { }
             throw new Error(msg);
         }
 

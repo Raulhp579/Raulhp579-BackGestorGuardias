@@ -10,6 +10,7 @@ import GestionFichajes from "../pages/GestionFichajes";
 import GestionUsuarios from "../pages/GestionUsuarios";
 import PerfilUsuario from "../pages/PerfilUsuario";
 import MisGuardias from "../pages/MisGuardias";
+import RequestsInbox from "../pages/RequestsInbox";
 
 // Nuevas páginas legales
 import AvisoLegal from "../pages/AvisoLegal";
@@ -29,31 +30,32 @@ export default function AppRouter() {
                 <Route path="/home" element={<HomeDashboard />} />
                 <Route path="/perfil" element={<PerfilUsuario />} />
                 <Route path="/mis-guardias" element={<MisGuardias />} />
-                
+                <Route path="/solicitudes" element={<RequestsInbox />} />
+
                 {/* SOLO ADMIN - Protegido con ProtectedRoute */}
-                <Route 
-                    path="/guardias" 
+                <Route
+                    path="/guardias"
                     element={
                         <ProtectedRoute requireAdmin={true}>
                             <Guardias />
                         </ProtectedRoute>
-                    } 
+                    }
                 />
-                <Route 
-                    path="/fichajes" 
+                <Route
+                    path="/fichajes"
                     element={
                         <ProtectedRoute requireAdmin={true}>
                             <GestionFichajes />
                         </ProtectedRoute>
-                    } 
+                    }
                 />
-                <Route 
-                    path="/usuarios" 
+                <Route
+                    path="/usuarios"
                     element={
                         <ProtectedRoute requireAdmin={true}>
                             <GestionUsuarios />
                         </ProtectedRoute>
-                    } 
+                    }
                 />
 
                 {/* Legales (también dentro del layout para mantener header/sidebar) */}

@@ -297,4 +297,40 @@ class WorkerController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Get all duties for a specific worker
+     */
+    public function getDuties(string $id)
+    {
+        try {
+            $worker = Worker::find($id);
+            if (!$worker) {
+                return response()->json(['error' => 'Worker not found'], 404);
+            }
+
+            $duties = $worker->duties()
+                ->with(['speciality', 'worker'])
+                ->orderBy('date', 'asc')
+                ->get()
+                ->map(function($duty) {
+                    return [
+                        'id' => $duty->id,
+                        'date' => $duty->date,
+                        'duty_type' => $duty->duty_type,
+                        'id_speciality' => $duty->id_speciality,
+                        'speciality' => $duty->speciality?->name ?? null,
+                        'id_worker' => $duty->id_worker,
+                        'worker' => $duty->worker?->name ?? null,
+                    ];
+                });
+
+            return response()->json($duties);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => 'Error fetching worker duties',
+                'mistake' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

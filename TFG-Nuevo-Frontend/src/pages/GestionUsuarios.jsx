@@ -10,7 +10,7 @@ import {
     updateAdmin,
     deleteAdmin as deleteAdminApi,
 } from "../services/userService";
-import { getSpecialities } from "../services/SpecialitiesService";
+import { getSpecialities, updateSpeciality } from "../services/SpecialitiesService";
 
 import RowActions from "../components/RowActions/RowActions";
 import Select2 from "../components/Select2/Select2";
@@ -174,8 +174,8 @@ export default function GestionUsuarios() {
                 const arr = Array.isArray(data)
                     ? data
                     : Array.isArray(data?.data)
-                      ? data.data
-                      : [];
+                        ? data.data
+                        : [];
                 setSpecialities(arr);
             } catch (e) {
                 console.error("No se pudieron cargar las especialidades", e);
@@ -393,8 +393,8 @@ export default function GestionUsuarios() {
                             updated.speciality = spec
                                 ? spec.name
                                 : payload.id_speciality === null
-                                  ? null
-                                  : w.speciality;
+                                    ? null
+                                    : w.speciality;
                             return updated;
                         }),
                     );
@@ -436,6 +436,39 @@ export default function GestionUsuarios() {
         }
     }
 
+    async function handleSetChief(worker) {
+        if (!worker.id_speciality) {
+            showToast("El trabajador no tiene especialidad asignada", "error");
+            return;
+        }
+
+        const spec = specialities.find(s => s.id == worker.id_speciality);
+        if (!spec) {
+            showToast("No se encontró la especialidad", "error");
+            return;
+        }
+
+        setLoading(true);
+        try {
+            await updateSpeciality(worker.id_speciality, {
+                name: spec.name,
+                active: spec.active,
+                id_chief: worker.id
+            });
+
+            // Update local specialities state
+            setSpecialities(prev => prev.map(s =>
+                s.id == worker.id_speciality ? { ...s, id_chief: worker.id } : s
+            ));
+
+            showToast(`${worker.name} ahora es Jefe de ${spec.name}`, "success");
+        } catch (err) {
+            showToast("Error al asignar jefe: " + err.message, "error");
+        } finally {
+            setLoading(false);
+        }
+    }
+
     async function confirmDelete() {
         if (!deleteRow || !deleteType) return;
 
@@ -467,8 +500,8 @@ export default function GestionUsuarios() {
             handleSuccessDelete(null);
             setDeleteError(
                 err?.response?.data?.error ||
-                    err?.message ||
-                    "No se pudo eliminar",
+                err?.message ||
+                "No se pudo eliminar",
             );
         } finally {
             setDeleteLoading(false);
@@ -608,23 +641,33 @@ export default function GestionUsuarios() {
     let tableRows = null;
 
     if (view === "workers") {
-        tableRows = pagedRows.map((w) => (
-            <tr key={w.id}>
-                <td>{w.name}</td>
-                <td>{w.rank}</td>
-                <td>{w.registration_date}</td>
-                <td>{w.discharge_date ?? "-"}</td>
-                <td>{w.speciality}</td>
-                <td>
-                    <RowActions
-                        row={w}
-                        onEdit={editWorker}
-                        onDelete={deleteWorker}
-                        disabled={loading}
-                    />
-                </td>
-            </tr>
-        ));
+        tableRows = pagedRows.map((w) => {
+            const spec = specialities.find(s => s.id == w.id_speciality);
+            const isChief = spec && spec.id_chief == w.id;
+
+            return (
+                <tr key={w.id}>
+                    <td className="wNameCell">
+                        {w.name}
+                        {isChief && <span className="chiefBadge" title="Jefe de Especialidad">⭐</span>}
+                    </td>
+                    <td>{w.rank}</td>
+                    <td>{w.registration_date}</td>
+                    <td>{w.discharge_date ?? "-"}</td>
+                    <td>{w.speciality}</td>
+                    <td>
+                        <RowActions
+                            row={w}
+                            onEdit={editWorker}
+                            onDelete={deleteWorker}
+                            onSetChief={handleSetChief}
+                            isChief={isChief}
+                            disabled={loading}
+                        />
+                    </td>
+                </tr>
+            );
+        });
     } else {
         tableRows = pagedRows.map((a) => (
             <tr key={a.id}>
@@ -863,19 +906,19 @@ export default function GestionUsuarios() {
                                                     <td>
                                                         {row.registration_date
                                                             ? new Date(
-                                                                  row.registration_date,
-                                                              ).toLocaleDateString(
-                                                                  "es-ES",
-                                                              )
+                                                                row.registration_date,
+                                                            ).toLocaleDateString(
+                                                                "es-ES",
+                                                            )
                                                             : "-"}
                                                     </td>
                                                     <td>
                                                         {row.discharge_date
                                                             ? new Date(
-                                                                  row.discharge_date,
-                                                              ).toLocaleDateString(
-                                                                  "es-ES",
-                                                              )
+                                                                row.discharge_date,
+                                                            ).toLocaleDateString(
+                                                                "es-ES",
+                                                            )
                                                             : "-"}
                                                     </td>
                                                     <td>{row.speciality}</td>
@@ -883,20 +926,18 @@ export default function GestionUsuarios() {
                                                         {(() => {
                                                             const relatedUser = admins.find(a => a.worker_id === row.id);
                                                             const isAdminWorker = relatedUser && relatedUser.roles && relatedUser.roles.some(r => r.name === 'admin');
-                                                            
+                                                            const s = specialities.find(sp => sp.id == row.id_speciality);
+                                                            const isChief = s && s.id_chief == row.id;
+
                                                             return (
                                                                 <div className="cdActionsCenter">
                                                                     <RowActions
                                                                         row={row}
-                                                                        onEdit={
-                                                                            editWorker
-                                                                        }
-                                                                        onDelete={
-                                                                            deleteWorker
-                                                                        }
-                                                                        disabled={
-                                                                            loading
-                                                                        }
+                                                                        onEdit={editWorker}
+                                                                        onDelete={deleteWorker}
+                                                                        onSetChief={handleSetChief}
+                                                                        isChief={isChief}
+                                                                        disabled={loading}
                                                                         hideEdit={isAdminWorker}
                                                                         hideDelete={isAdminWorker}
                                                                     />

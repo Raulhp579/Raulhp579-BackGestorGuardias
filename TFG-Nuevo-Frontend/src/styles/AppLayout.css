@@ -472,46 +472,48 @@ body {
     flex-direction: column;
 }
 
-:root{
-  --appHeaderH: 72px; /* ajusta si tu header es 64/70/72 */
+:root {
+    --appHeaderH: 72px;
+    /* ajusta si tu header es 64/70/72 */
 }
 
 /* 1) MISMA ALTURA para Header y SidebarBrand */
-.cdHeader{
-  height: var(--appHeaderH);
+.cdHeader {
+    height: var(--appHeaderH);
 }
 
-.cdHeaderInner{
-  height: 100%;
+.cdHeaderInner {
+    height: 100%;
 }
 
-.appSidebarBrand{
-  height: var(--appHeaderH);
-  display: flex;
-  align-items: center;
+.appSidebarBrand {
+    height: var(--appHeaderH);
+    display: flex;
+    align-items: center;
 }
 
 /* 2) MISMO fondo (mismo verde exacto) */
 .cdHeader,
 .appSidebar,
-.appSidebarBrand{
-  background: var(--appPrimary);
+.appSidebarBrand {
+    background: var(--appPrimary);
 }
 
 /* 3) Unifica la “línea” inferior: o ambos, o ninguno */
-.cdHeader{
-  border-bottom: 1px solid rgba(255,255,255,.12);
+.cdHeader {
+    border-bottom: 1px solid rgba(255, 255, 255, .12);
 }
-.appSidebarBrand{
-  border-bottom: 1px solid rgba(255,255,255,.12);
+
+.appSidebarBrand {
+    border-bottom: 1px solid rgba(255, 255, 255, .12);
 }
 
 /* 4) Evita que aparezca un “corte” por borde/sombra en desktop */
-@media (min-width: 1024px){
-  .appSidebar{
-    box-shadow: none !important;
-    border-right: none !important;
-  }
+@media (min-width: 1024px) {
+    .appSidebar {
+        box-shadow: none !important;
+        border-right: none !important;
+    }
 }
 
 /* ===== DESKTOP: sidebar fijo visible ===== */
@@ -560,6 +562,40 @@ body {
     }
 }
 
+.appNavBadge {
+    background: #ef4444;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    padding: 0 0.25rem;
+}
 
+.appToast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #007041;
+    color: white;
+    padding: 14px 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.95rem;
+    max-width: 360px;
+    animation: toastSlideIn 0.3s ease;
+}
 
-
+@keyframes toastSlideIn {
+    from { transform: translateX(110%); opacity: 0; }
+    to   { transform: translateX(0);   opacity: 1; }
+}

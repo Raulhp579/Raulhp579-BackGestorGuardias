@@ -12,8 +12,19 @@ class Speciality extends Model
     protected $primaryKey = 'id';
     protected $fillable = [
         "name",
-        "active"
+        "active",
+        "id_chief"
     ]; 
+
+    public function workers()
+    {
+        return $this->hasMany(Worker::class, 'id_speciality');
+    }
+
+    public function chief()
+    {
+        return $this->belongsTo(Worker::class, 'id_chief');
+    }
 
     protected function casts(): array
     {

@@ -1,24 +1,41 @@
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import Echo from "laravel-echo";
+import Pusher from "pusher-js";
 import "../styles/AppLayout.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { getProfile } from "../services/ProfileService";
+import { getNotifications, markAllAsRead } from "../services/NotificationService";
 import { useAuth } from "../hooks/useAuth";
 
 export default function AppLayout() {
     const [open, setOpen] = useState(false);
+    const [userId, setUserId] = useState(null);
     const [user, setUser] = useState({
         name: "Usuario",
         email: "",
         avatarUrl: "",
     });
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [notifications, setNotifications] = useState([]);
+    const [toast, setToast] = useState(null);
     const { isAdmin } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const isHome = location.pathname === "/";
 
-    // Cargar perfil del usuario al montar el componente
+    const loadNotifications = useCallback(async () => {
+        try {
+            const data = await getNotifications();
+            setNotifications(data);
+            setUnreadCount(data.filter(n => !n.read_at).length);
+        } catch (e) {
+            console.error("Error loading notifications", e);
+        }
+    }, []);
+
+    // Cargar perfil y notificaciones al montar
     useEffect(() => {
         async function loadUser() {
             try {
@@ -29,10 +46,10 @@ export default function AppLayout() {
                         email: profileData.email ?? "",
                         avatarUrl: profileData.avatarUrl ?? "",
                     });
+                    setUserId(profileData.id);
                 }
             } catch (error) {
                 console.error("Error al cargar perfil:", error);
-                // Si hay error de autenticación, redirigir al login
                 if (
                     error.message?.includes("401") ||
                     error.message?.includes("autenticación")
@@ -43,7 +60,53 @@ export default function AppLayout() {
         }
 
         loadUser();
-    }, [navigate]);
+        loadNotifications();
+
+        const interval = setInterval(loadNotifications, 60000);
+        window.addEventListener("notificationsRead", loadNotifications);
+
+        return () => {
+            clearInterval(interval);
+            window.removeEventListener("notificationsRead", loadNotifications);
+        };
+    }, [navigate, loadNotifications]);
+
+    // Echo WebSocket: escucha notificaciones en tiempo real
+    useEffect(() => {
+        if (!userId) return;
+
+        const token = localStorage.getItem("token");
+        window.Pusher = Pusher;
+
+        const echo = new Echo({
+            broadcaster: "reverb",
+            key: import.meta.env.VITE_REVERB_APP_KEY,
+            wsHost: import.meta.env.VITE_REVERB_HOST,
+            wsPort: import.meta.env.VITE_REVERB_PORT ?? 80,
+            wssPort: import.meta.env.VITE_REVERB_PORT ?? 443,
+            forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? "https") === "https",
+            enabledTransports: ["ws", "wss"],
+            authEndpoint: "/api/broadcasting/auth",
+            auth: {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    Accept: "application/json",
+                },
+            },
+        });
+
+        echo.private(`notifications.${userId}`)
+            .listen(".create", () => {
+                loadNotifications();
+                setToast("Tienes una nueva notificación de intercambio de guardia");
+                setTimeout(() => setToast(null), 5000);
+            });
+
+        return () => {
+            echo.leave(`notifications.${userId}`);
+            echo.disconnect();
+        };
+    }, [userId, loadNotifications]);
 
     // Redirección forzada para el tutorial global
     useEffect(() => {
@@ -53,29 +116,23 @@ export default function AppLayout() {
             const phase = localStorage.getItem("tutorial_phase");
             const pathname = location.pathname;
 
-            // Lógica de redirección según la fase
             if (!phase) {
-                // Fase 1: Usuarios (Inicio)
                 if (pathname !== "/usuarios") {
                     navigate("/usuarios");
                 }
             } else if (phase === "PHASE_GUARDS") {
-                // Fase 2: Guardias
                 if (pathname !== "/guardias") {
                     navigate("/guardias");
                 }
             } else if (phase === "PHASE_FICHAJES") {
-                // Fase 3: Fichajes
                 if (pathname !== "/fichajes") {
                     navigate("/fichajes");
                 }
             } else if (phase === "PHASE_MIS_GUARDIAS") {
-                // Fase 4: Mis Guardias
                 if (pathname !== "/mis-guardias") {
                     navigate("/mis-guardias");
                 }
             } else if (phase === "PHASE_HOME") {
-                // Fase 5: Home
                 if (pathname !== "/home") {
                     navigate("/home");
                 }
@@ -83,13 +140,11 @@ export default function AppLayout() {
         }
     }, [location.pathname, navigate]);
 
-    // logout
     function logout() {
         localStorage.removeItem("token");
         localStorage.removeItem("auth");
         sessionStorage.removeItem("roles");
 
-        // Disparar evento personalizado para notificar cambios de autenticación
         window.dispatchEvent(
             new CustomEvent("authChange", { detail: { roles: [] } }),
         );
@@ -103,7 +158,13 @@ export default function AppLayout() {
 
     return (
         <div className="appShell">
-            {/* Sidebar - oculto en página Home */}
+            {toast && (
+                <div className="appToast">
+                    <span className="material-icons-outlined">notifications</span>
+                    {toast}
+                </div>
+            )}
+
             {!isHome && (
                 <aside className={`appSidebar ${open ? "open" : ""}`}>
                     <div className="appSidebarBrand">
@@ -132,7 +193,6 @@ export default function AppLayout() {
                     </div>
 
                     <nav className="appNav">
-                        {/* SOLO MOSTRAR PARA ADMINS */}
                         {isAdmin && (
                             <>
                                 <NavLink
@@ -160,7 +220,7 @@ export default function AppLayout() {
                                     </span>
                                     <span>Usuarios</span>
                                 </NavLink>
-                                
+
                                 <NavLink
                                     to="/fichajes"
                                     onClick={closeMenu}
@@ -204,6 +264,20 @@ export default function AppLayout() {
                             <span>Control de Guardia</span>
                         </NavLink>
 
+                        <NavLink
+                            to="/solicitudes"
+                            onClick={closeMenu}
+                            className={({ isActive }) =>
+                                `appNavItem ${isActive ? "active" : ""}`
+                            }
+                        >
+                            <span className="material-icons-outlined">
+                                forum
+                            </span>
+                            <span>Solicitudes</span>
+                            {unreadCount > 0 && <span className="appNavBadge">{unreadCount}</span>}
+                        </NavLink>
+
                         <a
                             href="#"
                             className="appNavItem"
@@ -226,7 +300,6 @@ export default function AppLayout() {
                 </aside>
             )}
 
-            {/* Derecha */}
             <div className="appBody">
                 <Header
                     onMenuClick={() => setOpen(true)}

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { getProfile } from "../services/ProfileService";
 import { getWorkerDutiesPaginated } from "../services/DutyService";
+import SwapRequestModal from "../components/SwapRequestModal";
 import { punchClock, getLastThreePunches } from "../services/FichajeService";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -90,6 +91,7 @@ export default function MisGuardias() {
     // Modal state
     const [selectedDuty, setSelectedDuty] = useState(null);
     const [dutyModalOpen, setDutyModalOpen] = useState(false);
+    const [swapModalOpen, setSwapModalOpen] = useState(false);
     const [confirmPunchModalOpen, setConfirmPunchModalOpen] = useState(false);
 
     // Leer ?status= al volver del callback de Google
@@ -103,7 +105,7 @@ export default function MisGuardias() {
             setToast({ type: "error", message: decodeURIComponent(msg) });
             setSearchParams({}, { replace: true });
         }
-    }, []);
+    }, [searchParams, setSearchParams]);
 
     // Auto-cerrar toast tras 4 segundos
     useEffect(() => {
@@ -192,7 +194,7 @@ export default function MisGuardias() {
             setTimeout(() => {
                 if (mapContainerRef.current && !mapRef.current) {
                     const map = L.map(mapContainerRef.current).setView([37.876, -4.814], 16);
-                    
+
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         maxZoom: 19,
                         attribution: '© OpenStreetMap'
@@ -280,9 +282,9 @@ export default function MisGuardias() {
             try {
                 const d = new Date();
                 const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                
+
                 const res = await getWorkerDutiesPaginated(workerId, 1, todayStr);
-                
+
                 if (res && res.data && res.data.length === 0) {
                     setIsPunching(false);
                     setConfirmPunchModalOpen(true);
@@ -330,6 +332,11 @@ export default function MisGuardias() {
         window.location.href = `/api/google/redirect?duty_id=${dutyId}`;
     };
 
+    const handleSwapRequest = () => {
+        setDutyModalOpen(false);
+        setSwapModalOpen(true);
+    };
+
     return (
         <div className="mgPage">
             {toast && (
@@ -356,14 +363,14 @@ export default function MisGuardias() {
 
                 {/* Navigation Tabs */}
                 <div className="mgTabs tour-mg-tabs">
-                    <button 
+                    <button
                         className={`mgTabBtn ${activeView === 'guardias' ? 'active' : ''}`}
                         onClick={() => setActiveView('guardias')}
                     >
                         <span className="material-icons-outlined">event</span>
                         Próximas Guardias
                     </button>
-                    <button 
+                    <button
                         className={`mgTabBtn ${activeView === 'fichar' ? 'active' : ''}`}
                         onClick={() => setActiveView('fichar')}
                     >
@@ -384,185 +391,185 @@ export default function MisGuardias() {
                         </div>
 
                         <button className="mgExportAllBtn tour-mg-export" onClick={handleExportAll}>
-                            <span className="material-icons-outlined">calendar_today</span>
-                            <span>Exportar a Google Calendar</span>
-                        </button>
+                                <span className="material-icons-outlined">calendar_today</span>
+                                <span>Exportar a Google Calendar</span>
+                            </button>
 
-                        <div className="mgFilterGroup">
-                            <span className="material-icons-outlined mgFilterIcon">
-                                calendar_today
-                            </span>
-                            <input
-                                type="date"
-                                className="mgDateInput"
-                                value={searchDate}
-                                onChange={handleDateChange}
-                                placeholder="Buscar por fecha"
-                            />
-                            {searchDate && (
-                                <button
-                                    className="mgClearBtn"
-                                    onClick={() => {
-                                        setSearchDate("");
-                                        setPage(1);
-                                    }}
-                                    title="Limpiar filtro"
-                                >
-                                    <span className="material-icons">close</span>
-                                </button>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Main Content Card */}
-                    <div className="mgCard">
-                        <div className="mgTableContainer">
-                            {loading ? (
-                                <div className="mgEmpty">
-                                    <span
-                                        className="material-icons-outlined mgEmptyIcon"
-                                        style={{
-                                            animation: "spin 1s linear infinite",
-                                        }}
-                                    >
-                                        sync
-                                    </span>
-                                    <span>Cargando datos...</span>
-                                </div>
-                            ) : error ? (
-                                <div className="mgEmpty">
-                                    <span
-                                        className="material-icons-outlined mgEmptyIcon"
-                                        style={{ color: "#EF4444" }}
-                                    >
-                                        error
-                                    </span>
-                                    <span>{error}</span>
-                                </div>
-                            ) : duties.length === 0 ? (
-                                <div className="mgEmpty">
-                                    <span className="material-icons-outlined mgEmptyIcon">
-                                        event_busy
-                                    </span>
-                                    <span>No se encontraron guardias.</span>
-                                </div>
-                            ) : (
-                                <table className="mgTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Fecha</th>
-                                            <th>Tipo</th>
-                                            <th>Especialidad</th>
-                                            <th>Jefe de Guardia</th>
-                                            <th style={{ textAlign: "center" }}>
-                                                Detalles
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {duties.map((duty) => (
-                                            <tr key={duty.id}>
-                                                <td>
-                                                    <div className="mgDateCell">
-                                                        <span className="mgDay">
-                                                            {new Date(
-                                                                duty.date,
-                                                            ).getDate()}
-                                                        </span>
-                                                        <span className="mgMonthYear">
-                                                            {new Date(
-                                                                duty.date,
-                                                            ).toLocaleDateString(
-                                                                "es-ES",
-                                                                {
-                                                                    month: "short",
-                                                                    year: "numeric",
-                                                                },
-                                                            )}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <span
-                                                        className={`mgPill ${duty.duty_type?.toLowerCase()}`}
-                                                    >
-                                                        {duty.duty_type}
-                                                    </span>
-                                                </td>
-                                                <td>{duty.speciality || "-"}</td>
-                                                <td>
-                                                    {duty.is_chief ? (
-                                                        <span className="mgChiefBadge">
-                                                            <span className="material-icons">
-                                                                star
-                                                            </span>
-                                                            Jefe
-                                                        </span>
-                                                    ) : (
-                                                        duty.chief_worker || "-"
-                                                    )}
-                                                </td>
-                                                <td style={{ textAlign: "center" }}>
-                                                    <button
-                                                        className="mgActionBtn"
-                                                        onClick={() =>
-                                                            openModal(duty)
-                                                        }
-                                                        title="Ver ficha completa"
-                                                    >
-                                                        <span className="material-icons-outlined">
-                                                            visibility
-                                                        </span>
-                                                    </button>
-                                                    <button
-                                                        className="mgActionBtn mgExportRowBtn"
-                                                        onClick={() =>
-                                                            handleExportOne(duty.id)
-                                                        }
-                                                        title="Exportar a Google Calendar"
-                                                    >
-                                                        <span className="material-icons-outlined">
-                                                            event
-                                                        </span>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            )}
-                        </div>
-
-                        {/* Pagination */}
-                        {totalPages > 1 && (
-                            <div className="mgPagination">
-                                <span className="mgPageInfo">
-                                    {page} / {totalPages}
+                            <div className="mgFilterGroup">
+                                <span className="material-icons-outlined mgFilterIcon">
+                                    calendar_today
                                 </span>
-                                <div style={{ display: "flex", gap: "8px" }}>
+                                <input
+                                    type="date"
+                                    className="mgDateInput"
+                                    value={searchDate}
+                                    onChange={handleDateChange}
+                                    placeholder="Buscar por fecha"
+                                />
+                                {searchDate && (
                                     <button
-                                        className="mgPageBtn"
-                                        onClick={handlePrevPage}
-                                        disabled={page === 1}
+                                        className="mgClearBtn"
+                                        onClick={() => {
+                                            setSearchDate("");
+                                            setPage(1);
+                                        }}
+                                        title="Limpiar filtro"
                                     >
-                                        <span className="material-icons">
-                                            chevron_left
-                                        </span>
+                                        <span className="material-icons">close</span>
                                     </button>
-                                    <button
-                                        className="mgPageBtn"
-                                        onClick={handleNextPage}
-                                        disabled={page === totalPages}
-                                    >
-                                        <span className="material-icons">
-                                            chevron_right
-                                        </span>
-                                    </button>
-                                </div>
+                                )}
                             </div>
-                        )}
-                    </div>
-                </>
+                        </div>
+
+                        {/* Main Content Card */}
+                        <div className="mgCard">
+                            <div className="mgTableContainer">
+                                {loading ? (
+                                    <div className="mgEmpty">
+                                        <span
+                                            className="material-icons-outlined mgEmptyIcon"
+                                            style={{
+                                                animation: "spin 1s linear infinite",
+                                            }}
+                                        >
+                                            sync
+                                        </span>
+                                        <span>Cargando datos...</span>
+                                    </div>
+                                ) : error ? (
+                                    <div className="mgEmpty">
+                                        <span
+                                            className="material-icons-outlined mgEmptyIcon"
+                                            style={{ color: "#EF4444" }}
+                                        >
+                                            error
+                                        </span>
+                                        <span>{error}</span>
+                                    </div>
+                                ) : duties.length === 0 ? (
+                                    <div className="mgEmpty">
+                                        <span className="material-icons-outlined mgEmptyIcon">
+                                            event_busy
+                                        </span>
+                                        <span>No se encontraron guardias.</span>
+                                    </div>
+                                ) : (
+                                    <table className="mgTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Fecha</th>
+                                                <th>Tipo</th>
+                                                <th>Especialidad</th>
+                                                <th>Jefe de Guardia</th>
+                                                <th style={{ textAlign: "center" }}>
+                                                    Detalles
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {duties.map((duty) => (
+                                                <tr key={duty.id}>
+                                                    <td>
+                                                        <div className="mgDateCell">
+                                                            <span className="mgDay">
+                                                                {new Date(
+                                                                    duty.date,
+                                                                ).getDate()}
+                                                            </span>
+                                                            <span className="mgMonthYear">
+                                                                {new Date(
+                                                                    duty.date,
+                                                                ).toLocaleDateString(
+                                                                    "es-ES",
+                                                                    {
+                                                                        month: "short",
+                                                                        year: "numeric",
+                                                                    },
+                                                                )}
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <span
+                                                            className={`mgPill ${duty.duty_type?.toLowerCase()}`}
+                                                        >
+                                                            {duty.duty_type}
+                                                        </span>
+                                                    </td>
+                                                    <td>{duty.speciality || "-"}</td>
+                                                    <td>
+                                                        {duty.is_chief ? (
+                                                            <span className="mgChiefBadge">
+                                                                <span className="material-icons">
+                                                                    star
+                                                                </span>
+                                                                Jefe
+                                                            </span>
+                                                        ) : (
+                                                            duty.chief_worker || "-"
+                                                        )}
+                                                    </td>
+                                                    <td style={{ textAlign: "center" }}>
+                                                        <button
+                                                            className="mgActionBtn"
+                                                            onClick={() =>
+                                                                openModal(duty)
+                                                            }
+                                                            title="Ver ficha completa"
+                                                        >
+                                                            <span className="material-icons-outlined">
+                                                                visibility
+                                                            </span>
+                                                        </button>
+                                                        <button
+                                                            className="mgActionBtn mgExportRowBtn"
+                                                            onClick={() =>
+                                                                handleExportOne(duty.id)
+                                                            }
+                                                            title="Exportar a Google Calendar"
+                                                        >
+                                                            <span className="material-icons-outlined">
+                                                                event
+                                                            </span>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                )}
+                            </div>
+
+                            {/* Pagination */}
+                            {totalPages > 1 && (
+                                <div className="mgPagination">
+                                    <span className="mgPageInfo">
+                                        {page} / {totalPages}
+                                    </span>
+                                    <div style={{ display: "flex", gap: "8px" }}>
+                                        <button
+                                            className="mgPageBtn"
+                                            onClick={handlePrevPage}
+                                            disabled={page === 1}
+                                        >
+                                            <span className="material-icons">
+                                                chevron_left
+                                            </span>
+                                        </button>
+                                        <button
+                                            className="mgPageBtn"
+                                            onClick={handleNextPage}
+                                            disabled={page === totalPages}
+                                        >
+                                            <span className="material-icons">
+                                                chevron_right
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </>
                 ) : (
                     <div className="mgFicharLayout">
                         <div className="mgClockCard">
@@ -634,10 +641,10 @@ export default function MisGuardias() {
                                 <>
                                     <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }}></div>
                                     {!userLocation && (
-                                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.85)', zIndex: 1000}}>
-                                            <span className="material-icons-outlined mgMapIcon" style={{ animation: 'spin 1.5s linear infinite'}}>my_location</span>
+                                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.85)', zIndex: 1000 }}>
+                                            <span className="material-icons-outlined mgMapIcon" style={{ animation: 'spin 1.5s linear infinite' }}>my_location</span>
                                             <h3 style={{ marginTop: 15, fontWeight: 600 }}>Calculando tu ubicación...</h3>
-                                            <p style={{ marginTop: 5, color: 'var(--muted)'}}>Por favor espera mientras el GPS establece tu posición exacta.</p>
+                                            <p style={{ marginTop: 5, color: 'var(--muted)' }}>Por favor espera mientras el GPS establece tu posición exacta.</p>
                                         </div>
                                     )}
                                 </>
@@ -740,13 +747,27 @@ export default function MisGuardias() {
                             </div>
                         </div>
 
-                        <div className="mgModalFooter">
-                            <button className="mgBtn" onClick={closeModal}>
+                        <div className="mgModalFooter" style={{ gap: '12px' }}>
+                            <button className="mgBtn mgBtn--secondary" onClick={closeModal}>
                                 Cerrar
                             </button>
+                            {!selectedDuty.is_chief && (
+                                <button className="mgBtn mgBtn--primary" onClick={handleSwapRequest}>
+                                    <span className="material-icons-outlined">swap_horiz</span>
+                                    Solicitar Cambio
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
+            )}
+
+            {swapModalOpen && selectedDuty && (
+                <SwapRequestModal
+                    dutyFrom={selectedDuty}
+                    onClose={() => setSwapModalOpen(false)}
+                    onSuccess={() => setToast({ type: "success", message: "Solicitud enviada correctamente" })}
+                />
             )}
 
             {/* Premium Modal for Warning NO Shift */}
@@ -771,23 +792,23 @@ export default function MisGuardias() {
                             </div>
                             <div style={{ padding: '16px', background: '#FEF2F2', borderRadius: '8px', color: '#991B1B', fontSize: '14px', lineHeight: '1.6' }}>
                                 Si decides continuar y realizar el fichaje, el sistema <strong>creará automáticamente una nueva guardia</strong> asociada a tu jornada para reflejar este periodo de trabajo no agendado.
-                                <br/><br/>
+                                <br /><br />
                                 <span style={{ fontWeight: 600 }}>¿Estás seguro de que deseas continuar con el fichaje?</span>
                             </div>
                         </div>
 
                         <div className="mgModalFooter" style={{ justifyContent: 'flex-end', gap: '12px' }}>
-                            <button 
-                                className="mgBtn" 
-                                style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text)' }} 
+                            <button
+                                className="mgBtn"
+                                style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text)' }}
                                 onClick={() => setConfirmPunchModalOpen(false)}
                                 disabled={isPunching}
                             >
                                 Cancelar
                             </button>
-                            <button 
-                                className="mgBtn" 
-                                style={{ background: '#b91c1c', color: 'white', border: 'none' }} 
+                            <button
+                                className="mgBtn"
+                                style={{ background: '#b91c1c', color: 'white', border: 'none' }}
                                 onClick={executePunch}
                                 disabled={isPunching}
                             >
@@ -797,7 +818,6 @@ export default function MisGuardias() {
                     </div>
                 </div>
             )}
-
             {/* Joyride Tour */}
             <Joyride
                 steps={tourSteps}

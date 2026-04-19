@@ -62,8 +62,20 @@ export async function createWorker(payload) {
         try {
             const err = await response.json();
             msg = err?.error || msg;
-        } catch (e) {}
+        } catch (e) { }
         throw new Error(msg);
+    }
+
+    return await response.json();
+}
+export async function getWorkersBySpeciality(idSpeciality) {
+    const response = await fetch(`${API_BASE_URL}/workers/speciality/${idSpeciality}`, {
+        method: "GET",
+        headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+        throw new Error("Error al obtener los trabajadores de la especialidad");
     }
 
     return await response.json();

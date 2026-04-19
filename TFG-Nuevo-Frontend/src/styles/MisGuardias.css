@@ -7,7 +7,8 @@
     --mg-text: #1f2937;
     --mg-text-muted: #6b7280;
     --mg-border: #e5e7eb;
-    --mg-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08); /* Premium shadow */
+    --mg-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
+    /* Premium shadow */
     --mg-radius: 20px;
     --mg-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -98,7 +99,8 @@
     cursor: pointer;
     transition: var(--mg-transition);
     box-shadow: 0 4px 12px rgba(66, 133, 244, 0.2);
-    margin: 0 auto; /* Center in the middle of space-between if it stretches */
+    margin: 0 auto;
+    /* Center in the middle of space-between if it stretches */
     white-space: nowrap;
     width: fit-content;
 }
@@ -120,7 +122,8 @@
 }
 
 .mgDateInput {
-    padding: 0.75rem 1rem 0.75rem 2.5rem; /* Space for icon */
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    /* Space for icon */
     border: 1px solid var(--mg-border);
     border-radius: 12px;
     font-family: inherit;
@@ -167,7 +170,8 @@
     background: var(--mg-card-bg);
     border-radius: var(--mg-radius);
     box-shadow: var(--mg-shadow);
-    overflow: hidden; /* For table header rounded corners */
+    overflow: hidden;
+    /* For table header rounded corners */
     border: 1px solid rgba(0, 0, 0, 0.02);
 }
 
@@ -206,7 +210,8 @@
 }
 
 .mgTable tbody tr:hover td {
-    background-color: #f0fdf4; /* Very light green hint */
+    background-color: #f0fdf4;
+    /* Very light green hint */
 }
 
 /* Date Cell Styling */
@@ -244,10 +249,12 @@
     background: rgba(0, 112, 65, 0.1);
     color: var(--mg-primary);
 }
+
 .mgPill.pf {
     background: rgba(59, 130, 246, 0.1);
     color: #2563eb;
 }
+
 .mgPill.loc {
     background: rgba(139, 92, 246, 0.1);
     color: #7c3aed;
@@ -381,7 +388,8 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.4); /* Darker backdrop */
+    background: rgba(0, 0, 0, 0.4);
+    /* Darker backdrop */
     backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
@@ -504,7 +512,8 @@
 }
 
 .mgBtn {
-    background: var(--mg-text); /* Black/Dark button */
+    background: var(--mg-text);
+    /* Black/Dark button */
     color: #fff;
     padding: 0.75rem 1.5rem;
     border-radius: 12px;
@@ -519,19 +528,45 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+.mgBtn--primary {
+    background: var(--mg-primary);
+    color: white;
+}
+
+.mgBtn--primary:hover {
+    background: var(--mg-primary-dark);
+}
+
+.mgBtn--secondary {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.mgBtn--secondary:hover {
+    background: #d1d5db;
+}
+
+.mgBtn--primary span {
+    margin-right: 0.5rem;
+    vertical-align: middle;
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
 }
+
 @keyframes slideUp {
     from {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -543,22 +578,27 @@
     .mgPage {
         padding: 1rem;
     }
+
     .mgHeader {
         flex-direction: column;
         align-items: flex-start;
         gap: 1rem;
     }
+
     .mgActionsBar {
         flex-direction: column;
         align-items: stretch;
         gap: 1rem;
     }
+
     .mgFilterGroup {
         width: 100%;
     }
+
     .mgDateInput {
         width: 100%;
     }
+
     .mgModalGrid {
         grid-template-columns: 1fr;
     }
@@ -577,7 +617,7 @@
     border-radius: 12px;
     font-size: 0.95rem;
     font-weight: 500;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     animation: mgToastIn 0.3s ease;
     max-width: 360px;
 }
@@ -611,9 +651,12 @@
     opacity: 0.7;
 }
 
-.mgToastClose:hover { opacity: 1; }
+.mgToastClose:hover {
+    opacity: 1;
+}
 
 @keyframes mgToastIn {
+
     from { opacity: 0; transform: translateY(-12px); }
     to   { opacity: 1; transform: translateY(0); }
 }
@@ -890,3 +933,4 @@
         grid-template-columns: 1fr;
     }
 }
+
