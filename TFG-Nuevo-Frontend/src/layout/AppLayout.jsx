@@ -78,13 +78,18 @@ export default function AppLayout() {
         const token = localStorage.getItem("token");
         window.Pusher = Pusher;
 
+        const wsHost = import.meta.env.VITE_REVERB_HOST;
+        const wsPort = import.meta.env.VITE_REVERB_PORT ?? 80;
+        const scheme = import.meta.env.VITE_REVERB_SCHEME ?? "https";
+        console.log(`[Reverb] Conectando a ${scheme === "https" ? "wss" : "ws"}://${wsHost}:${wsPort}`);
+
         const echo = new Echo({
             broadcaster: "reverb",
             key: import.meta.env.VITE_REVERB_APP_KEY,
-            wsHost: import.meta.env.VITE_REVERB_HOST,
-            wsPort: import.meta.env.VITE_REVERB_PORT ?? 80,
-            wssPort: import.meta.env.VITE_REVERB_PORT ?? 443,
-            forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? "https") === "https",
+            wsHost,
+            wsPort,
+            wssPort: wsPort,
+            forceTLS: scheme === "https",
             enabledTransports: ["ws", "wss"],
             authEndpoint: "/api/broadcasting/auth",
             auth: {
@@ -93,6 +98,19 @@ export default function AppLayout() {
                     Accept: "application/json",
                 },
             },
+        });
+
+        echo.connector.pusher.connection.bind("state_change", ({ previous, current }) => {
+            const icons = { connected: "✅", connecting: "🔄", disconnected: "❌", failed: "💥", unavailable: "⚠️" };
+            console.log(`[Reverb] Estado: ${icons[previous] ?? "?"} ${previous} → ${icons[current] ?? "?"} ${current}`);
+        });
+
+        echo.connector.pusher.connection.bind("connected", () => {
+            console.log("[Reverb] ✅ WebSocket conectado correctamente");
+        });
+
+        echo.connector.pusher.connection.bind("error", (err) => {
+            console.error("[Reverb] ❌ Error de conexión:", err);
         });
 
         echo.private(`notifications.${userId}`)
