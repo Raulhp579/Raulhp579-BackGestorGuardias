@@ -186,10 +186,10 @@ class UserController extends Controller
     {
         try {
             if (isset($request->name)) {
-                return response()->json(User::where('name', 'LIKE', "%{$request->name}%")->first());
+                return response()->json(User::with('roles')->where('name', 'LIKE', "%{$request->name}%")->first());
             }
 
-            return response()->json(User::all(), 200);
+            return response()->json(User::with('roles')->get(), 200);
         } catch (Exception $e) {
             return response()->json([
                 'error' => 'there is a problem getting the users',

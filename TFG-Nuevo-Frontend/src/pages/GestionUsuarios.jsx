@@ -52,8 +52,18 @@ export default function GestionUsuarios() {
         {
             target: ".tour-import-users",
             content:
-                "Paso 1: Importa masivamente los trabajadores desde un archivo Excel.",
+                "Paso 1: Importa masivamente los trabajadores desde un archivo Excel para empezar a trabajar.",
             disableBeacon: true,
+        },
+        {
+            target: ".tour-view-toggle",
+            content:
+                "Puedes alternar entre la vista de 'Trabajadores' y la de 'Usuarios' (cuentas con acceso al panel).",
+        },
+        {
+            target: ".tour-search-users",
+            content:
+                "Utiliza el buscador para localizar rápidamente a cualquier persona por su nombre.",
         },
     ];
 
@@ -133,11 +143,11 @@ export default function GestionUsuarios() {
         }
     }
     useEffect(() => {
-        if (view === "workers") {
-            loadWorkers();
-        } else {
-            loadAdmins();
-        }
+        loadWorkers();
+        loadAdmins();
+    }, []);
+
+    useEffect(() => {
         setSearchTerm(""); // Resetear búsqueda al cambiar de vista
     }, [view]);
 
@@ -202,12 +212,9 @@ export default function GestionUsuarios() {
         discharge_date: "",
         id_speciality: "",
         password: "",
-        worker_id: "",
     });
 
     // Trabajadores disponibles para asociar al usuario
-    const [availableWorkers, setAvailableWorkers] = useState([]);
-    const [loadingWorkers, setLoadingWorkers] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
 
     function handleCreateWorker() {
@@ -222,7 +229,6 @@ export default function GestionUsuarios() {
             id_speciality: "",
             email: "",
             password: "",
-            worker_id: "",
         });
         setEditOpen(true);
     }
@@ -245,11 +251,8 @@ export default function GestionUsuarios() {
                     : "",
                 email: "",
                 password: "",
-                worker_id: "",
             });
         } else {
-            // Cargar trabajadores disponibles para asociar
-            loadAvailableWorkers(row.worker_id);
             setEditForm({
                 name: row.name || "",
                 email: row.email || "",
@@ -258,26 +261,12 @@ export default function GestionUsuarios() {
                 discharge_date: "",
                 id_speciality: "",
                 password: "",
-                worker_id: row.worker_id ? String(row.worker_id) : "",
             });
         }
         setEditOpen(true);
     }
 
-    // Cargar trabajadores disponibles para asociar al usuario
-    async function loadAvailableWorkers(currentWorkerId) {
-        setLoadingWorkers(true);
-        try {
-            const allWorkers = await getWorkers();
-            // Mostrar todos los trabajadores para seleccionar
-            setAvailableWorkers(allWorkers);
-        } catch (e) {
-            console.error("Error cargando trabajadores disponibles", e);
-            setAvailableWorkers([]);
-        } finally {
-            setLoadingWorkers(false);
-        }
-    }
+
 
     function closeEdit() {
         setEditOpen(false);
@@ -418,9 +407,6 @@ export default function GestionUsuarios() {
                 const payload = {
                     name: editForm.name,
                     email: editForm.email,
-                    worker_id: editForm.worker_id
-                        ? Number(editForm.worker_id)
-                        : null,
                 };
                 console.log("Payload que se envía al backend:", payload);
                 await updateAdmin(editRow.id, payload);
@@ -542,9 +528,7 @@ export default function GestionUsuarios() {
         specialities.map(s => ({ value: String(s.id), label: s.name }))
     , [specialities]);
 
-    const availableWorkerOptions = useMemo(() =>
-        availableWorkers.map(w => ({ value: String(w.id), label: w.name ?? `ID ${w.id}` }))
-    , [availableWorkers]);
+
 
     // Filtrado por búsqueda
     const filteredRows = useMemo(() => {
@@ -896,20 +880,29 @@ export default function GestionUsuarios() {
                                                     </td>
                                                     <td>{row.speciality}</td>
                                                     <td>
-                                                        <div className="cdActionsCenter">
-                                                            <RowActions
-                                                                row={row}
-                                                                onEdit={
-                                                                    editWorker
-                                                                }
-                                                                onDelete={
-                                                                    deleteWorker
-                                                                }
-                                                                disabled={
-                                                                    loading
-                                                                }
-                                                            />
-                                                        </div>
+                                                        {(() => {
+                                                            const relatedUser = admins.find(a => a.worker_id === row.id);
+                                                            const isAdminWorker = relatedUser && relatedUser.roles && relatedUser.roles.some(r => r.name === 'admin');
+                                                            
+                                                            return (
+                                                                <div className="cdActionsCenter">
+                                                                    <RowActions
+                                                                        row={row}
+                                                                        onEdit={
+                                                                            editWorker
+                                                                        }
+                                                                        onDelete={
+                                                                            deleteWorker
+                                                                        }
+                                                                        disabled={
+                                                                            loading
+                                                                        }
+                                                                        hideEdit={isAdminWorker}
+                                                                        hideDelete={isAdminWorker}
+                                                                    />
+                                                                </div>
+                                                            );
+                                                        })()}
                                                     </td>
                                                 </>
                                             ) : (
@@ -924,20 +917,27 @@ export default function GestionUsuarios() {
                                                         )}
                                                     </td>
                                                     <td>
-                                                        <div className="cdActionsCenter">
-                                                            <RowActions
-                                                                row={row}
-                                                                onEdit={
-                                                                    editAdmin
-                                                                }
-                                                                onDelete={
-                                                                    deleteAdmin
-                                                                }
-                                                                disabled={
-                                                                    adminsLoading
-                                                                }
-                                                            />
-                                                        </div>
+                                                        {(() => {
+                                                            const isAdminUser = row.roles && row.roles.some(r => r.name === 'admin');
+                                                            return (
+                                                                <div className="cdActionsCenter">
+                                                                    <RowActions
+                                                                        row={row}
+                                                                        onEdit={
+                                                                            editAdmin
+                                                                        }
+                                                                        onDelete={
+                                                                            deleteAdmin
+                                                                        }
+                                                                        disabled={
+                                                                            adminsLoading
+                                                                        }
+                                                                        hideEdit={isAdminUser}
+                                                                        hideDelete={isAdminUser}
+                                                                    />
+                                                                </div>
+                                                            );
+                                                        })()}
                                                     </td>
                                                 </>
                                             )}
@@ -1033,14 +1033,15 @@ export default function GestionUsuarios() {
                                         </div>
                                         <div>
                                             <div className="modalTitle">
-                                                Editar{" "}
+                                                {isCreating ? "Crear" : "Editar"}{" "}
                                                 {editType === "worker"
                                                     ? "Trabajador"
                                                     : "Administrador"}
                                             </div>
                                             <div className="modalSubtitle">
-                                                Modifica los campos y guarda los
-                                                cambios.
+                                                {isCreating
+                                                    ? "Rellena los campos para añadir un nuevo registro."
+                                                    : "Modifica los campos y guarda los cambios."}
                                             </div>
                                         </div>
                                     </div>
@@ -1058,32 +1059,19 @@ export default function GestionUsuarios() {
                                         </label>
 
                                         {editType === "admin" ? (
-                                            <>
-                                                <label className="label">
-                                                    Email
-                                                    <input
-                                                        name="email"
-                                                        type="email"
-                                                        className="control"
-                                                        value={editForm.email}
-                                                        onChange={
-                                                            onEditFieldChange
-                                                        }
-                                                        required
-                                                    />
-                                                </label>
-
-                                                <label className="label">
-                                                    Asociar con trabajador
-                                                    <Select2
-                                                        placeholder={loadingWorkers ? "Cargando trabajadores..." : "-- Ninguno --"}
-                                                        options={availableWorkerOptions}
-                                                        value={editForm.worker_id}
-                                                        onChange={(val) => onEditFieldChange({ target: { name: "worker_id", value: val } })}
-                                                        disabled={loadingWorkers}
-                                                    />
-                                                </label>
-                                            </>
+                                            <label className="label">
+                                                Email
+                                                <input
+                                                    name="email"
+                                                    type="email"
+                                                    className="control"
+                                                    value={editForm.email}
+                                                    onChange={
+                                                        onEditFieldChange
+                                                    }
+                                                    required
+                                                />
+                                            </label>
                                         ) : (
                                             <>
                                                 <label className="label">
@@ -1113,20 +1101,22 @@ export default function GestionUsuarios() {
                                                     />
                                                 </label>
 
-                                                <label className="label">
-                                                    Baja
-                                                    <input
-                                                        name="discharge_date"
-                                                        type="date"
-                                                        className="control"
-                                                        value={
-                                                            editForm.discharge_date
-                                                        }
-                                                        onChange={
-                                                            onEditFieldChange
-                                                        }
-                                                    />
-                                                </label>
+                                                {!isCreating && (
+                                                    <label className="label">
+                                                        Baja
+                                                        <input
+                                                            name="discharge_date"
+                                                            type="date"
+                                                            className="control"
+                                                            value={
+                                                                editForm.discharge_date
+                                                            }
+                                                            onChange={
+                                                                onEditFieldChange
+                                                            }
+                                                        />
+                                                    </label>
+                                                )}
 
                                                 <label className="label">
                                                     Especialidad
@@ -1138,27 +1128,23 @@ export default function GestionUsuarios() {
                                                     />
                                                 </label>
 
-                                                <label className="label">
-                                                    Contraseña (dejar vacío si
-                                                    no deseas cambiarla o usar
-                                                    por defecto "password")
-                                                    <input
-                                                        name="password"
-                                                        type="password"
-                                                        className="control"
-                                                        value={
-                                                            editForm.password
-                                                        }
-                                                        onChange={
-                                                            onEditFieldChange
-                                                        }
-                                                        placeholder={
-                                                            isCreating
-                                                                ? "Contraseña (opcional)"
-                                                                : "Nueva contraseña"
-                                                        }
-                                                    />
-                                                </label>
+                                                {!isCreating && (
+                                                    <label className="label">
+                                                        Contraseña (opcional)
+                                                        <input
+                                                            name="password"
+                                                            type="password"
+                                                            className="control"
+                                                            value={
+                                                                editForm.password
+                                                            }
+                                                            onChange={
+                                                                onEditFieldChange
+                                                            }
+                                                            placeholder="Nueva contraseña o dejar vacío"
+                                                        />
+                                                    </label>
+                                                )}
                                             </>
                                         )}
                                     </div>
@@ -1172,8 +1158,8 @@ export default function GestionUsuarios() {
                                             disabled={editSaving}
                                         >
                                             {editSaving
-                                                ? "Guardando..."
-                                                : "Guardar"}
+                                                ? (isCreating ? "Creando..." : "Guardando...")
+                                                : (isCreating ? "Crear" : "Guardar")}
                                         </button>
                                         <button
                                             className="btnSecondary btnSecondary--destructive"

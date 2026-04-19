@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { getProfile } from "../services/ProfileService";
 import { getWorkerDutiesPaginated } from "../services/DutyService";
 import { punchClock, getLastThreePunches } from "../services/FichajeService";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "../styles/MisGuardias.css";
+import Joyride, { STATUS } from "react-joyride-react-19";
 
 // Fix leaflet icon default behavior
 delete L.Icon.Default.prototype._getIconUrl;
@@ -16,6 +17,7 @@ L.Icon.Default.mergeOptions({
 });
 
 export default function MisGuardias() {
+    const navigate = useNavigate();
     const [duties, setDuties] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -47,6 +49,43 @@ export default function MisGuardias() {
 
     // User info
     const [workerId, setWorkerId] = useState(null);
+
+    // Joyride Steps
+    const [runTour, setRunTour] = useState(false);
+    const tourSteps = [
+        {
+            target: ".tour-mg-tabs",
+            content: "Paso 4: Este es tu portal personal. Puedes alternar entre ver tus próximas guardias y la pantalla para fichar.",
+            disableBeacon: true,
+        },
+        {
+            target: ".tour-mg-export",
+            content: "Sincroniza todas tus guardias con Google Calendar para tenerlas siempre a mano en tu móvil.",
+        },
+        {
+            target: ".tour-mg-clock",
+            content: "Cuando llegues a tu puesto, usa este botón para fichar con tu ubicación GPS. ¡Es muy sencillo!",
+        },
+    ];
+
+    useEffect(() => {
+        const phase = localStorage.getItem("tutorial_phase");
+        if (phase === "PHASE_MIS_GUARDIAS") {
+            setRunTour(true);
+        }
+    }, []);
+
+    const handleJoyrideCallback = (data) => {
+        const { status } = data;
+        const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
+
+        if (finishedStatuses.includes(status)) {
+            // Pasamos a la fase 5: Home
+            localStorage.setItem("tutorial_phase", "PHASE_HOME");
+            setRunTour(false);
+            navigate("/home");
+        }
+    };
 
     // Modal state
     const [selectedDuty, setSelectedDuty] = useState(null);
@@ -316,7 +355,7 @@ export default function MisGuardias() {
                 </div>
 
                 {/* Navigation Tabs */}
-                <div className="mgTabs">
+                <div className="mgTabs tour-mg-tabs">
                     <button 
                         className={`mgTabBtn ${activeView === 'guardias' ? 'active' : ''}`}
                         onClick={() => setActiveView('guardias')}
@@ -344,7 +383,7 @@ export default function MisGuardias() {
                             <span>{totalRecords} Registros</span>
                         </div>
 
-                        <button className="mgExportAllBtn" onClick={handleExportAll}>
+                        <button className="mgExportAllBtn tour-mg-export" onClick={handleExportAll}>
                             <span className="material-icons-outlined">calendar_today</span>
                             <span>Exportar a Google Calendar</span>
                         </button>
@@ -549,7 +588,7 @@ export default function MisGuardias() {
 
                             <div className="mgClockAction">
                                 <button 
-                                    className={`mgBigPunchBtn ${recentPunches[0]?.type === 0 ? 'mgBtnOut' : 'mgBtnIn'}`}
+                                    className={`mgBigPunchBtn ${recentPunches[0]?.type === 0 ? 'mgBtnOut' : 'mgBtnIn'} tour-mg-clock`}
                                     onClick={handlePunch}
                                     disabled={isPunching}
                                 >
@@ -758,6 +797,29 @@ export default function MisGuardias() {
                     </div>
                 </div>
             )}
+
+            {/* Joyride Tour */}
+            <Joyride
+                steps={tourSteps}
+                run={runTour}
+                continuous
+                showProgress
+                showSkipButton={true}
+                callback={handleJoyrideCallback}
+                styles={{
+                    options: {
+                        zIndex: 10000,
+                        primaryColor: "#3b82f6",
+                    },
+                }}
+                locale={{
+                    back: "Atrás",
+                    close: "Cerrar",
+                    last: "Finalizar Tour",
+                    next: "Siguiente",
+                    skip: "Saltar tutorial",
+                }}
+            />
         </div>
     );
 }

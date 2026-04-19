@@ -527,20 +527,21 @@ export default function HomeDashboard() {
     const [runTour, setRunTour] = useState(false);
     const tourSteps = [
         {
-            target: ".tour-import-excel",
-            content:
-                "Aquí puedes importar las guardias desde un archivo Excel. Asegúrate de seleccionar el mes, año y especialidad correctos.",
+            target: ".tour-stats",
+            content: "¡Bienvenido al resumen global! Aquí puedes ver las estadísticas clave del mes actual de un vistazo.",
             disableBeacon: true,
         },
         {
-            target: ".tour-new-guard",
-            content:
-                "Utiliza este botón para añadir manualmente una nueva guardia si no está en el Excel.",
+            target: ".tour-calendar",
+            content: "Este es el calendario interactivo. Puedes navegar por los días y ver quién está de guardia en cada momento.",
         },
         {
             target: ".tour-filters",
-            content:
-                "Filtra las guardias visibles por tipo (Continuidad, Presencia Física, Localizada) para ver solo lo que te interesa.",
+            content: "Filtra las guardias por tipo para limpiar la vista y centrarte en lo que necesitas.",
+        },
+        {
+            target: ".hdSearchWrap",
+            content: "Usa el buscador para localizar rápidamente a un trabajador en el calendario.",
         },
     ];
 
@@ -719,7 +720,7 @@ export default function HomeDashboard() {
     return (
         <div className="hdContent">
             {/* Cards stats */}
-            <section className="hdStats">
+            <section className="hdStats tour-stats">
                 {stats.map((s) => (
                     <div className="hdStatCard" key={s.title}>
                         <div>
@@ -739,7 +740,7 @@ export default function HomeDashboard() {
             </section>
 
             {/* Calendar card */}
-            <section className="hdCalendarCard">
+            <section className="hdCalendarCard tour-calendar">
                 <div className="hdCalendarTop">
                     <div className="hdMonthPicker">
                         <button

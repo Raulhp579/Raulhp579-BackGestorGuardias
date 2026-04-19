@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/GestionGuardias.css"; 
 import {
     getFichajes,
@@ -13,6 +14,7 @@ import RowActions from "../components/RowActions/RowActions";
 import Select2 from "../components/Select2/Select2";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import Joyride, { STATUS } from "react-joyride-react-19";
 
 // Fix leaflet icon default behavior
 delete L.Icon.Default.prototype._getIconUrl;
@@ -23,6 +25,7 @@ L.Icon.Default.mergeOptions({
 });
 
 export default function GestionFichajes() {
+    const navigate = useNavigate();
     const { addNotification } = useNotifications();
     const pageSize = 10;
 
@@ -58,6 +61,43 @@ export default function GestionFichajes() {
     // Animations
     const [updatedRowId, setUpdatedRowId] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
+
+    // Joyride Steps
+    const [runTour, setRunTour] = useState(false);
+    const tourSteps = [
+        {
+            target: ".tour-fichajes-header",
+            content: "Paso 3: Aquí puedes monitorear todos los registros de jornada (entradas y salidas) en tiempo real.",
+            disableBeacon: true,
+        },
+        {
+            target: ".tour-fichajes-search",
+            content: "Busca trabajadores específicos o filtra por email para revisar sus registros.",
+        },
+        {
+            target: ".tour-fichajes-map-btn",
+            content: "¡Muy importante! Haz clic en el icono del mapa para verificar la ubicación GPS exacta donde se realizó el fichaje.",
+        },
+    ];
+
+    useEffect(() => {
+        const phase = localStorage.getItem("tutorial_phase");
+        if (phase === "PHASE_FICHAJES") {
+            setRunTour(true);
+        }
+    }, []);
+
+    const handleJoyrideCallback = (data) => {
+        const { status } = data;
+        const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
+
+        if (finishedStatuses.includes(status)) {
+            // Pasamos a la fase 4: Mis Guardias
+            localStorage.setItem("tutorial_phase", "PHASE_MIS_GUARDIAS");
+            setRunTour(false);
+            navigate("/mis-guardias");
+        }
+    };
 
     // Map Modal Admin
     const [mapOpen, setMapOpen] = useState(false);
@@ -285,14 +325,14 @@ export default function GestionFichajes() {
                 <div className="ggTableCard">
                     <div className="ggTableCardTop" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <h2 className="ggTableCardTitle">Gestión de Fichajes</h2>
+                            <h2 className="ggTableCardTitle tour-fichajes-header">Gestión de Fichajes</h2>
                             <div className="ggTableCount">
                                 {loading ? "Cargando..." : `${filteredData.length} registros`}
                             </div>
                         </div>
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                            <div className="ggSearchContainer" style={{ position: 'relative', width: '260px' }}>
+                            <div className="ggSearchContainer tour-fichajes-search" style={{ position: 'relative', width: '260px' }}>
                                 <span className="material-icons" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF', fontSize: '18px' }}>search</span>
                                 <input
                                     className="ggSearchInput"
@@ -359,7 +399,7 @@ export default function GestionFichajes() {
                                                 <td className="ggColActions">
                                                     <div style={{ display: 'flex', gap: '5px', alignItems: 'center', justifyContent: 'center' }}>
                                                         <button 
-                                                            className="ggActionBtn" 
+                                                            className="ggActionBtn tour-fichajes-map-btn" 
                                                             title="Ver en mapa" 
                                                             style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: '4px' }}
                                                             onClick={() => {
@@ -419,6 +459,29 @@ export default function GestionFichajes() {
                             <span className="material-icons">chevron_right</span>
                         </button>
                     </div>
+
+                    {/* Joyride Tour */}
+                    <Joyride
+                        steps={tourSteps}
+                        run={runTour}
+                        continuous
+                        showProgress
+                        showSkipButton={true}
+                        callback={handleJoyrideCallback}
+                        styles={{
+                            options: {
+                                zIndex: 10000,
+                                primaryColor: "#3b82f6",
+                            },
+                        }}
+                        locale={{
+                            back: "Atrás",
+                            close: "Cerrar",
+                            last: "Siguiente: Mi Portal",
+                            next: "Siguiente",
+                            skip: "Saltar tutorial",
+                        }}
+                    />
                 </div>
             </main>
 

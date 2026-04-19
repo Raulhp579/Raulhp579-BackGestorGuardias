@@ -168,10 +168,10 @@ export default function GestionGuardias() {
         const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
 
         if (finishedStatuses.includes(status)) {
-            // Pasamos a la fase 3: Home / Dashboard
-            localStorage.setItem("tutorial_phase", "PHASE_HOME");
+            // Pasamos a la fase 3: Fichajes
+            localStorage.setItem("tutorial_phase", "PHASE_FICHAJES");
             setRunTour(false);
-            navigate("/home");
+            navigate("/fichajes");
         }
     };
 

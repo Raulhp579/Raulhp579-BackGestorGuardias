@@ -64,8 +64,18 @@ export default function AppLayout() {
                 if (pathname !== "/guardias") {
                     navigate("/guardias");
                 }
+            } else if (phase === "PHASE_FICHAJES") {
+                // Fase 3: Fichajes
+                if (pathname !== "/fichajes") {
+                    navigate("/fichajes");
+                }
+            } else if (phase === "PHASE_MIS_GUARDIAS") {
+                // Fase 4: Mis Guardias
+                if (pathname !== "/mis-guardias") {
+                    navigate("/mis-guardias");
+                }
             } else if (phase === "PHASE_HOME") {
-                // Fase 3: Home
+                // Fase 5: Home
                 if (pathname !== "/home") {
                     navigate("/home");
                 }
