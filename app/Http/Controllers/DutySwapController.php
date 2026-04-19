@@ -217,7 +217,9 @@ class DutySwapController extends Controller
     private function notifyUser($workerId, $title, $message, $type, $relatedId = null)
     {
         $user = User::where('worker_id', '=', $workerId)->first();
-        if ($user) {
+        if (!$user) return;
+
+        try {
             Notification::create([
                 'user_id' => $user->id,
                 'title' => $title,
@@ -225,7 +227,15 @@ class DutySwapController extends Controller
                 'type' => $type,
                 'related_id' => $relatedId
             ]);
+        } catch (\Throwable $e) {
+            \Log::error('Error creating notification: ' . $e->getMessage());
+            return;
+        }
+
+        try {
             event(new NotificationEvent($user));
+        } catch (\Throwable $e) {
+            \Log::error('Error broadcasting NotificationEvent: ' . $e->getMessage());
         }
     }
 }
