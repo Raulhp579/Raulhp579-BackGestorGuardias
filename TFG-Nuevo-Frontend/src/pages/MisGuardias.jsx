@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { getProfile } from "../services/ProfileService";
 import { getWorkerDutiesPaginated } from "../services/DutyService";
+import SwapRequestModal from "../components/SwapRequestModal";
 import "../styles/MisGuardias.css";
 
 export default function MisGuardias() {
@@ -25,6 +26,7 @@ export default function MisGuardias() {
     // Modal state
     const [selectedDuty, setSelectedDuty] = useState(null);
     const [dutyModalOpen, setDutyModalOpen] = useState(false);
+    const [swapModalOpen, setSwapModalOpen] = useState(false);
 
     // Leer ?status= al volver del callback de Google
     useEffect(() => {
@@ -37,7 +39,7 @@ export default function MisGuardias() {
             setToast({ type: "error", message: decodeURIComponent(msg) });
             setSearchParams({}, { replace: true });
         }
-    }, []);
+    }, [searchParams, setSearchParams]);
 
     // Auto-cerrar toast tras 4 segundos
     useEffect(() => {
@@ -132,6 +134,11 @@ export default function MisGuardias() {
 
     const handleExportOne = (dutyId) => {
         window.location.href = `/api/google/redirect?duty_id=${dutyId}`;
+    };
+
+    const handleSwapRequest = () => {
+        setDutyModalOpen(false);
+        setSwapModalOpen(true);
     };
 
     return (
@@ -239,7 +246,7 @@ export default function MisGuardias() {
                                         <th>Especialidad</th>
                                         <th>Jefe de Guardia</th>
                                         <th style={{ textAlign: "center" }}>
-                                            Detalles
+                                            Acciones
                                         </th>
                                     </tr>
                                 </thead>
@@ -292,7 +299,7 @@ export default function MisGuardias() {
                                                     onClick={() =>
                                                         openModal(duty)
                                                     }
-                                                    title="Ver ficha completa"
+                                                    title="Ver detalles"
                                                 >
                                                     <span className="material-icons-outlined">
                                                         visibility
@@ -442,12 +449,20 @@ export default function MisGuardias() {
                         </div>
 
                         <div className="mgModalFooter">
-                            <button className="mgBtn" onClick={closeModal}>
+                            <button className="mgBtn mgBtn--secondary" onClick={closeModal}>
                                 Cerrar
                             </button>
                         </div>
                     </div>
                 </div>
+            )}
+
+            {swapModalOpen && selectedDuty && (
+                <SwapRequestModal
+                    dutyFrom={selectedDuty}
+                    onClose={() => setSwapModalOpen(false)}
+                    onSuccess={() => setToast({ type: "success", message: "Solicitud enviada correctamente" })}
+                />
             )}
         </div>
     );

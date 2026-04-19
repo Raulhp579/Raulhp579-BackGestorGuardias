@@ -4,6 +4,7 @@ import "../styles/AppLayout.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { getProfile } from "../services/ProfileService";
+import { getNotifications, markAllAsRead } from "../services/NotificationService";
 import { useAuth } from "../hooks/useAuth";
 
 export default function AppLayout() {
@@ -13,6 +14,8 @@ export default function AppLayout() {
         email: "",
         avatarUrl: "",
     });
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [notifications, setNotifications] = useState([]);
     const { isAdmin } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
@@ -43,6 +46,22 @@ export default function AppLayout() {
         }
 
         loadUser();
+
+        // Cargar notificaciones
+        async function loadNotifications() {
+            try {
+                const data = await getNotifications();
+                setNotifications(data);
+                const unread = data.filter(n => !n.read_at).length;
+                setUnreadCount(unread);
+            } catch (e) {
+                console.error("Error loading notifications", e);
+            }
+        }
+        loadNotifications();
+        // Polling cada minuto
+        const interval = setInterval(loadNotifications, 60000);
+        return () => clearInterval(interval);
     }, [navigate]);
 
     // Redirección forzada para el tutorial global
@@ -192,6 +211,20 @@ export default function AppLayout() {
                                 event
                             </span>
                             <span>Mis Guardias</span>
+                        </NavLink>
+
+                        <NavLink
+                            to="/solicitudes"
+                            onClick={closeMenu}
+                            className={({ isActive }) =>
+                                `appNavItem ${isActive ? "active" : ""}`
+                            }
+                        >
+                            <span className="material-icons-outlined">
+                                forum
+                            </span>
+                            <span>Solicitudes</span>
+                            {unreadCount > 0 && <span className="appNavBadge">{unreadCount}</span>}
                         </NavLink>
 
                         <button

@@ -13,7 +13,8 @@ class SpecialityController extends Controller
 
         $rules = [
             "name"=>"required|min:3|max:20|string",
-            "active"=>"boolean"
+            "active"=>"boolean",
+            "id_chief"=>"nullable|exists:worker,id"
         ];
 
         $messages = [
@@ -21,7 +22,8 @@ class SpecialityController extends Controller
             "name.min"=>"the name must have minimun 3 characters",
             "name.max"=>"the name must have maximun 20 characters",
             "name.string"=>"the name must be a string",
-            "active.boolean"=>"the name must be a boolean"
+            "active.boolean"=>"the name must be a boolean",
+            "id_chief.exists"=>"the chief must be a valid worker"
         ];
 
         return [$rules, $messages];
@@ -62,6 +64,7 @@ class SpecialityController extends Controller
             $speciality = new Speciality();
             $speciality->name = $request->name;
             $speciality->active = true;
+            $speciality->id_chief = $request->id_chief;
             $speciality->save();
 
             return response()->json([
@@ -124,9 +127,9 @@ class SpecialityController extends Controller
                 ]);
             }
 
-            $speciality = new Speciality();
             $speciality->name = $request->name;
             $speciality->active = $request->active;
+            $speciality->id_chief = $request->id_chief;
             $speciality->save();
 
             return response()->json([

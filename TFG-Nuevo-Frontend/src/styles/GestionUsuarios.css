@@ -13,6 +13,17 @@
     --r: 14px;
 }
 
+.wNameCell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.chiefBadge {
+    font-size: 1.1rem;
+    cursor: help;
+}
+
 * {
     box-sizing: border-box;
 }
@@ -551,7 +562,7 @@ body {
     flex-wrap: wrap;
 }
 
-.cdTableCardTop > div {
+.cdTableCardTop>div {
     display: flex;
     align-items: center;
     gap: 16px;

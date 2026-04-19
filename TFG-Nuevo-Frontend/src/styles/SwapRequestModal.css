@@ -1,0 +1,158 @@
+.srmOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.srmModal {
+    background: white;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+}
+
+.srmHeader {
+    padding: 1.25rem;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.srmHeader h3 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.srmClose {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #6b7280;
+}
+
+.srmBody {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.srmSection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.srmLabel {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #374151;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.srmFlexRow {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.srmSelect {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 0.75rem;
+    font-size: 0.95rem;
+    background: #f9fafb;
+    color: #1f2937;
+    transition: all 0.2s;
+    outline: none;
+}
+
+.srmSelect:focus {
+    border-color: #2563eb;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.srmSelect--small {
+    flex: 0 0 120px;
+}
+
+.srmHint {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+.srmError {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    background: #fef2f2;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid #fee2e2;
+}
+
+.srmFooter {
+    padding: 1.25rem;
+    background: #f9fafb;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+.srmBtn {
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+}
+
+.srmBtn--cancel {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.srmBtn--submit {
+    background: #2563eb;
+    color: white;
+}
+
+.srmBtn--submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.srmTextarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 0.75rem;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 0.75rem;
+    font-size: 0.95rem;
+    font-family: inherit;
+    resize: vertical;
+    outline: none;
+    transition: all 0.2s;
+    background: #f9fafb;
+    color: #1f2937;
+}
+
+.srmTextarea:focus {
+    border-color: #2563eb;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}

@@ -27,3 +27,21 @@ export async function getSpecialities() {
         throw error;
     }
 }
+export async function updateSpeciality(id, data) {
+    try {
+        let response = await fetch(`${url}/speciality/${id}`, {
+            method: "PUT",
+            headers: getAuthHeaders(),
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error al actualizar especialidad:", error);
+        throw error;
+    }
+}

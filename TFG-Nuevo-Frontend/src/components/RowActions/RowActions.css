@@ -45,6 +45,22 @@
     border-color: rgba(185, 28, 28, .25);
 }
 
+/* Chief Assignment Styles */
+.raIconBtn.raStar .material-icons,
+.raIconBtn.raStar .material-icons-outlined {
+    color: #eab308 !important;
+}
+
+.raIconBtn.raActive {
+    background: rgba(234, 179, 8, .1) !important;
+    border-color: rgba(234, 179, 8, .4) !important;
+}
+
+.raIconBtn.raStar:hover:not(:disabled) {
+    background: rgba(234, 179, 8, .2) !important;
+    border-color: rgba(234, 179, 8, .5) !important;
+}
+
 @media (max-width: 560px) {
     .raWrap {
         gap: 8px;

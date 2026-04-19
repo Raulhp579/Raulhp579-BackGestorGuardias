@@ -1,0 +1,143 @@
+.riPage {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.riHeaderRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.riTitle {
+    font-size: 2rem;
+    color: var(--primary-color, #1a7f37);
+    margin: 0;
+}
+
+.riSection {
+    margin-bottom: 3rem;
+}
+
+.riSection h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 0.5rem;
+}
+
+.riGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.riCard {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    border: 1px solid #e5e7eb;
+}
+
+.riSwapDates {
+    margin-bottom: 0.5rem;
+}
+
+.riComments {
+    background: #f3f4f6;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.85rem;
+    color: #4b5563;
+    margin-bottom: 0.5rem;
+    font-style: italic;
+}
+
+.riActions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.riBtn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: 600;
+    border: none;
+    transition: all 0.2s;
+}
+
+.riBtn--accept {
+    background: #10b981;
+    color: white;
+}
+
+.riBtn--reject {
+    background: #ef4444;
+    color: white;
+}
+
+.riBtn--approve {
+    background: #3b82f6;
+    color: white;
+}
+
+.riBtn--decline {
+    background: #f59e0b;
+    color: white;
+}
+
+.riBtn--primary {
+    background: #1a7f37;
+    color: white;
+}
+
+.riStatus {
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+}
+
+.riStatus--pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.riStatus--accepted {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.riStatus--rejected,
+.riStatus--declined {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.riStatus--approved {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.riToast {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    color: white;
+    z-index: 1000;
+}
+
+.riToast--success {
+    background: #10b981;
+}
+
+.riToast--error {
+    background: #ef4444;
+}

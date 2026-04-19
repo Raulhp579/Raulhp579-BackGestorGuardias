@@ -17,8 +17,13 @@ class UserController extends Controller
     {
         try {
             $user = Auth::user();
+            $user->load('worker');
 
-            return response()->json($user, 200);
+            // Flatten specialty ID for easier frontend access if needed
+            $userData = $user->toArray();
+            $userData['id_speciality'] = $user->worker?->id_speciality;
+
+            return response()->json($userData, 200);
         } catch (Exception $e) {
             return response()->json([
                 'error' => 'there is a problem showing your profile',
