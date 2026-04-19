@@ -13,6 +13,7 @@ import { importExcel } from "../services/importExcelService";
 import { useNotifications } from "../context/NotificationsContext";
 
 import RowActions from "../components/RowActions/RowActions";
+import Select2 from "../components/Select2/Select2";
 import Joyride, { STATUS } from "react-joyride-react-19";
 
 export default function GestionGuardias() {
@@ -331,6 +332,49 @@ export default function GestionGuardias() {
         for (let y = now - 3; y <= now + 3; y++) arr.push(String(y));
         return arr;
     }, []);
+
+    const monthOptions = useMemo(() =>
+        months.map(m => ({ value: m.value, label: `${m.label} (${m.value})` }))
+    , [months]);
+
+    const yearOptions = useMemo(() =>
+        years.map(y => ({ value: y, label: y }))
+    , [years]);
+
+    const specialityOptions = useMemo(() =>
+        specialities.map(s => ({ value: String(s.id), label: s.name }))
+    , [specialities]);
+
+    const workerOptions = useMemo(() =>
+        workers.map(w => ({ value: String(w.id), label: w.name ?? w.email ?? `ID ${w.id}` }))
+    , [workers]);
+
+    const dutyTypeOptions = [
+        { value: "CA", label: "CA" },
+        { value: "PF", label: "PF" },
+        { value: "LOC", label: "LOC" },
+    ];
+
+    const pdfDayOptions = useMemo(() =>
+        Array.from({ length: getDaysInMonth(pdfMonth, pdfYear) }, (_, i) => {
+            const d = String(i + 1).padStart(2, "0");
+            return { value: d, label: d };
+        })
+    , [pdfMonth, pdfYear]);
+
+    const pdfMonthOptions = useMemo(() =>
+        [1,2,3,4,5,6,7,8,9,10,11,12].map(m => {
+            const v = String(m).padStart(2, "0");
+            return { value: v, label: v };
+        })
+    , []);
+
+    const pdfYearOptions = useMemo(() =>
+        Array.from({ length: 10 }, (_, i) => {
+            const y = String(new Date().getFullYear() - 5 + i);
+            return { value: y, label: y };
+        })
+    , []);
 
     function pillClass(type) {
         const t = String(type || "").toUpperCase();
@@ -1113,41 +1157,22 @@ export default function GestionGuardias() {
                             <div className="formGrid">
                                 <label className="label">
                                     Mes
-                                    <select
-                                        className="control"
+                                    <Select2
+                                        options={monthOptions}
                                         value={assignMonth}
-                                        onChange={(e) =>
-                                            setAssignMonth(e.target.value)
-                                        }
+                                        onChange={setAssignMonth}
                                         disabled={assignLoading}
-                                    >
-                                        {months.map((m) => (
-                                            <option
-                                                key={m.value}
-                                                value={m.value}
-                                            >
-                                                {m.label} ({m.value})
-                                            </option>
-                                        ))}
-                                    </select>
+                                    />
                                 </label>
 
                                 <label className="label">
                                     Año
-                                    <select
-                                        className="control"
+                                    <Select2
+                                        options={yearOptions}
                                         value={assignYear}
-                                        onChange={(e) =>
-                                            setAssignYear(e.target.value)
-                                        }
+                                        onChange={setAssignYear}
                                         disabled={assignLoading}
-                                    >
-                                        {years.map((y) => (
-                                            <option key={y} value={y}>
-                                                {y}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    />
                                 </label>
 
                                 {assignMsg && (
@@ -1230,64 +1255,31 @@ export default function GestionGuardias() {
                                             {specialitiesError}
                                         </div>
                                     ) : (
-                                        <select
-                                            className="control"
+                                        <Select2
+                                            placeholder="-- Selecciona una especialidad --"
+                                            options={specialityOptions}
                                             value={idSpeciality}
-                                            onChange={(e) =>
-                                                setIdSpeciality(e.target.value)
-                                            }
-                                        >
-                                            <option value="">
-                                                -- Selecciona una especialidad
-                                                --
-                                            </option>
-                                            {specialities.map((s) => (
-                                                <option
-                                                    key={s.id}
-                                                    value={String(s.id)}
-                                                >
-                                                    {s.name} (id: {s.id})
-                                                </option>
-                                            ))}
-                                        </select>
+                                            onChange={setIdSpeciality}
+                                        />
                                     )}
                                 </label>
 
                                 <label className="label">
                                     <span>Mes</span>
-                                    <select
-                                        className="control"
+                                    <Select2
+                                        options={monthOptions}
                                         value={importMonth}
-                                        onChange={(e) =>
-                                            setImportMonth(e.target.value)
-                                        }
-                                    >
-                                        {months.map((m) => (
-                                            <option
-                                                key={m.value}
-                                                value={m.value}
-                                            >
-                                                {m.label} ({m.value})
-                                            </option>
-                                        ))}
-                                    </select>
+                                        onChange={setImportMonth}
+                                    />
                                 </label>
 
                                 <label className="label">
                                     <span>Año</span>
-                                    <select
-                                        className="control"
+                                    <Select2
+                                        options={yearOptions}
                                         value={importYear}
-                                        onChange={(e) =>
-                                            setImportYear(e.target.value)
-                                        }
-                                    >
-                                        {years.map((y) => (
-                                            <option key={y} value={y}>
-                                                {y}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        onChange={setImportYear}
+                                    />
                                 </label>
 
                                 <input
@@ -1437,74 +1429,34 @@ export default function GestionGuardias() {
 
                                     <label className="label">
                                         Tipo
-                                        <select
-                                            className="control"
+                                        <Select2
+                                            options={dutyTypeOptions}
                                             value={editForm.duty_type}
-                                            onChange={(e) =>
-                                                setEditForm((p) => ({
-                                                    ...p,
-                                                    duty_type: e.target.value,
-                                                }))
-                                            }
+                                            onChange={(val) => setEditForm((p) => ({ ...p, duty_type: val }))}
                                             disabled={editSaving}
-                                        >
-                                            <option value="CA">CA</option>
-                                            <option value="PF">PF</option>
-                                            <option value="LOC">LOC</option>
-                                        </select>
+                                        />
                                     </label>
 
                                     <label className="label">
                                         Especialidad
-                                        <select
-                                            className="control"
+                                        <Select2
+                                            placeholder="—"
+                                            options={specialityOptions}
                                             value={editForm.id_speciality}
-                                            onChange={(e) =>
-                                                setEditForm((p) => ({
-                                                    ...p,
-                                                    id_speciality:
-                                                        e.target.value,
-                                                }))
-                                            }
+                                            onChange={(val) => setEditForm((p) => ({ ...p, id_speciality: val }))}
                                             disabled={editSaving}
-                                        >
-                                            <option value="">—</option>
-                                            {specialities.map((s) => (
-                                                <option
-                                                    key={s.id}
-                                                    value={String(s.id)}
-                                                >
-                                                    {s.name}
-                                                </option>
-                                            ))}
-                                        </select>
+                                        />
                                     </label>
 
                                     <label className="label">
                                         Trabajador
-                                        <select
-                                            className="control"
+                                        <Select2
+                                            placeholder="—"
+                                            options={workerOptions}
                                             value={editForm.id_worker}
-                                            onChange={(e) =>
-                                                setEditForm((p) => ({
-                                                    ...p,
-                                                    id_worker: e.target.value,
-                                                }))
-                                            }
+                                            onChange={(val) => setEditForm((p) => ({ ...p, id_worker: val }))}
                                             disabled={editSaving}
-                                        >
-                                            <option value="">—</option>
-                                            {workers.map((w) => (
-                                                <option
-                                                    key={w.id}
-                                                    value={String(w.id)}
-                                                >
-                                                    {w.name ??
-                                                        w.email ??
-                                                        `ID ${w.id}`}
-                                                </option>
-                                            ))}
-                                        </select>
+                                        />
                                     </label>
 
                                     <label
@@ -1512,30 +1464,13 @@ export default function GestionGuardias() {
                                         style={{ gridColumn: "1 / -1" }}
                                     >
                                         Jefe (opcional)
-                                        <select
-                                            className="control"
+                                        <Select2
+                                            placeholder="—"
+                                            options={workerOptions}
                                             value={editForm.id_chief_worker}
-                                            onChange={(e) =>
-                                                setEditForm((p) => ({
-                                                    ...p,
-                                                    id_chief_worker:
-                                                        e.target.value,
-                                                }))
-                                            }
+                                            onChange={(val) => setEditForm((p) => ({ ...p, id_chief_worker: val }))}
                                             disabled={editSaving}
-                                        >
-                                            <option value="">—</option>
-                                            {workers.map((w) => (
-                                                <option
-                                                    key={w.id}
-                                                    value={String(w.id)}
-                                                >
-                                                    {w.name ??
-                                                        w.email ??
-                                                        `ID ${w.id}`}
-                                                </option>
-                                            ))}
-                                        </select>
+                                        />
                                     </label>
                                 </div>
                             </div>
@@ -1718,61 +1653,22 @@ export default function GestionGuardias() {
                             <div className="formGrid">
                                 <label className="label">
                                     Día
-                                    <select
-                                        className="control"
+                                    <Select2
+                                        options={pdfDayOptions}
                                         value={pdfDay}
-                                        onChange={(e) =>
-                                            setPdfDay(e.target.value)
-                                        }
+                                        onChange={setPdfDay}
                                         disabled={pdfLoading}
-                                    >
-                                        {Array.from(
-                                            {
-                                                length: getDaysInMonth(
-                                                    pdfMonth,
-                                                    pdfYear,
-                                                ),
-                                            },
-                                            (_, i) => i + 1,
-                                        ).map((d) => (
-                                            <option
-                                                key={d}
-                                                value={String(d).padStart(
-                                                    2,
-                                                    "0",
-                                                )}
-                                            >
-                                                {String(d).padStart(2, "0")}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    />
                                 </label>
 
                                 <label className="label">
                                     Mes
-                                    <select
-                                        className="control"
+                                    <Select2
+                                        options={pdfMonthOptions}
                                         value={pdfMonth}
-                                        onChange={(e) =>
-                                            setPdfMonth(e.target.value)
-                                        }
+                                        onChange={setPdfMonth}
                                         disabled={pdfLoading}
-                                    >
-                                        {[
-                                            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
-                                            12,
-                                        ].map((m) => (
-                                            <option
-                                                key={m}
-                                                value={String(m).padStart(
-                                                    2,
-                                                    "0",
-                                                )}
-                                            >
-                                                {String(m).padStart(2, "0")}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    />
                                 </label>
 
                                 <label
@@ -1780,26 +1676,12 @@ export default function GestionGuardias() {
                                     style={{ gridColumn: "1 / -1" }}
                                 >
                                     Año
-                                    <select
-                                        className="control"
+                                    <Select2
+                                        options={pdfYearOptions}
                                         value={pdfYear}
-                                        onChange={(e) =>
-                                            setPdfYear(e.target.value)
-                                        }
+                                        onChange={setPdfYear}
                                         disabled={pdfLoading}
-                                    >
-                                        {Array.from(
-                                            { length: 10 },
-                                            (_, i) =>
-                                                new Date().getFullYear() -
-                                                5 +
-                                                i,
-                                        ).map((y) => (
-                                            <option key={y} value={String(y)}>
-                                                {y}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    />
                                 </label>
                             </div>
 

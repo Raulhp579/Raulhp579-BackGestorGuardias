@@ -170,6 +170,19 @@ export default function AppLayout() {
                                     <span>Usuarios</span>
                                 </NavLink>
 
+                                <NavLink
+                                    to="/fichajes"
+                                    onClick={closeMenu}
+                                    className={({ isActive }) =>
+                                        `appNavItem ${isActive ? "active" : ""}`
+                                    }
+                                >
+                                    <span className="material-icons-outlined">
+                                        history_toggle_off
+                                    </span>
+                                    <span>Fichajes</span>
+                                </NavLink>
+
                                 <div className="appNavDivider" />
                             </>
                         )}
@@ -188,19 +201,6 @@ export default function AppLayout() {
                         </NavLink>
 
                         <NavLink
-                            to="/perfil"
-                            onClick={closeMenu}
-                            className={({ isActive }) =>
-                                `appNavItem ${isActive ? "active" : ""}`
-                            }
-                        >
-                            <span className="material-icons-outlined">
-                                person
-                            </span>
-                            <span>Mi Perfil</span>
-                        </NavLink>
-
-                        <NavLink
                             to="/mis-guardias"
                             onClick={closeMenu}
                             className={({ isActive }) =>
@@ -208,9 +208,9 @@ export default function AppLayout() {
                             }
                         >
                             <span className="material-icons-outlined">
-                                event
+                                history_toggle_off
                             </span>
-                            <span>Mis Guardias</span>
+                            <span>Control de Guardia</span>
                         </NavLink>
 
                         <NavLink
@@ -227,19 +227,20 @@ export default function AppLayout() {
                             {unreadCount > 0 && <span className="appNavBadge">{unreadCount}</span>}
                         </NavLink>
 
-                        <button
-                            className="appNavItem "
-                            onClick={() => {
+                        <a
+                            href="#"
+                            className="appNavItem"
+                            onClick={(e) => {
+                                e.preventDefault();
                                 closeMenu();
                                 logout();
                             }}
-                            type="button"
                         >
                             <span className="material-icons-outlined">
                                 logout
                             </span>
                             <span>Cerrar Sesión</span>
-                        </button>
+                        </a>
                     </nav>
 
                     <div className="appSidebarFooter">

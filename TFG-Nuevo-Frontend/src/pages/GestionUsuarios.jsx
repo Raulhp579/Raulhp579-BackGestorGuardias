@@ -13,6 +13,7 @@ import {
 import { getSpecialities, updateSpeciality } from "../services/SpecialitiesService";
 
 import RowActions from "../components/RowActions/RowActions";
+import Select2 from "../components/Select2/Select2";
 import Joyride, { STATUS } from "react-joyride-react-19";
 import {
     deleteWorker as deleteWorkerApi,
@@ -569,6 +570,15 @@ export default function GestionUsuarios() {
         rows = admins;
     }
 
+    // Select2 options
+    const specialityOptions = useMemo(() =>
+        specialities.map(s => ({ value: String(s.id), label: s.name }))
+    , [specialities]);
+
+    const availableWorkerOptions = useMemo(() =>
+        availableWorkers.map(w => ({ value: String(w.id), label: w.name ?? `ID ${w.id}` }))
+    , [availableWorkers]);
+
     // Filtrado por búsqueda
     const filteredRows = useMemo(() => {
         if (!searchTerm.trim()) return rows;
@@ -1107,35 +1117,13 @@ export default function GestionUsuarios() {
 
                                                 <label className="label">
                                                     Asociar con trabajador
-                                                    <select
-                                                        name="worker_id"
-                                                        className="control"
-                                                        value={
-                                                            editForm.worker_id
-                                                        }
-                                                        onChange={
-                                                            onEditFieldChange
-                                                        }
-                                                        disabled={
-                                                            loadingWorkers
-                                                        }
-                                                    >
-                                                        <option value="">
-                                                            {loadingWorkers
-                                                                ? "Cargando trabajadores..."
-                                                                : "-- Ninguno --"}
-                                                        </option>
-                                                        {availableWorkers.map(
-                                                            (w) => (
-                                                                <option
-                                                                    key={w.id}
-                                                                    value={w.id}
-                                                                >
-                                                                    {w.name}
-                                                                </option>
-                                                            ),
-                                                        )}
-                                                    </select>
+                                                    <Select2
+                                                        placeholder={loadingWorkers ? "Cargando trabajadores..." : "-- Ninguno --"}
+                                                        options={availableWorkerOptions}
+                                                        value={editForm.worker_id}
+                                                        onChange={(val) => onEditFieldChange({ target: { name: "worker_id", value: val } })}
+                                                        disabled={loadingWorkers}
+                                                    />
                                                 </label>
                                             </>
                                         ) : (
@@ -1184,30 +1172,12 @@ export default function GestionUsuarios() {
 
                                                 <label className="label">
                                                     Especialidad
-                                                    <select
-                                                        name="id_speciality"
-                                                        className="control"
-                                                        value={
-                                                            editForm.id_speciality
-                                                        }
-                                                        onChange={
-                                                            onEditFieldChange
-                                                        }
-                                                    >
-                                                        <option value="">
-                                                            -- Ninguna --
-                                                        </option>
-                                                        {specialities.map(
-                                                            (s) => (
-                                                                <option
-                                                                    key={s.id}
-                                                                    value={s.id}
-                                                                >
-                                                                    {s.name}
-                                                                </option>
-                                                            ),
-                                                        )}
-                                                    </select>
+                                                    <Select2
+                                                        placeholder="-- Ninguna --"
+                                                        options={specialityOptions}
+                                                        value={editForm.id_speciality}
+                                                        onChange={(val) => onEditFieldChange({ target: { name: "id_speciality", value: val } })}
+                                                    />
                                                 </label>
 
                                                 <label className="label">

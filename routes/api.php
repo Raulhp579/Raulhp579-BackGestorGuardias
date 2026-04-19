@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DutyController;
 use App\Http\Controllers\DutyMetaController;
+use App\Http\Controllers\FichajeController;
 use App\Http\Controllers\GoogleCalendarController;
 use App\Http\Controllers\ImportExcelsController;
 use App\Http\Controllers\PdfController;
@@ -66,6 +67,10 @@ Route::middleware(['auth:sanctum', isAdmin::class])->group(function () {
     Route::get('/assingChiefs', [DutyController::class, 'assignChief']);
 
     Route::get('/plantilla-dia-pdf', [PdfController::class, 'generarPdfDia']);
+
+    Route::prefix('admin')->group(function () {
+        Route::apiResource('/fichajes', FichajeController::class);
+    });
 });
 
 // ---------------------Duties routes-----------------------------
@@ -102,3 +107,9 @@ Route::get('/login', function () {
 
 Route::get('/google/redirect', [GoogleCalendarController::class, 'redirectToGoogle']);
 Route::get('/google/callback', [GoogleCalendarController::class, 'handleGoogleCallback']);
+
+//ruta de usuario de fichajes
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/fichajes', [FichajeController::class, 'fichar']);
+    Route::get('/fichajes/mis-ultimos-tres', [FichajeController::class, 'misUltimosTresFicahjes']);
+});

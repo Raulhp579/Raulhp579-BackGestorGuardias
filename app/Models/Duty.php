@@ -44,4 +44,9 @@ class Duty extends Model
     {
         return $this->belongsTo(Speciality::class, 'id_speciality');
     }
+
+    public function fichajes()
+    {
+        return $this->hasMany(Fichaje::class, 'id_duty');
+    }
 }

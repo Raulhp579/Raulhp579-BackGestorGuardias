@@ -22,7 +22,8 @@
 }
 
 .mgContainer {
-    max-width: 1200px;
+    width: 96%;
+    max-width: 1600px;
     margin: 0 auto;
 }
 
@@ -655,13 +656,281 @@
 }
 
 @keyframes mgToastIn {
-    from {
-        opacity: 0;
-        transform: translateY(-12px);
-    }
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
+    from { opacity: 0; transform: translateY(-12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Tabs & Fichaje UI ─────────────────────────────────────── */
+.mgTabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    background: var(--mg-card-bg);
+    padding: 0.5rem;
+    border-radius: 999px;
+    width: fit-content;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.mgTabBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 999px;
+    border: none;
+    background: transparent;
+    color: var(--mg-text-muted);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: var(--mg-transition);
+}
+
+.mgTabBtn:hover {
+    color: var(--mg-primary);
+    background: rgba(0, 112, 65, 0.05);
+}
+
+.mgTabBtn.active {
+    background: var(--mg-primary);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 112, 65, 0.2);
+}
+
+.mgTabBtn .material-icons-outlined {
+    font-size: 1.2rem;
+}
+
+/* Fichar Layout */
+.mgFicharLayout {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 2rem;
+}
+
+.mgClockCard, .mgMapPlaceholder {
+    background: var(--mg-card-bg);
+    border-radius: var(--mg-radius);
+    padding: 2.5rem;
+    box-shadow: var(--mg-shadow);
+    border: 1px solid rgba(0, 0, 0, 0.02);
+    display: flex;
+    flex-direction: column;
+}
+
+.mgClockHeader {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.mgCurrentTime {
+    font-size: 4rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--mg-text);
+    letter-spacing: -2px;
+}
+
+.mgCurrentDate {
+    font-size: 1.1rem;
+    color: var(--mg-text-muted);
+    text-transform: capitalize;
+    margin-top: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.mgClockStatus {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.mgStatusIn {
+    background: rgba(0, 112, 65, 0.1);
+    color: var(--mg-primary);
+}
+
+.mgStatusOut {
+    background: rgba(220, 38, 38, 0.1);
+    color: #dc2626;
+}
+
+.mgStatusNone {
+    background: rgba(107, 114, 128, 0.1);
+    color: #6b7280;
+}
+
+.mgClockAction {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.mgBigPunchBtn {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1.2rem;
+    font-weight: 800;
+    cursor: pointer;
+    color: #fff;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.mgBigPunchBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.mgBtnIn {
+    background: linear-gradient(135deg, var(--mg-primary) 0%, #00a86b 100%);
+    box-shadow: 0 15px 35px rgba(0, 112, 65, 0.3), inset 0 2px 5px rgba(255,255,255,0.3);
+}
+
+.mgBtnIn:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 20px 40px rgba(0, 112, 65, 0.4), inset 0 2px 5px rgba(255,255,255,0.4);
+}
+
+.mgBtnIn:active:not(:disabled) {
+    transform: scale(0.95);
+    box-shadow: 0 5px 15px rgba(0, 112, 65, 0.3);
+}
+
+.mgBtnOut {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    box-shadow: 0 15px 35px rgba(220, 38, 38, 0.3), inset 0 2px 5px rgba(255,255,255,0.3);
+}
+
+.mgBtnOut:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 20px 40px rgba(220, 38, 38, 0.4), inset 0 2px 5px rgba(255,255,255,0.4);
+}
+
+.mgBtnOut:active:not(:disabled) {
+    transform: scale(0.95);
+    box-shadow: 0 5px 15px rgba(220, 38, 38, 0.3);
+}
+
+.mgPunchIcon {
+    font-size: 4rem;
+}
+
+.mgRecentPunches h3 {
+    font-size: 1.1rem;
+    color: var(--mg-text);
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.mgPunchList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.mgPunchListItem {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--mg-border);
+}
+
+.mgPunchListItem:last-child {
+    border-bottom: none;
+}
+
+.mgPunchDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.mgPunchDot.in {
+    background: var(--mg-primary);
+}
+
+.mgPunchDot.out {
+    background: #dc2626;
+}
+
+.mgPunchType {
+    font-weight: 700;
+    color: var(--mg-text);
+    width: 80px;
+}
+
+.mgPunchTime {
+    color: var(--mg-text-muted);
+    font-size: 0.95rem;
+}
+
+.mgNoPunches {
+    color: var(--mg-text-muted);
+    font-size: 0.95rem;
+    font-style: italic;
+}
+
+.mgMapPlaceholder {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: repeating-linear-gradient(
+        45deg,
+        #f9fafb,
+        #f9fafb 10px,
+        #ffffff 10px,
+        #ffffff 20px
+    );
+}
+
+.mgMapIconWrap {
+    width: 80px;
+    height: 80px;
+    background: rgba(0, 112, 65, 0.05);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.mgMapIcon {
+    font-size: 3rem;
+    color: var(--mg-primary);
+    opacity: 0.8;
+}
+
+.mgMapPlaceholder h3 {
+    font-size: 1.2rem;
+    color: var(--mg-text);
+    margin-bottom: 0.5rem;
+}
+
+.mgMapPlaceholder p {
+    color: var(--mg-text-muted);
+    max-width: 250px;
+    line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+    .mgFicharLayout {
+        grid-template-columns: 1fr;
     }
 }
+
