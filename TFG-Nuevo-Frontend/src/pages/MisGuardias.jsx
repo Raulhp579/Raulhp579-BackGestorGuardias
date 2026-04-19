@@ -708,10 +708,16 @@ export default function MisGuardias() {
                             </div>
                         </div>
 
-                        <div className="mgModalFooter">
+                        <div className="mgModalFooter" style={{ gap: '12px' }}>
                             <button className="mgBtn mgBtn--secondary" onClick={closeModal}>
                                 Cerrar
                             </button>
+                            {!selectedDuty.is_chief && (
+                                <button className="mgBtn mgBtn--primary" onClick={handleSwapRequest}>
+                                    <span className="material-icons-outlined">swap_horiz</span>
+                                    Solicitar Cambio
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
