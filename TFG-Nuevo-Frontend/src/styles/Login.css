@@ -327,7 +327,6 @@ html {
 
     /* Movimiento de la capa 1 */
     transform: translate(0, 0);
-    animation: layer1Float 20s infinite cubic-bezier(0.25, 1, 0.5, 1); /* Movimiento más suave */
     will-change: transform;
 }
 
@@ -346,35 +345,9 @@ html {
 
     /* Movimiento de la capa 2 */
     transform: translate(0, 0);
-    animation: layer2Float 25s infinite cubic-bezier(0.25, 1, 0.5, 1); /* Movimiento más suave */
     will-change: transform;
 }
 
-/* Animación de la capa 1 */
-@keyframes layer1Float {
-    0% {
-        transform: translate(0, 0);
-    }
-    50% {
-        transform: translate(20px, -20px); /* Movimiento más amplio */
-    }
-    100% {
-        transform: translate(0, 0);
-    }
-}
-
-/* Animación de la capa 2 */
-@keyframes layer2Float {
-    0% {
-        transform: translate(0, 0);
-    }
-    50% {
-        transform: translate(-30px, 30px); /* Movimiento más amplio y en dirección opuesta */
-    }
-    100% {
-        transform: translate(0, 0);
-    }
-}
 
 /* Accesibilidad */
 @media (prefers-reduced-motion: reduce) {
