@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Notification;
 use App\Models\User;
+use Carbon\Carbon;
 
 class DutySwapController extends Controller
 {
@@ -63,12 +64,34 @@ class DutySwapController extends Controller
             return response()->json(['message' => 'You already have a duty assigned on the target date'], 400);
         }
 
+        $consecutiveRequester = Duty::where('id_worker', '=', $workerRequesterId)
+            ->whereIn('date', [
+                Carbon::parse($dutyTo->date)->subDay()->toDateString(),
+                Carbon::parse($dutyTo->date)->addDay()->toDateString()
+            ])
+            ->exists();
+
+        if ($consecutiveRequester) {
+            return response()->json(['message' => 'No puedes solicitar este cambio porque tendrías 48 horas de guardia seguidas (tienes guardia el día anterior o posterior).'], 400);
+        }
+
         $conflictTarget = Duty::where('id_worker', '=', $dutyTo->id_worker)
             ->where('date', '=', $dutyFrom->date)
             ->exists();
         
         if ($conflictTarget) {
             return response()->json(['message' => 'The target colleague already has a duty assigned on your source date'], 400);
+        }
+
+        $consecutiveTarget = Duty::where('id_worker', '=', $dutyTo->id_worker)
+            ->whereIn('date', [
+                Carbon::parse($dutyFrom->date)->subDay()->toDateString(),
+                Carbon::parse($dutyFrom->date)->addDay()->toDateString()
+            ])
+            ->exists();
+
+        if ($consecutiveTarget) {
+            return response()->json(['message' => 'No puedes intercambiar esta guardia porque el compañero tendría 48 horas de guardia seguidas.'], 400);
         }
 
         $swap = DutySwap::create([
