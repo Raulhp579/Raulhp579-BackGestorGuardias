@@ -183,7 +183,7 @@ class FichajeController extends Controller
             $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) + cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
             $distance = $angle * $earthRadius;
 
-            if ($distance > 200) {
+            if ($distance > 20000) {
                 return response()->json([
                     "message" => "Estás demasiado lejos del Medac Arena para fichar. Distancia aproximada: " . round($distance) . " metros.",
                 ], 422);
