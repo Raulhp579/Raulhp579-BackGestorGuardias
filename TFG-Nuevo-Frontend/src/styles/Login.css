@@ -325,9 +325,7 @@ html {
     background-size: 200% 200%;
     opacity: 0.5;
 
-    /* Movimiento de la capa 1 */
-    transform: translate(0, 0);
-    will-change: transform;
+  
 }
 
 /* ===== Fondo: capa 2 (partículas pequeñas) ====== */
@@ -343,9 +341,7 @@ html {
     background-size: 300% 300%;
     opacity: 0.3;
 
-    /* Movimiento de la capa 2 */
-    transform: translate(0, 0);
-    will-change: transform;
+   
 }
 
 
