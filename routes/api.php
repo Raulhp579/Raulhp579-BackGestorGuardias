@@ -12,7 +12,6 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\WorkerController;
 use App\Http\Middleware\isAdmin;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
 // Preflight CORS para /api/*
@@ -98,11 +97,6 @@ Route::get('/duties/{id}', [DutyController::class, 'show']);
         Route::put('/notifications/{id}/read', [App\Http\Controllers\NotificationController::class, 'markAsRead']);
         Route::put('/notifications/read-all', [App\Http\Controllers\NotificationController::class, 'markAllAsRead']);
     });
-
-    // Broadcasting auth con Sanctum para el SPA React
-Route::middleware('auth:sanctum')->post('/broadcasting/auth', function (Request $request) {
-    return Broadcast::auth($request);
-});
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/login', function () {

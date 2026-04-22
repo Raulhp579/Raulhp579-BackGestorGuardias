@@ -1,17 +1,16 @@
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
-import { useState, useEffect, useCallback } from "react";
-import Echo from "laravel-echo";
-import Pusher from "pusher-js";
+import { useState, useEffect, useCallback, useRef } from "react";
 import "../styles/AppLayout.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { getProfile } from "../services/ProfileService";
-import { getNotifications, markAllAsRead } from "../services/NotificationService";
+import { getNotifications } from "../services/NotificationService";
 import { useAuth } from "../hooks/useAuth";
+
+const POLL_INTERVAL_MS = 15000;
 
 export default function AppLayout() {
     const [open, setOpen] = useState(false);
-    const [userId, setUserId] = useState(null);
     const [user, setUser] = useState({
         name: "Usuario",
         email: "",
@@ -20,6 +19,8 @@ export default function AppLayout() {
     const [unreadCount, setUnreadCount] = useState(0);
     const [notifications, setNotifications] = useState([]);
     const [toast, setToast] = useState(null);
+    const prevUnreadRef = useRef(0);
+    const firstLoadRef = useRef(true);
     const { isAdmin } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
@@ -29,13 +30,19 @@ export default function AppLayout() {
         try {
             const data = await getNotifications();
             setNotifications(data);
-            setUnreadCount(data.filter(n => !n.read_at).length);
+            const newUnread = data.filter(n => !n.read_at).length;
+            if (!firstLoadRef.current && newUnread > prevUnreadRef.current) {
+                setToast("Tienes una nueva notificación de intercambio de guardia");
+                setTimeout(() => setToast(null), 5000);
+            }
+            prevUnreadRef.current = newUnread;
+            firstLoadRef.current = false;
+            setUnreadCount(newUnread);
         } catch (e) {
             console.error("Error loading notifications", e);
         }
     }, []);
 
-    // Cargar perfil y notificaciones al montar
     useEffect(() => {
         async function loadUser() {
             try {
@@ -46,7 +53,6 @@ export default function AppLayout() {
                         email: profileData.email ?? "",
                         avatarUrl: profileData.avatarUrl ?? "",
                     });
-                    setUserId(profileData.id);
                 }
             } catch (error) {
                 console.error("Error al cargar perfil:", error);
@@ -62,102 +68,68 @@ export default function AppLayout() {
         loadUser();
         loadNotifications();
 
-        const interval = setInterval(loadNotifications, 60000);
+        let interval = null;
+        const startPolling = () => {
+            if (interval) return;
+            interval = setInterval(loadNotifications, POLL_INTERVAL_MS);
+        };
+        const stopPolling = () => {
+            if (!interval) return;
+            clearInterval(interval);
+            interval = null;
+        };
+
+        const onVisibilityChange = () => {
+            if (document.visibilityState === "visible") {
+                loadNotifications();
+                startPolling();
+            } else {
+                stopPolling();
+            }
+        };
+
+        if (document.visibilityState === "visible") startPolling();
+        document.addEventListener("visibilitychange", onVisibilityChange);
         window.addEventListener("notificationsRead", loadNotifications);
 
         return () => {
-            clearInterval(interval);
+            stopPolling();
+            document.removeEventListener("visibilitychange", onVisibilityChange);
             window.removeEventListener("notificationsRead", loadNotifications);
         };
     }, [navigate, loadNotifications]);
 
-    // Echo WebSocket: escucha notificaciones en tiempo real
-useEffect(() => {
-        if (!userId) return;
-
-        const token = localStorage.getItem("token");
-        window.Pusher = Pusher;
-
-        const wsHost = import.meta.env.VITE_REVERB_HOST;
-        const wsPort = import.meta.env.VITE_REVERB_PORT ?? 80;
-        const scheme = import.meta.env.VITE_REVERB_SCHEME ?? "https";
-        console.log(`[Reverb] Conectando a ${scheme === "https" ? "wss" : "ws"}://${wsHost}:${wsPort}`);
-
-        const echo = new Echo({
-            broadcaster: "reverb",
-            // PONEMOS LA CLAVE DIRECTAMENTE AQUÍ PARA PROBAR
-            key: "rdyiluxskpz4fxphbl3v", 
-            wsHost,
-            wsPort,
-            wssPort: wsPort,
-            forceTLS: scheme === "https",
-            enabledTransports: ["ws", "wss"],
-            authEndpoint: "/api/broadcasting/auth",
-            auth: {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    Accept: "application/json",
-                },
-            },
-        });
-
-        echo.connector.pusher.connection.bind("state_change", ({ previous, current }) => {
-            const icons = { connected: "✅", connecting: "🔄", disconnected: "❌", failed: "💥", unavailable: "⚠️" };
-            console.log(`[Reverb] Estado: ${icons[previous] ?? "?"} ${previous} → ${icons[current] ?? "?"} ${current}`);
-        });
-
-        echo.connector.pusher.connection.bind("connected", () => {
-            console.log("[Reverb] ✅ WebSocket conectado correctamente");
-        });
-
-        echo.connector.pusher.connection.bind("error", (err) => {
-            console.error("[Reverb] ❌ Error de conexión:", err);
-        });
-
-        echo.private(`notifications.${userId}`)
-            .listen(".create", () => {
-                loadNotifications();
-                setToast("Tienes una nueva notificación de intercambio de guardia");
-                setTimeout(() => setToast(null), 5000);
-            });
-
-        return () => {
-            echo.leave(`notifications.${userId}`);
-            echo.disconnect();
-        };
-    }, [userId, loadNotifications]);
-
-    // Redirección forzada para el tutorial global
     useEffect(() => {
+        if (!isAdmin) return;
+
         const globalDone = localStorage.getItem("global_tutorial_done");
+        if (globalDone) return;
 
-        if (!globalDone) {
-            const phase = localStorage.getItem("tutorial_phase");
-            const pathname = location.pathname;
+        const phase = localStorage.getItem("tutorial_phase");
+        const pathname = location.pathname;
 
-            if (!phase) {
-                if (pathname !== "/usuarios") {
-                    navigate("/usuarios");
-                }
-            } else if (phase === "PHASE_GUARDS") {
-                if (pathname !== "/guardias") {
-                    navigate("/guardias");
-                }
-            } else if (phase === "PHASE_FICHAJES") {
-                if (pathname !== "/fichajes") {
-                    navigate("/fichajes");
-                }
-            } else if (phase === "PHASE_MIS_GUARDIAS") {
-                if (pathname !== "/mis-guardias") {
-                    navigate("/mis-guardias");
-                }
-            } else if (phase === "PHASE_HOME") {
-                if (pathname !== "/home") {
-                    navigate("/home");
-                }
+        if (!phase) {
+            if (pathname !== "/usuarios") {
+                navigate("/usuarios");
+            }
+        } else if (phase === "PHASE_GUARDS") {
+            if (pathname !== "/guardias") {
+                navigate("/guardias");
+            }
+        } else if (phase === "PHASE_FICHAJES") {
+            if (pathname !== "/fichajes") {
+                navigate("/fichajes");
+            }
+        } else if (phase === "PHASE_MIS_GUARDIAS") {
+            if (pathname !== "/mis-guardias") {
+                navigate("/mis-guardias");
+            }
+        } else if (phase === "PHASE_HOME") {
+            if (pathname !== "/home") {
+                navigate("/home");
             }
         }
-    }, [location.pathname, navigate]);
+    }, [location.pathname, navigate, isAdmin]);
 
     function logout() {
         localStorage.removeItem("token");

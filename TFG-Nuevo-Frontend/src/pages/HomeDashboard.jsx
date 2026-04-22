@@ -453,35 +453,35 @@ export default function HomeDashboard() {
         setEventsLoading(true);
         setEventsError("");
 
-        try {
-            const data = await callGetDuties(start, end, debouncedName);
+        const [dutiesResult, metaResult] = await Promise.allSettled([
+            callGetDuties(start, end, debouncedName),
+            getDutiesLastUpdate({ start, end, name: debouncedName }),
+        ]);
+
+        if (dutiesResult.status === "fulfilled") {
+            const data = dutiesResult.value;
             const arr = Array.isArray(data)
                 ? data
                 : Array.isArray(data?.data)
                   ? data.data
                   : [];
             setEvents(arr.map(mapDutyToEvent));
-
-            try {
-                const meta = await getDutiesLastUpdate({
-                    start,
-                    end,
-                    name: debouncedName,
-                });
-                setLastUpdateISO(meta?.last_update ?? null);
-            } catch (e) {
-                console.error("last-update error:", e);
-                setLastUpdateISO(null);
-            }
-        } catch (e) {
-            console.error(e);
+        } else {
+            console.error(dutiesResult.reason);
             setEventsError(
                 "No se pudieron cargar las guardias desde la base de datos.",
             );
             setEvents([]);
-        } finally {
-            setEventsLoading(false);
         }
+
+        if (metaResult.status === "fulfilled") {
+            setLastUpdateISO(metaResult.value?.last_update ?? null);
+        } else {
+            console.error("last-update error:", metaResult.reason);
+            setLastUpdateISO(null);
+        }
+
+        setEventsLoading(false);
     }, [debouncedName]);
 
     useEffect(() => {

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\NotificationEvent;
 use App\Models\Duty;
 use App\Models\DutySwap;
 use App\Models\Worker;
@@ -116,7 +115,7 @@ class DutySwapController extends Controller
             $dutySwap->id
         );
 
-        // Notify Chief
+        // Notify Chief (jefe de especialidad)
         $chiefWorkerId = $dutySwap->dutyFrom->speciality->id_chief;
         if ($chiefWorkerId) {
             $this->notifyUser(
@@ -229,13 +228,6 @@ class DutySwapController extends Controller
             ]);
         } catch (\Throwable $e) {
             \Log::error('Error creating notification: ' . $e->getMessage());
-            return;
-        }
-
-        try {
-            event(new NotificationEvent($user));
-        } catch (\Throwable $e) {
-            \Log::error('Error broadcasting NotificationEvent: ' . $e->getMessage());
         }
     }
 }
