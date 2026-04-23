@@ -11,6 +11,37 @@ export default function Home() {
         setIsLoggedIn(!!token);
     }, []);
 
+
+    const descargarPlantillas =async () => {
+        const zip = new JSZip()
+
+        const carpeta = zip.folder('excels')
+        const archivos = {
+            'Plantilla_facultativos.xlsx': 'excels/LISTADO_FACULTATIVOS_PLANTILLA.xlsx',
+            'Plantilla_mes_especialidad.xlsx': 'excels/PLANTILLA_MES.xlsx'
+        }
+
+        try{
+            for(const [nombreArchivo, rutaArchivo] of Object.entries(archivos)){
+                const response = await fetch(rutaArchivo)
+                
+                if(!response.ok) throw new Error(`Error al descargar ${nombreArchivo}`)
+
+                const blob = await response.blob()
+                carpeta.file(nombreArchivo, blob)
+            }
+
+            const blobZip = await zip.generateAsync({
+                type:"blob",
+                compression: "DEFLATE",
+            })
+
+            saveAs(blobZip, "plantillas.zip")
+        }catch(error){
+            console.error("error al descargar los archivos", error)
+        }
+    }
+
     return (
         <div className="homeContainer">
             {/* Navbar */}
@@ -115,7 +146,7 @@ export default function Home() {
                                 Guía paso a paso directamente donde necesitas, con explicaciones contextuales 
                                 y demostraciones en tiempo real. Acceso completo desde tu cuenta.
                             </p>
-                            <button className="homeResourceButton">Acceder a Tutorial</button>
+                            <button className="homeResourceButton" >Acceder a Tutorial</button>
                         </div>
 
                         {/* Excel Template Resource */}
@@ -129,7 +160,7 @@ export default function Home() {
                                 Perfecta para transiciones o respaldos. Fácilmente importable a GuardiApp 
                                 cuando estés listo para migrar.
                             </p>
-                            <button className="homeResourceButton">Descargar</button>
+                            <button className="homeResourceButton" onClick={descargarPlantillas}>Descargar</button>
                         </div>
                     </div>
                 </div>

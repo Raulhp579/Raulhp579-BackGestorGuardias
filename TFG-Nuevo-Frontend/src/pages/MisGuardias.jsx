@@ -193,18 +193,18 @@ export default function MisGuardias() {
             // Re-init map if container exists
             setTimeout(() => {
                 if (mapContainerRef.current && !mapRef.current) {
-                    const map = L.map(mapContainerRef.current).setView([37.876, -4.814], 16);
+                    const map = L.map(mapContainerRef.current).setView([37.8802566, -4.8040947], 16);
 
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         maxZoom: 19,
                         attribution: '© OpenStreetMap'
                     }).addTo(map);
 
-                    L.circle([37.876, -4.814], {
+                    L.circle([37.8802566, -4.8040947], {
                         color: '#3b82f6',
                         fillColor: '#3b82f6',
                         fillOpacity: 0.2,
-                        radius: 200
+                        radius: 300
                     }).addTo(map).bindPopup("MEDAC Arena (Área de Fichaje)").openPopup();
 
                     mapRef.current = map;

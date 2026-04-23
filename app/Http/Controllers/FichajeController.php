@@ -159,9 +159,9 @@ class FichajeController extends Controller
                 $duty->save();
             }
 
-            // Validación de Ubicación (Medac Arena Córdoba: 37.876, -4.814)
-            $medacLat = 37.876;
-            $medacLng = -4.814;
+            // Validación de Ubicación (Medac Arena Córdoba: 37.8802566, -4.8040947)
+            $medacLat = 37.8802566;
+            $medacLng = -4.8040947;
             $userLat = $request->latitude;
             $userLng = $request->longitude;
 
@@ -183,7 +183,7 @@ class FichajeController extends Controller
             $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) + cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
             $distance = $angle * $earthRadius;
 
-            if ($distance > 20000) {
+            if ($distance > 300) {
                 return response()->json([
                     "message" => "Estás demasiado lejos del Medac Arena para fichar. Distancia aproximada: " . round($distance) . " metros.",
                 ], 422);
