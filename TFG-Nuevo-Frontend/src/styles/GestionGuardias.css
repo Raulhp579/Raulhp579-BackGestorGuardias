@@ -1,206 +1,271 @@
+/* ===================================================================
+   GestionGuardias.css — SaaS Premium Dashboard
+   =================================================================== */
+
 :root {
-    --primary: #007041;
-    --secondary: #2d453c;
+    --primary: #006236;
+    --primaryHover: #004d2a;
+    --primaryLight: #DCFCE7;
 
-    --bg: #f3f4f6;
-    --card: #ffffff;
-    --border: #e5e7eb;
+    --bg: #F1F5F9; /* slate-100 */
+    --bg-50: #F8FAFC; /* slate-50 */
+    --card: #FFFFFF;
+    --border: #E2E8F0;
+    --borderLight: #F1F5F9;
 
-    --text: #111827;
-    --muted: #6b7280;
+    --text: #0F172A;
+    --muted: #64748B;
+    --subtle: #94A3B8;
 
-    --shadow-soft: 0 6px 12px rgba(0, 0, 0, 0.06);
-    --r: 14px;
+    --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06);
+    --r: 16px;
 }
 
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-html,
-body {
+html, body {
     height: 100%;
     margin: 0;
     background: var(--bg);
-    font-family:
-        Inter,
-        system-ui,
-        -apple-system,
-        Segoe UI,
-        Arial,
-        sans-serif;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
 }
 
+/* ===== PAGE SHELL ===== */
 .ggPage {
-    min-height: 100vh;
+    width: 100%;
+    min-height: calc(100vh - 64px);
     background: var(--bg);
     color: var(--text);
-}
-
-/* Main */
-.ggMain {
-    width: 96%;
-    max-width: 1600px;
-    margin: 0 auto;
-    padding: 24px 32px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
 }
 
-/* ===== TABLA CARD CONTAINER ===== */
+/* Full width: ocupa todo el ancho disponible con padding uniforme */
+.ggMain {
+    width: 100%;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0; /* Permite que los hijos no desborden */
+}
+
+/* ===== CARD CONTAINER (envuelve TODO) ===== */
 .ggTableCard {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 16px;
-    box-shadow: var(--shadow-soft);
-    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08); /* shadow-lg */
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
+/* ===== TOP ROW: Título + Contador | Botones ===== */
 .ggTableCardTop {
-    padding: 8px 16px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-    background: linear-gradient(
-        to bottom,
-        rgba(0, 112, 65, 0.1),
-        rgba(255, 255, 255, 0)
-    );
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--borderLight);
     flex-wrap: wrap;
 }
 
+.ggTableTitleGroup {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+}
+
 .ggTableCardTitle {
-    font-weight: 900;
+    font-weight: 800;
     color: var(--text);
-    font-size: 16px;
+    font-size: 20px;
     margin: 0;
+    letter-spacing: -0.02em;
 }
 
 .ggTableCount {
-    font-weight: 800;
-    color: rgba(17, 24, 39, 0.65);
-    background: rgba(0, 112, 65, 0.1);
-    border: 1px solid rgba(0, 112, 65, 0.2);
-    padding: 6px 12px;
+    font-weight: 600;
+    color: var(--muted);
+    background: var(--borderLight);
+    padding: 5px 14px;
     border-radius: 999px;
     font-size: 13px;
 }
 
-/* Botones de acción */
+/* ===== BOTONES DE ACCIÓN ===== */
 .ggButtonsContainer {
     display: flex;
-    gap: 12px;
-    padding: 8px 16px;
-    border-bottom: 1px solid var(--border);
-    flex-wrap: nowrap;
+    gap: 10px;
     align-items: center;
-    justify-content: space-around;
-    overflow-x: auto;
+    flex-wrap: wrap;
 }
 
-.ggButtonsContainer .ggCtaBtn {
-    width: auto;
-    flex: 1;
-    padding: 8px 12px;
-    font-size: 12px;
+.ggCtaBtn {
+    padding: 9px 16px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    transition: all 160ms ease;
     white-space: nowrap;
+    line-height: 1;
+}
+
+.ggCtaBtn .material-icons {
+    font-size: 18px;
+}
+
+/* Primary: sólo "+ Crear guardia" */
+.ggCtaBtn.primary {
+    background: var(--primary);
+    color: #fff;
+    border: 1px solid var(--primary);
+    box-shadow: 0 4px 12px rgba(0, 98, 54, 0.2);
+}
+
+.ggCtaBtn.primary:hover:not(:disabled) {
+    background: var(--primaryHover);
+    border-color: var(--primaryHover);
+    box-shadow: 0 6px 20px rgba(0, 98, 54, 0.3);
+    transform: translateY(-1px);
+}
+
+/* Outline: gris discreto, sin borde verde */
+.ggCtaBtn.outline {
+    background: #fff;
+    color: #334155;
+    border: 1px solid var(--border);
+}
+
+.ggCtaBtn.outline .material-icons {
+    color: var(--subtle);
+}
+
+.ggCtaBtn.outline:hover:not(:disabled) {
+    background: var(--bg);
+    color: var(--text);
+}
+
+.ggCtaBtn.outline:hover:not(:disabled) .material-icons {
+    color: var(--muted);
+}
+
+/* PDF: mismo estilo gris que los demás outline */
+.ggCtaBtn.outline.pdfBtn {
+    /* hereda outline gris */
+}
+
+.ggCtaBtn.outline.pdfBtn:hover:not(:disabled) {
+    background: var(--bg);
+    color: var(--text);
+}
+
+.ggCtaBtn.outline.pdfBtn:hover:not(:disabled) .material-icons {
+    color: var(--muted);
+}
+
+.ggCtaBtn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* ===== FILTROS: Toolbar compacta ===== */
+.ggFilterContainer {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 28px;
+    border-bottom: 1px solid var(--borderLight);
+}
+
+.ggFilterToolbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    background: var(--bg-50);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 16px;
+}
+
+/* Grupo de filtro individual */
+.ggFilterGroup {
+    display: flex;
+    align-items: center;
+    position: relative;
+    gap: 0;
+}
+
+/* El campo de búsqueda principal ocupa todo el espacio disponible */
+.ggFilterGroup.ggFilterSearch {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Los campos de fecha y ordenar tienen ancho fijo */
+.ggFilterGroup.ggFilterDate {
+    flex: 0 0 auto;
+    width: 170px;
+}
+
+.ggFilterGroup.ggFilterSort {
+    flex: 0 0 auto;
+}
+
+/* Separador vertical entre campos */
+.ggFilterSep {
+    width: 1px;
+    height: 24px;
+    background: var(--border);
     flex-shrink: 0;
 }
 
-.ggButtonsContainer .ggCtaBtn .material-icons {
-    font-size: 18px;
+/* Icono dentro del input */
+.ggFilterIcon {
+    color: var(--subtle);
+    font-size: 20px;
+    flex-shrink: 0;
+    margin-right: 8px;
+    pointer-events: none;
 }
 
-.ggCtaPdfBtn {
-    background: #b91c1c !important;
-}
-
-.ggCtaPdfBtn:hover:not(:disabled) {
-    background: #991b1b !important;
-    box-shadow: 0 8px 16px rgba(185, 28, 28, 0.25) !important;
-}
-
-/* Search Input Container */
-.ggFilterContainer {
-    display: flex;
-    gap: 20px;
-    padding: 12px 16px;
-    background: var(--card);
-    border-bottom: 1px solid var(--border);
-    flex-wrap: wrap;
-    align-items: flex-start;
-}
-
-.ggFilterGroup {
-    flex: 1;
-    min-width: 220px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    position: relative;
-}
-
-.ggFilterLabel {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.ggFilterLabel .material-icons {
-    font-size: 18px;
-    color: var(--primary);
-}
-
+/* Input limpio sin bordes propios (el borde es del toolbar) */
 .ggSearchInput {
-    flex: 1;
-    border: 1px solid var(--border);
+    width: 100%;
+    border: none;
     outline: none;
     background: transparent;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--text);
     font-family: inherit;
-    min-width: 0;
-    padding: 8px 10px;
-    border-radius: 8px;
-    transition: all 200ms ease;
+    padding: 4px 0;
 }
 
 .ggSearchInput:focus {
-    border-color: var(--primary);
-    background: rgba(0, 112, 65, 0.02);
-    box-shadow: 0 0 0 3px rgba(0, 112, 65, 0.08);
+    /* sin box-shadow individual, el toolbar ya tiene borde */
 }
 
 select.ggSearchInput {
-    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%239CA3AF' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2394A3B8' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 10px center;
-    padding-right: 30px;
+    background-position: right 4px center;
+    padding-right: 20px;
     appearance: none;
-}
-
-.ggFilterGroup {
-    position: relative;
-}
-
-.ggFilterGroup .ggSearchClear {
-    position: absolute;
-    right: 8px;
-    top: 30px;
+    cursor: pointer;
 }
 
 .ggSearchInput::placeholder {
-    color: var(--muted);
+    color: var(--subtle);
 }
 
 .ggSearchClear {
@@ -211,8 +276,8 @@ select.ggSearchInput {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--muted);
-    transition: color 200ms ease;
+    color: var(--subtle);
+    transition: color 150ms ease;
     flex-shrink: 0;
 }
 
@@ -221,40 +286,149 @@ select.ggSearchInput {
 }
 
 .ggSearchClear .material-icons {
-    font-size: 18px;
+    font-size: 16px;
 }
 
-/* wrapper para scroll horizontal en móvil */
+/* Botón de dirección de orden */
+.ggSortDirBtn {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 4px 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--muted);
+    border-radius: 6px;
+    transition: all 150ms ease;
+    display: flex;
+    align-items: center;
+}
+
+.ggSortDirBtn:hover {
+    background: #E2E8F0;
+    color: var(--text);
+}
+
+/* ===== DROPDOWN PERSONALIZADO ===== */
+.ggDropdownWrap {
+    position: relative;
+    display: inline-flex;
+}
+
+.ggDropdownTrigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    color: #334155;
+    border-radius: 8px;
+    transition: all 150ms ease;
+    white-space: nowrap;
+}
+
+.ggDropdownTrigger:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.ggDropdownChevron {
+    font-size: 18px !important;
+    color: var(--subtle);
+}
+
+.ggDropdownOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background: transparent;
+}
+
+.ggDropdownMenu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 50;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+    min-width: 130px;
+    animation: ggDropIn 120ms ease;
+}
+
+@keyframes ggDropIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.ggDropdownItem {
+    all: unset;
+    box-sizing: border-box;
+    width: 100%;
+    display: block;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    cursor: pointer;
+    text-align: left;
+    transition: background 100ms ease;
+}
+
+.ggDropdownItem:hover {
+    background: #F1F5F9;
+}
+
+.ggDropdownItem.active {
+    color: var(--text);
+    font-weight: 700;
+    background: #F1F5F9;
+}
+
+/* Ocultar labels (ahora usamos placeholders) */
+.ggFilterLabel {
+    display: none;
+}
+
+/* ===== TABLE WRAPPER ===== */
 .ggTableWrap {
     width: 100%;
     overflow-x: auto;
 }
 
-/* Estados de la tabla */
+/* Estados */
 .ggTableError {
-    padding: 16px;
-    color: #dc2626;
+    padding: 20px 28px;
+    color: #DC2626;
     font-weight: 700;
-    background: rgba(220, 38, 38, 0.06);
+    background: #FEF2F2;
+    border-bottom: 1px solid #FECACA;
 }
 
 .ggTableEmpty {
     text-align: center;
-    padding: 24px 14px;
-    color: #9ca3af;
-    font-weight: 700;
+    padding: 48px 28px;
+    color: var(--subtle);
+    font-weight: 600;
+    font-size: 15px;
 }
 
-/* ========== ENHANCED TABLE STYLES ========== */
+/* ===== TABLE ===== */
 .ggTable {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    min-width: 800px;
+    min-width: 820px;
     background: #fff;
-    table-layout: fixed;
 }
 
+/* Cabeceras */
 .ggTable thead th {
     position: sticky;
     top: 0;
@@ -263,346 +437,279 @@ select.ggSearchInput {
     font-size: 11px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgba(17, 24, 39, 0.55);
-    background: linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
-    padding: 14px 16px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-    font-weight: 800;
+    color: var(--muted);
+    background: var(--bg-50);
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    font-weight: 700;
+    line-height: 1;
 }
 
+/* Filas */
 .ggTable tbody td {
-    padding: 16px 16px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-    font-size: 13px;
+    padding: 20px;
+    border-bottom: 1px solid var(--borderLight);
+    font-size: 14px;
     color: var(--text);
     vertical-align: middle;
 }
 
+/* Hover filas */
 .ggTable tbody tr {
-    transition: all 0.2s ease;
+    transition: background 160ms ease;
 }
 
 .ggTable tbody tr:hover {
-    background: rgba(0, 112, 65, 0.03);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-    transform: translateY(-1px);
-    z-index: 2;
-    position: relative;
+    background: var(--bg);
 }
 
-/* Micro-animaciones */
+.ggTable tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ===== MICRO-ANIMACIONES ===== */
 .ggRowEnter {
-    animation: slideIn 200ms ease-out;
+    animation: ggSlideIn 220ms ease-out;
 }
 
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-8px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+@keyframes ggSlideIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 .ggRowUpdated {
-    background: rgba(0, 112, 65, 0.08) !important;
+    background: rgba(0, 98, 54, 0.06) !important;
 }
 
 .ggRowExit {
-    animation: slideOut 180ms ease-out forwards;
+    animation: ggSlideOut 200ms ease-out forwards;
 }
 
-@keyframes slideOut {
-    to {
-        opacity: 0;
-        transform: translateX(20px);
-    }
+@keyframes ggSlideOut {
+    to { opacity: 0; transform: translateX(16px); }
 }
 
-/* Skeleton loading */
+/* ===== SKELETON ===== */
 .ggSkRow {
-    background: #f9fafb;
+    background: #FAFBFC;
 }
 
 .ggSk {
-    background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+    background: linear-gradient(90deg, #E5E7EB 25%, #F3F4F6 50%, #E5E7EB 75%);
     background-size: 200% 100%;
-    animation: loading 1.5s infinite;
-    border-radius: 8px;
+    animation: ggLoading 1.5s infinite;
+    border-radius: 6px;
 }
 
-@keyframes loading {
-    0% {
-        background-position: 200% 0;
-    }
-    100% {
-        background-position: -200% 0;
-    }
+@keyframes ggLoading {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }
 
-.ggSk.skMd {
-    height: 14px;
-    width: 80%;
-}
+.ggSk.skMd  { height: 14px; width: 75%; }
+.ggSk.skLg  { height: 14px; width: 100%; }
+.ggSk.skSm  { height: 14px; width: 55%; }
+.ggSk.skXs  { height: 14px; width: 35%; }
+.ggSk.skBtn { height: 30px; width: 100%; }
 
-.ggSk.skLg {
-    height: 14px;
-    width: 100%;
-}
+/* ===== COLUMN WIDTHS (auto-proporcionales) ===== */
+.ggTable { table-layout: auto; }
 
-.ggSk.skSm {
-    height: 14px;
-    width: 60%;
-}
-
-.ggSk.skXs {
-    height: 14px;
-    width: 40%;
-}
-
-.ggSk.skBtn {
-    height: 32px;
-    width: 100%;
-}
-
-/* Columns */
-.ggColDate {
-    width: 180px;
-    padding-left: 18px !important;
-}
-
-.ggColType {
-    width: 130px;
-    text-align: center !important;
-}
-
-.ggColSpec {
-    width: 25%;
-    text-align: left;
-}
-
-.ggColWorker {
-    width: 45%;
-    text-align: left;
-}
-
-.ggColChief {
-    width: 20%;
-    text-align: left;
-}
-
-.ggColActions {
-    width: 180px;
-    text-align: center !important;
-}
+.ggColDate    { white-space: nowrap; }
+.ggColType    { white-space: nowrap; }
+.ggColSpec    { }
+.ggColWorker  { width: 28%; }
+.ggColChief   { }
+.ggColActions { width: 100px; text-align: right !important; }
 
 .ggMono {
-    font-family: "Courier New", monospace;
+    font-family: "JetBrains Mono", "Fira Code", "Courier New", monospace;
     font-size: 13px;
+    color: var(--text);
 }
 
-/* Pills/Tags */
+/* ===== PILLS / BADGES ===== */
 .ggPill {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 900;
-    padding: 4px 8px;
-    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 999px;
     line-height: 1;
+    letter-spacing: 0.02em;
 }
 
-.ggPill.ca {
-    background: rgba(0, 112, 65, 0.1);
-    color: var(--primary);
-}
+.ggPill.ca  { background: #D1FAE5; color: #065F46; }
+.ggPill.pf  { background: #DBEAFE; color: #1E40AF; }
+.ggPill.loc { background: #EDE9FE; color: #5B21B6; }
+.ggPill.other { background: var(--borderLight); color: #475569; }
 
-.ggPill.pf {
-    background: rgba(59, 130, 246, 0.15);
-    color: #1d4ed8;
-}
-
-.ggPill.loc {
-    background: rgba(168, 85, 247, 0.15);
-    color: #6d28d9;
-}
-
-.ggPill.other {
-    background: rgba(107, 114, 128, 0.15);
-    color: #4b5563;
-}
-
-/* Action buttons - Usar RowActions component */
-
-/* Pager */
+/* ===== PAGINACIÓN PREMIUM ===== */
 .ggPager {
-    padding: 12px 16px;
+    padding: 16px 28px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     border-top: 1px solid var(--border);
     background: var(--card);
-    flex-wrap: wrap;
-    gap: 8px;
+    gap: 16px;
 }
 
-.ggPagerBtn {
-    border: 1px solid var(--border);
-    background: var(--card);
-    color: var(--text);
-    padding: 8px 12px;
-    border-radius: 10px;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-    display: flex;
-    align-items: center;
-    gap: 6px;
+.ggPagerInfo {
     font-size: 13px;
+    color: var(--muted);
+    white-space: nowrap;
 }
 
-.ggPagerBtn:hover:not(:disabled) {
-    background: #f9fafb;
-    border-color: var(--primary);
-    color: var(--primary);
+.ggPagerInfo strong {
+    font-weight: 600;
+    color: #334155;
 }
 
-.ggPagerBtn:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-}
-
-.ggPagerBtn .material-icons-outlined {
-    font-size: 18px;
-}
-
-.ggPagerNums {
+.ggPagerControls {
     display: flex;
-    gap: 4px;
     align-items: center;
+    gap: 4px;
 }
 
-.ggPagerNum {
+/* Botones Anterior / Siguiente: solo icono */
+.ggPagerArrow {
+    width: 36px;
+    height: 36px;
     border: 1px solid var(--border);
     background: var(--card);
+    color: var(--muted);
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 150ms ease;
+}
+
+.ggPagerArrow:hover:not(:disabled) {
+    background: var(--bg);
     color: var(--text);
-    width: 32px;
-    height: 32px;
+    border-color: #CBD5E1;
+}
+
+.ggPagerArrow:disabled {
+    cursor: not-allowed;
+    opacity: 0.35;
+}
+
+.ggPagerArrow .material-icons-outlined {
+    font-size: 20px;
+}
+
+/* Números de página: cuadrados */
+.ggPagerNum {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
     border-radius: 8px;
     cursor: pointer;
     font-weight: 600;
-    font-size: 12px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 150ms ease;
 }
 
-.ggPagerNum:hover:not(:disabled) {
-    border-color: var(--primary);
-    color: var(--primary);
+.ggPagerNum:hover:not(:disabled):not(.active) {
+    background: var(--bg);
+    color: var(--text);
 }
 
 .ggPagerNum.active {
     background: var(--primary);
-    border-color: var(--primary);
     color: #fff;
+    font-weight: 700;
 }
 
 .ggPagerNum:disabled {
     cursor: not-allowed;
-    opacity: 0.5;
+    opacity: 0.35;
 }
 
 .ggPagerEllipsis {
-    color: var(--muted);
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--subtle);
     font-weight: 600;
+    font-size: 13px;
 }
 
-/* CTA Button */
-.ggCtaBtn {
-    width: 100%;
-    background: var(--primary);
-    color: #fff;
-    border: none;
-    padding: 14px 18px;
-    border-radius: 12px;
-    font-weight: 700;
-    font-size: 14px;
-    cursor: pointer;
+/* ===== MODALS — CENTRADO + ANIMACIÓN ===== */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.50);
+    backdrop-filter: blur(6px);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    box-shadow: 0 6px 12px rgba(0, 112, 65, 0.15);
-    transition: all 200ms ease;
-}
-
-.ggCtaBtn:hover:not(:disabled) {
-    background: #00592e;
-    box-shadow: 0 8px 16px rgba(0, 112, 65, 0.25);
-    transform: translateY(-2px);
-}
-
-.ggCtaBtn:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-}
-
-.ggCtaBtn .material-icons {
-    font-size: 22px;
-}
-
-/* Modals */
-.modalOverlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
     z-index: 999;
-    padding: 16px;
+    padding: 24px;
     overflow-y: auto;
-    scrollbar-width: thin;
 }
 
+/* Ya no necesitamos .centered, TODOS se centran */
 .modalOverlay.centered {
     align-items: center;
 }
 
+/* La tarjeta del modal */
 .modalSheet {
     background: var(--card);
-    border-radius: 16px 16px 0 0;
-    max-width: 600px;
-    width: 100%;
-    margin: auto 0 0 0;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-    overflow: visible;
-}
-
-.modalOverlay.centered .modalSheet {
     border-radius: 16px;
+    max-width: 520px;
+    width: 100%;
     margin: auto;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
+    overflow: visible;
+    animation: modalEnter 250ms ease-out;
 }
 
+@keyframes modalEnter {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Body (contenido) */
 .modalBody {
-    padding: 24px;
+    padding: 28px 28px 20px;
 }
 
+/* Header: Icono + Título */
 .modalHeader {
     display: flex;
     align-items: flex-start;
-    gap: 16px;
-    margin-bottom: 16px;
+    gap: 14px;
+    margin-bottom: 22px;
 }
 
+/* Icono circular */
 .modalIcon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    background: rgba(0, 112, 65, 0.12);
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    background: #ECFDF5;
     color: var(--primary);
     display: flex;
     align-items: center;
@@ -611,21 +718,49 @@ select.ggSearchInput {
 }
 
 .modalIcon .material-icons {
-    font-size: 26px;
+    font-size: 22px;
+}
+
+/* Variante danger del icono */
+.modalIcon.danger {
+    background: #FEF2F2;
+    color: #DC2626;
+}
+
+/* Variante PDF (rojo suave) */
+.modalIcon.pdf {
+    background: #FEF2F2;
+    color: #DC2626;
 }
 
 .modalTitle {
-    font-size: 18px;
-    font-weight: 900;
+    font-size: 17px;
+    font-weight: 700;
     color: var(--text);
+    letter-spacing: -0.01em;
+    line-height: 1.2;
 }
 
 .modalSubtitle {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--muted);
-    margin-top: 4px;
+    margin-top: 3px;
+    line-height: 1.4;
 }
 
+/* Error alert dentro del modal */
+.modalAlert {
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    color: #B91C1C;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+/* Form grid */
 .formGrid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -645,97 +780,198 @@ select.ggSearchInput {
     grid-column: 1 / -1;
 }
 
+/* Inputs / Controls */
 .control {
     padding: 10px 12px;
     border: 1px solid var(--border);
     border-radius: 10px;
-    background: var(--card);
+    background: #fff;
     font-size: 13px;
     color: var(--text);
     font-family: inherit;
     outline: none;
     appearance: none;
+    transition: all 180ms ease;
 }
 
 .control:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(0, 112, 65, 0.18);
+    box-shadow: 0 0 0 3px rgba(0, 98, 54, 0.08);
 }
 
 .control:disabled {
-    background: #f9fafb;
-    color: #9ca3af;
+    background: #F1F5F9;
+    color: #94A3B8;
     cursor: not-allowed;
 }
 
 select.control {
-    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%239CA3AF' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2394A3B8' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 10px center;
-    padding-right: 30px;
+    background-position: right 12px center;
+    padding-right: 32px;
 }
 
+/* Drop zone (importar Excel) */
+.dropZone {
+    grid-column: 1 / -1;
+    margin-top: 8px;
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 24px 16px;
+    cursor: pointer;
+    text-align: center;
+    user-select: none;
+    transition: all 180ms ease;
+    background: var(--bg);
+}
+
+.dropZone:hover {
+    border-color: #CBD5E1;
+    background: #F1F5F9;
+}
+
+.dropZone.dragging {
+    border-color: var(--primary);
+    background: #ECFDF5;
+}
+
+.dropZoneTitle {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text);
+}
+
+.dropZoneSub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+}
+
+.dropZoneFile {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--primary);
+    font-weight: 600;
+}
+
+/* Mensaje de estado */
+.importMsg {
+    grid-column: 1 / -1;
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 600;
+}
+
+/* Footer: siempre Cancelar (izq.) → Acción (der.) */
 .modalFooter {
-    padding: 16px 24px;
-    border-top: 1px solid var(--border);
+    padding: 16px 28px;
+    border-top: 1px solid var(--borderLight);
     display: flex;
     gap: 10px;
     justify-content: flex-end;
 }
 
+/* Primary button (verde) */
 .btnPrimary {
-    padding: 10px 18px;
+    padding: 10px 20px;
     background: var(--primary);
     color: #fff;
     border: none;
     border-radius: 10px;
     font-weight: 700;
+    font-size: 13px;
     cursor: pointer;
-    transition: all 150ms ease;
+    transition: all 160ms ease;
 }
 
 .btnPrimary:hover:not(:disabled) {
-    background: #00592e;
-    box-shadow: 0 4px 8px rgba(0, 112, 65, 0.2);
+    background: var(--primaryHover);
+    box-shadow: 0 4px 12px rgba(0, 98, 54, 0.2);
+    transform: translateY(-1px);
 }
 
 .btnPrimary:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
 }
 
-.btnSecondary {
-    padding: 10px 18px;
-    background: var(--card);
-    color: var(--text);
-    border: 1px solid var(--border);
+/* Danger button (rojo — para Eliminar y Generar PDF) */
+.btnDanger {
+    padding: 10px 20px;
+    background: #DC2626;
+    color: #fff;
+    border: none;
     border-radius: 10px;
     font-weight: 700;
+    font-size: 13px;
     cursor: pointer;
-    transition: all 150ms ease;
+    transition: all 160ms ease;
+}
+
+.btnDanger:hover:not(:disabled) {
+    background: #B91C1C;
+    box-shadow: 0 4px 12px rgba(185, 28, 28, 0.2);
+    transform: translateY(-1px);
+}
+
+.btnDanger:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Secondary button (outline gris) */
+.btnSecondary {
+    padding: 10px 20px;
+    background: #fff;
+    color: #334155;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 160ms ease;
 }
 
 .btnSecondary:hover:not(:disabled) {
-    background: #f9fafb;
-    border-color: var(--primary);
-    color: var(--primary);
+    background: var(--bg);
+    border-color: #CBD5E1;
+    color: var(--text);
 }
 
 .btnSecondary:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
 }
 
-/* Responsive */
+/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
     .ggMain {
-        width: 100%;
         padding: 12px 12px 80px;
     }
 
     .ggTableCardTop {
         flex-direction: column;
         align-items: flex-start;
+        padding: 20px 16px;
+    }
+
+    .ggFilterContainer {
+        padding: 12px 16px;
+    }
+
+    .ggFilterToolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .ggFilterSep {
+        display: none;
+    }
+
+    .ggFilterGroup.ggFilterDate {
+        width: 100%;
     }
 
     .formGrid {
@@ -743,16 +979,22 @@ select.control {
     }
 
     .ggTable {
-        min-width: 600px;
+        min-width: 640px;
     }
 
     .ggPager {
         flex-direction: column;
         align-items: stretch;
+        padding: 12px 16px;
+        gap: 12px;
     }
 
-    .ggPagerBtn {
-        width: 100%;
+    .ggPagerInfo {
+        text-align: center;
+    }
+
+    .ggPagerControls {
         justify-content: center;
+        flex-wrap: wrap;
     }
 }

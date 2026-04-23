@@ -1,17 +1,17 @@
 .raWrap {
     display: flex;
-    justify-content: center;
-    gap: 10px;
+    justify-content: flex-end;
+    gap: 8px;
     align-items: center;
 }
 
 .raIconBtn {
-    width: 40px;
-    height: 40px;
-    border: 1px solid rgba(0, 0, 0, .10);
-    background: #fff;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
     cursor: pointer;
-    border-radius: 12px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -28,21 +28,28 @@
 .raIconBtn .material-icons-outlined {
     font-size: 20px;
     line-height: 1;
-    color: rgba(17, 24, 39, .75);
+    color: #94A3B8; /* Gris medio */
+    transition: color 150ms ease;
 }
 
 .raIconBtn:hover:not(:disabled) {
-    background: rgba(0, 112, 65, .06);
-    border-color: rgba(0, 112, 65, .30);
+    background: #F1F5F9;
+}
+
+.raIconBtn:hover:not(:disabled) .material-icons-outlined {
+    color: #0F172A; /* Gris oscuro en hover */
 }
 
 .raIconBtn.raDanger .material-icons-outlined {
-    color: #b91c1c;
+    color: #94A3B8; /* Mismo gris discreto inicialmente */
 }
 
 .raIconBtn.raDanger:hover:not(:disabled) {
-    background: rgba(185, 28, 28, .08);
-    border-color: rgba(185, 28, 28, .25);
+    background: #FEF2F2;
+}
+
+.raIconBtn.raDanger:hover:not(:disabled) .material-icons-outlined {
+    color: #EF4444; /* Rojo al hacer hover */
 }
 
 /* Chief Assignment Styles */
@@ -53,12 +60,10 @@
 
 .raIconBtn.raActive {
     background: rgba(234, 179, 8, .1) !important;
-    border-color: rgba(234, 179, 8, .4) !important;
 }
 
 .raIconBtn.raStar:hover:not(:disabled) {
     background: rgba(234, 179, 8, .2) !important;
-    border-color: rgba(234, 179, 8, .5) !important;
 }
 
 @media (max-width: 560px) {
@@ -67,8 +72,8 @@
     }
 
     .raIconBtn {
-        width: 36px;
-        height: 36px;
+        width: 32px;
+        height: 32px;
     }
 
     .raIconBtn .material-icons-outlined {

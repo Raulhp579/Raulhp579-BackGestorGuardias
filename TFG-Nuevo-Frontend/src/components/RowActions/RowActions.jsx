@@ -11,6 +11,8 @@ export default function RowActions({
     deleteTitle = "Eliminar",
     hideEdit = false,
     hideDelete = false,
+    disableEdit = false,
+    disableDelete = false,
     chiefTitle = "Designar como Jefe de Especialidad",
 }) {
     return (
@@ -20,10 +22,10 @@ export default function RowActions({
                     type="button"
                     className={`raIconBtn raStar ${isChief ? "raActive" : ""}`}
                     onClick={() => onSetChief?.(row)}
-                    disabled={disabled}
                     title={isChief ? "Es Jefe de Especialidad" : chiefTitle}
+                    style={{ opacity: 1, pointerEvents: "auto", cursor: "pointer", color: "#fbbf24" }}
                 >
-                    <span className="material-icons">
+                    <span className="material-icons" style={{ color: "#fbbf24" }}>
                         {isChief ? "star" : "star_border"}
                     </span>
                 </button>
@@ -34,8 +36,9 @@ export default function RowActions({
                     type="button"
                     className="raIconBtn"
                     onClick={() => onEdit?.(row)}
-                    disabled={disabled}
-                    title={editTitle}
+                    disabled={disabled || disableEdit}
+                    title={disableEdit ? "No se puede editar" : editTitle}
+                    style={(disableEdit) ? { opacity: 0.3, pointerEvents: "none", cursor: "not-allowed" } : undefined}
                 >
                     <span className="material-icons-outlined">edit</span>
                 </button>
@@ -46,8 +49,9 @@ export default function RowActions({
                     type="button"
                     className="raIconBtn raDanger"
                     onClick={() => onDelete?.(row)}
-                    disabled={disabled}
-                    title={deleteTitle}
+                    disabled={disabled || disableDelete}
+                    title={disableDelete ? "No se puede eliminar" : deleteTitle}
+                    style={(disableDelete) ? { opacity: 0.3, pointerEvents: "none", cursor: "not-allowed" } : undefined}
                 >
                     <span className="material-icons-outlined">delete</span>
                 </button>

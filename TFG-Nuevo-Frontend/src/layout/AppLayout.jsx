@@ -306,7 +306,6 @@ export default function AppLayout() {
                 <main className="appMain" onClick={() => open && closeMenu()}>
                     <Outlet />
                 </main>
-                <Footer />
             </div>
         </div>
     );

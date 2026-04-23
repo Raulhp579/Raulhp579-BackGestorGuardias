@@ -1,71 +1,83 @@
+/* ===== HEADER: WHITE TOP BAR ===== */
 .cdHeader {
     position: sticky;
     top: 0;
     z-index: 50;
-    background: var(--appPrimary);
-    color: #fff;
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+    background: #FFFFFF;
+    color: #0F172A;
+    flex-shrink: 0;
+    border-bottom: 1px solid #E2E8F0;
 }
 
-
 .cdHeaderInner {
-    padding: 16px 16px;
+    padding: 0 20px;
+    height: 100%;
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
 }
 
+/* ===== LEFT ===== */
 .cdHeaderLeft {
     justify-self: start;
-    min-width: 40px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-/* Botones/iconos */
+/* Hamburger (solo móvil) */
 .cdIconBtn {
     width: 40px;
     height: 40px;
     border: none;
-    border-radius: 999px;
-    background: rgba(63, 46, 46, 0.862);
-    color: #fff;
+    border-radius: 10px;
+    background: transparent;
+    color: #64748B;
     display: grid;
     place-items: center;
     cursor: pointer;
+    transition: all 150ms ease;
 }
 
 .cdIconBtn:hover {
-    background: rgba(255, 1, 1, 0.16);
+    background: #F1F5F9;
+    color: #0F172A;
 }
 
+/* ===== CENTER: GuardiApp brand ===== */
 .cdBrand {
     display: flex;
     align-items: center;
     gap: 10px;
     font-weight: 800;
-    letter-spacing: -0.01em;
+    font-size: 17px;
+    letter-spacing: -0.02em;
 }
 
 .cdBrandCenter {
     justify-self: center;
+    color: #006236;
 }
 
 .cdLogo {
-    width: 24px;
-    height: 24px;
-    fill: currentColor;
+    width: 22px;
+    height: 22px;
+    fill: #006236;
 }
 
+/* ===== RIGHT: Notificaciones + Avatar ===== */
 .cdHeaderRight {
     justify-self: end;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 
 .cdNotifBtn .material-icons-outlined {
-    color: #fff;
+    color: #94A3B8;
     font-size: 22px;
     line-height: 1;
+    transition: color 150ms ease;
     font-variation-settings:
         "FILL" 0,
         "wght" 400,
@@ -73,40 +85,36 @@
         "opsz" 24;
 }
 
-.cdNotifBtn .material-icons-outlined:hover {
-    color: #ffffffc8;
+.cdNotifBtn:hover .material-icons-outlined {
+    color: #0F172A;
 }
 
-/* Avatar */
+/* ===== Avatar ===== */
 .cdAvatarWrap {
     position: relative;
 }
 
 .cdAvatarBtn {
-    width: 44px;
-    height: 44px;
-    min-width: 44px;
-    min-height: 44px;
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
     border-radius: 50%;
-    border: 3px solid rgba(255, 255, 255, 0.85);
-    background: rgba(255, 255, 255, 0.15);
-    color: #fff;
+    border: 1px solid #E2E8F0;
+    background: #F1F5F9;
+    color: #334155;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     overflow: hidden;
     padding: 0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
+    transition: all 0.2s ease;
 }
 
 .cdAvatarBtn:hover {
-    background: rgba(255, 255, 255, 0.25);
-    transform: scale(1.05);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    background: #E2E8F0;
+    transform: scale(1.04);
 }
 
 .cdAvatarImg {
@@ -118,9 +126,14 @@
 }
 
 .cdAvatarInitials {
-    font-weight: 900;
-    font-size: 14px;
+    font-weight: 800;
+    font-size: 13px;
     letter-spacing: -0.02em;
+    color: #334155;
+}
+
+.cdAvatarPersonIcon {
+    font-size: 22px;
 }
 
 /* En desktop NO hace falta hamburguesa (porque sidebar está visible) */
@@ -130,20 +143,23 @@
     }
 }
 
-/* ===== FIX: Aislar estilos del menú del avatar (evitar CSS global de buttons) ===== */
-
+/* ===== MENÚ DESPLEGABLE DEL AVATAR ===== */
 .cdAvatarWrap .cdMenu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    z-index: 200;
     background: #fff !important;
-    border: 1.5px solid rgba(0, 0, 0, 0.08) !important;
-    border-radius: 14px !important;
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45) !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12) !important;
     overflow: hidden !important;
     width: 240px !important;
 }
 
 .cdAvatarWrap .cdMenuHeader {
     padding: 14px 14px 12px !important;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+    border-bottom: 1px solid #F1F5F9 !important;
     background: #fff !important;
 }
 
@@ -154,26 +170,26 @@
 }
 
 .cdMenuAvatar {
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #2f5d4e;
+    border: 2px solid #006236;
     flex-shrink: 0;
 }
 
 .cdMenuAvatarInitials {
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-    border: 2px solid #2f5d4e;
+    background: linear-gradient(135deg, #DCFCE7 0%, #BBF7D0 100%);
+    border: 2px solid #006236;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 900;
-    font-size: 16px;
-    color: #2f5d4e;
+    font-size: 15px;
+    color: #006236;
     flex-shrink: 0;
 }
 
@@ -183,8 +199,8 @@
 }
 
 .cdAvatarWrap .cdMenuName {
-    font-weight: 900 !important;
-    color: #111827 !important;
+    font-weight: 800 !important;
+    color: #0F172A !important;
     font-size: 14px;
     white-space: nowrap;
     overflow: hidden;
@@ -194,66 +210,56 @@
 .cdAvatarWrap .cdMenuEmail {
     margin-top: 2px !important;
     font-size: 12px !important;
-    color: rgba(17, 24, 39, 0.65) !important;
+    color: #64748B !important;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-/* Fuerza los botones del menú a "fila" (y quita bordes/background globales) */
 .cdAvatarWrap .cdMenuItem {
     all: unset;
-    /* resetea estilos globales */
     box-sizing: border-box;
     width: 100%;
-    padding: 10px 12px;
+    padding: 10px 14px;
     display: flex;
     align-items: center;
     gap: 10px;
     cursor: pointer;
-    font-weight: 700;
-    color: #111827;
+    font-weight: 600;
+    font-size: 14px;
+    color: #0F172A;
+    transition: background 120ms ease;
 }
 
 .cdAvatarWrap .cdMenuItem:hover {
-    background: rgba(17, 24, 39, 0.06);
+    background: #F8FAFC;
 }
 
 .cdAvatarWrap .cdMenuItem .material-icons-outlined {
     font-size: 20px;
     line-height: 1;
-    color: rgba(17, 24, 39, 0.75);
+    color: #64748B;
 }
 
 .cdAvatarWrap .cdMenuDivider {
     height: 1px;
-    background: rgba(0, 0, 0, 0.06);
-    margin: 6px 0;
+    background: #F1F5F9;
+    margin: 4px 0;
 }
 
 .cdAvatarWrap .cdMenuItem.danger {
-    color: #b91c1c;
+    color: #DC2626;
+}
+
+.cdAvatarWrap .cdMenuItem.danger .material-icons-outlined {
+    color: #DC2626;
 }
 
 .cdAvatarWrap .cdMenuItem.danger:hover {
-    background: rgba(185, 28, 28, 0.08);
+    background: #FEF2F2;
 }
 
-/* El wrapper del avatar debe ser el "anchor" del menú */
-.cdAvatarWrap {
-    position: relative;
-}
-
-/* El menú debe flotar, NO empujar el header */
-.cdAvatarWrap .cdMenu {
-    position: absolute;
-    top: calc(100% + 10px);
-    right: 0;
-    z-index: 200;
-    /* por encima del header */
-}
-
-/* El overlay debe cubrir toda la pantalla (para cerrar click fuera) */
+/* Overlay para cerrar al hacer click fuera */
 .cdMenuOverlay {
     position: fixed;
     inset: 0;
@@ -261,6 +267,7 @@
     background: transparent;
 }
 
+/* ===== NOTIFICACIONES PANEL ===== */
 .cdNotifWrap {
     position: relative;
     display: inline-flex;
@@ -278,15 +285,14 @@
     height: 18px;
     padding: 0 5px;
     border-radius: 999px;
-    background: #ef4444;
-    /* rojo */
+    background: #EF4444;
     color: #fff;
     font-size: 11px;
     font-weight: 900;
     display: grid;
     place-items: center;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
-    border: 2px solid rgba(255, 255, 255, 0.65);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+    border: 2px solid #fff;
 }
 
 .cdNotifMenu {
@@ -296,10 +302,10 @@
     width: 320px;
     max-width: calc(100vw - 24px);
     background: #fff;
-    color: #111827;
-    border-radius: 14px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+    color: #0F172A;
+    border-radius: 12px;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
     overflow: hidden;
     z-index: 200;
 }
@@ -308,31 +314,36 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 12px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    background: #f9fafb;
+    padding: 12px 14px;
+    border-bottom: 1px solid #F1F5F9;
+    background: #F8FAFC;
 }
 
 .cdNotifTitle {
-    font-weight: 900;
+    font-weight: 800;
+    font-size: 14px;
 }
 
 .cdNotifClear {
     border: none;
     background: transparent;
     cursor: pointer;
-    font-weight: 800;
-    color: rgba(17, 24, 39, 0.7);
+    font-weight: 600;
+    font-size: 13px;
+    color: #64748B;
+    transition: color 150ms ease;
 }
 
 .cdNotifClear:hover {
-    color: rgba(17, 24, 39, 0.95);
+    color: #0F172A;
 }
 
 .cdNotifEmpty {
-    padding: 14px 12px;
-    color: rgba(17, 24, 39, 0.55);
-    font-weight: 700;
+    padding: 20px 14px;
+    color: #94A3B8;
+    font-weight: 600;
+    text-align: center;
+    font-size: 14px;
 }
 
 .cdNotifList {
@@ -341,8 +352,13 @@
 }
 
 .cdNotifItem {
-    padding: 12px 12px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    padding: 12px 14px;
+    border-bottom: 1px solid #F1F5F9;
+    transition: background 120ms ease;
+}
+
+.cdNotifItem:hover {
+    background: #F8FAFC;
 }
 
 .cdNotifItem:last-child {
@@ -350,12 +366,13 @@
 }
 
 .cdNotifText {
-    font-weight: 800;
+    font-weight: 600;
     font-size: 13px;
+    color: #0F172A;
 }
 
 .cdNotifTime {
     margin-top: 4px;
     font-size: 12px;
-    color: rgba(17, 24, 39, 0.55);
+    color: #94A3B8;
 }

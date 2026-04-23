@@ -3,7 +3,8 @@
     "allow": [
       "Bash(curl -sIk https://raulhp579-backgestorguardias.test/app/assets/index-PkFFu4Q2.js)",
       "Bash(php artisan *)",
-      "Bash(php -l app/Http/Controllers/DutySwapController.php)"
+      "Bash(php -l app/Http/Controllers/DutySwapController.php)",
+      "Bash(node *)"
     ]
   }
 }

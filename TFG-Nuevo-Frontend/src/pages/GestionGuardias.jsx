@@ -33,6 +33,7 @@ export default function GestionGuardias() {
     const [searchDate, setSearchDate] = useState(""); // Filtro por fecha
     const [sortBy, setSortBy] = useState("date"); // Ordenar por: date o type
     const [sortOrder, setSortOrder] = useState("desc"); // asc o desc
+    const [sortDropOpen, setSortDropOpen] = useState(false);
 
     // admin + datos auxiliares
     const [isAdmin, setIsAdmin] = useState(false);
@@ -782,178 +783,179 @@ export default function GestionGuardias() {
             <main className="ggMain">
                 <div className="ggTableCard">
                     <div className="ggTableCardTop">
-                        <div>
+                        <div className="ggTableTitleGroup">
                             <h2 className="ggTableCardTitle">
                                 Gestión de Guardias
                             </h2>
+                            <div className="ggTableCount">
+                                {loading
+                                    ? "Cargando..."
+                                    : `${filteredGuardias.length}`}{" "}
+                                registros
+                            </div>
                         </div>
-                        <div className="ggTableCount">
-                            {loading
-                                ? "Cargando..."
-                                : `${filteredGuardias.length}`}{" "}
-                            registros
-                        </div>
-                    </div>
 
-                    {isAdmin && (
-                        <div className="ggButtonsContainer">
-                            <button
-                                className="ggCtaBtn tour-create-guard"
-                                type="button"
-                                onClick={handleCreateGuardia}
-                                disabled={loading}
-                            >
-                                <span className="material-icons">
-                                    add_circle_outline
-                                </span>
-                                <span>Crear guardia</span>
-                            </button>
-                            <button
-                                className="ggCtaBtn tour-assign-chief"
-                                type="button"
-                                onClick={openAssignModal}
-                                disabled={loading}
-                            >
-                                <span className="material-icons">
-                                    supervised_user_circle
-                                </span>
-                                <span>Asignar jefe automáticamente</span>
-                            </button>
-                            <button
-                                className="ggCtaBtn ggCtaPdfBtn tour-generate-pdf"
-                                type="button"
-                                onClick={handleGeneratePdf}
-                                disabled={loading}
-                            >
-                                <span className="material-icons">
-                                    file_download
-                                </span>
-                                <span>Generar PDF</span>
-                            </button>
-                            <button
-                                className="ggCtaBtn tour-import-excel"
-                                type="button"
-                                onClick={openImportModal}
-                                disabled={loading}
-                            >
-                                <span className="material-icons">
-                                    table_view
-                                </span>
-                                <span>Importar Excel</span>
-                            </button>
-                        </div>
-                    )}
+                        {isAdmin && (
+                            <div className="ggButtonsContainer">
+                                <button
+                                    className="ggCtaBtn outline tour-assign-chief"
+                                    type="button"
+                                    onClick={openAssignModal}
+                                    disabled={loading}
+                                >
+                                    <span className="material-icons">
+                                        supervised_user_circle
+                                    </span>
+                                    <span>Asignar jefe</span>
+                                </button>
+                                <button
+                                    className="ggCtaBtn outline pdfBtn tour-generate-pdf"
+                                    type="button"
+                                    onClick={handleGeneratePdf}
+                                    disabled={loading}
+                                >
+                                    <span className="material-icons">
+                                        file_download
+                                    </span>
+                                    <span>PDF</span>
+                                </button>
+                                <button
+                                    className="ggCtaBtn outline tour-import-excel"
+                                    type="button"
+                                    onClick={openImportModal}
+                                    disabled={loading}
+                                >
+                                    <span className="material-icons">
+                                        table_view
+                                    </span>
+                                    <span>Excel</span>
+                                </button>
+                                <button
+                                    className="ggCtaBtn primary tour-create-guard"
+                                    type="button"
+                                    onClick={handleCreateGuardia}
+                                    disabled={loading}
+                                >
+                                    <span className="material-icons">
+                                        add_circle_outline
+                                    </span>
+                                    <span>Crear guardia</span>
+                                </button>
+                            </div>
+                        )}
+                    </div>
 
                     {loadError && (
                         <div className="ggTableError">{loadError}</div>
                     )}
 
                     <div className="ggFilterContainer">
-                        <div className="ggFilterGroup">
-                            <label className="ggFilterLabel">
-                                <span className="material-icons">search</span>
-                                Nombre
-                            </label>
-                            <input
-                                type="text"
-                                className="ggSearchInput tour-search-name"
-                                placeholder="Buscar por nombre..."
-                                value={searchChief}
-                                onChange={(e) => {
-                                    setSearchChief(e.target.value);
-                                    setPage(1);
-                                }}
-                            />
-                            {searchChief && (
-                                <button
-                                    className="ggSearchClear"
-                                    onClick={() => {
-                                        setSearchChief("");
+                        <div className="ggFilterToolbar">
+                            <div className="ggFilterGroup ggFilterSearch">
+                                <span className="material-icons ggFilterIcon">search</span>
+                                <input
+                                    type="text"
+                                    className="ggSearchInput tour-search-name"
+                                    placeholder="Buscar por nombre de trabajador..."
+                                    value={searchChief}
+                                    onChange={(e) => {
+                                        setSearchChief(e.target.value);
                                         setPage(1);
                                     }}
-                                    title="Limpiar búsqueda"
-                                >
-                                    <span className="material-icons">
-                                        close
-                                    </span>
-                                </button>
-                            )}
-                        </div>
+                                />
+                                {searchChief && (
+                                    <button
+                                        className="ggSearchClear"
+                                        onClick={() => {
+                                            setSearchChief("");
+                                            setPage(1);
+                                        }}
+                                        title="Limpiar búsqueda"
+                                    >
+                                        <span className="material-icons">close</span>
+                                    </button>
+                                )}
+                            </div>
 
-                        <div className="ggFilterGroup">
-                            <label className="ggFilterLabel">
-                                <span className="material-icons">event</span>
-                                Fecha
-                            </label>
-                            <input
-                                type="date"
-                                className="ggSearchInput tour-search-date"
-                                value={searchDate}
-                                onChange={(e) => {
-                                    setSearchDate(e.target.value);
-                                    setPage(1);
-                                }}
-                            />
-                            {searchDate && (
-                                <button
-                                    className="ggSearchClear"
-                                    onClick={() => {
-                                        setSearchDate("");
+                            <div className="ggFilterSep" />
+
+                            <div className="ggFilterGroup ggFilterDate">
+                                <span className="material-icons ggFilterIcon">event</span>
+                                <input
+                                    type="date"
+                                    className="ggSearchInput tour-search-date"
+                                    value={searchDate}
+                                    onChange={(e) => {
+                                        setSearchDate(e.target.value);
                                         setPage(1);
                                     }}
-                                    title="Limpiar búsqueda"
-                                >
-                                    <span className="material-icons">
-                                        close
-                                    </span>
-                                </button>
-                            )}
-                        </div>
+                                />
+                                {searchDate && (
+                                    <button
+                                        className="ggSearchClear"
+                                        onClick={() => {
+                                            setSearchDate("");
+                                            setPage(1);
+                                        }}
+                                        title="Limpiar fecha"
+                                    >
+                                        <span className="material-icons">close</span>
+                                    </button>
+                                )}
+                            </div>
 
-                        <div className="ggFilterGroup">
-                            <label className="ggFilterLabel">
-                                <span className="material-icons">sort</span>
-                                Ordenar por
-                            </label>
-                            <div
-                                style={{
-                                    display: "flex",
-                                    gap: "6px",
-                                    width: "100%",
-                                }}
-                            >
-                                <select
-                                    className="ggSearchInput"
-                                    value={sortBy}
-                                    onChange={(e) => setSortBy(e.target.value)}
-                                    style={{ flex: 1 }}
-                                >
-                                    <option value="date">Fecha</option>
-                                    <option value="type">Tipo</option>
-                                </select>
+                            <div className="ggFilterSep" />
+
+                            <div className="ggFilterGroup ggFilterSort">
+                                <span className="material-icons ggFilterIcon">sort</span>
+                                <div className="ggDropdownWrap">
+                                    <button
+                                        className="ggDropdownTrigger"
+                                        type="button"
+                                        onClick={() => setSortDropOpen(v => !v)}
+                                    >
+                                        <span>{sortBy === "date" ? "Fecha" : "Tipo"}</span>
+                                        <span className="material-icons ggDropdownChevron">
+                                            {sortDropOpen ? "expand_less" : "expand_more"}
+                                        </span>
+                                    </button>
+                                    {sortDropOpen && (
+                                        <>
+                                            <div
+                                                className="ggDropdownOverlay"
+                                                onClick={() => setSortDropOpen(false)}
+                                            />
+                                            <div className="ggDropdownMenu">
+                                                <button
+                                                    className={`ggDropdownItem ${sortBy === "date" ? "active" : ""}`}
+                                                    type="button"
+                                                    onClick={() => { setSortBy("date"); setSortDropOpen(false); }}
+                                                >
+                                                    Fecha
+                                                </button>
+                                                <button
+                                                    className={`ggDropdownItem ${sortBy === "type" ? "active" : ""}`}
+                                                    type="button"
+                                                    onClick={() => { setSortBy("type"); setSortDropOpen(false); }}
+                                                >
+                                                    Tipo
+                                                </button>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
                                 <button
-                                    className="ggSearchInput"
+                                    className="ggSortDirBtn"
                                     onClick={() =>
                                         setSortOrder(
-                                            sortOrder === "asc"
-                                                ? "desc"
-                                                : "asc",
+                                            sortOrder === "asc" ? "desc" : "asc",
                                         )
                                     }
                                     title={`Ordenado ${sortOrder === "asc" ? "ascendente" : "descendente"}`}
-                                    style={{
-                                        flex: 0.5,
-                                        padding: "8px 12px",
-                                        cursor: "pointer",
-                                        background: "#f3f4f6",
-                                        border: "1px solid #d1d5db",
-                                        borderRadius: "8px",
-                                        fontSize: "14px",
-                                        fontWeight: "600",
-                                        color: "#1f2937",
-                                    }}
                                 >
-                                    {sortOrder === "asc" ? "↑" : "↓"}
+                                    <span className="material-icons" style={{ fontSize: 18 }}>
+                                        {sortOrder === "asc" ? "arrow_upward" : "arrow_downward"}
+                                    </span>
                                 </button>
                             </div>
                         </div>
@@ -1078,27 +1080,29 @@ export default function GestionGuardias() {
                     </div>
 
                     <div className="ggPager">
-                        <button
-                            className="ggPagerBtn"
-                            type="button"
-                            onClick={goPrev}
-                            disabled={page === 1 || loading}
-                        >
-                            <span className="material-icons-outlined">
-                                chevron_left
-                            </span>
-                            Anterior
-                        </button>
+                        <div className="ggPagerInfo">
+                            Mostrando{" "}
+                            <strong>{Math.min((page - 1) * pageSize + 1, filteredGuardias.length)}</strong>
+                            {" "}a{" "}
+                            <strong>{Math.min(page * pageSize, filteredGuardias.length)}</strong>
+                            {" "}de{" "}
+                            <strong>{filteredGuardias.length}</strong> registros
+                        </div>
 
-                        <div className="ggPagerNums" aria-label="Páginas">
+                        <div className="ggPagerControls">
+                            <button
+                                className="ggPagerArrow"
+                                type="button"
+                                onClick={goPrev}
+                                disabled={page === 1 || loading}
+                                aria-label="Anterior"
+                            >
+                                <span className="material-icons-outlined">chevron_left</span>
+                            </button>
+
                             {pageButtons.map((p, idx) =>
                                 p === "..." ? (
-                                    <span
-                                        className="ggPagerEllipsis"
-                                        key={`e-${idx}`}
-                                    >
-                                        …
-                                    </span>
+                                    <span className="ggPagerEllipsis" key={`e-${idx}`}>…</span>
                                 ) : (
                                     <button
                                         key={p}
@@ -1111,104 +1115,55 @@ export default function GestionGuardias() {
                                     </button>
                                 ),
                             )}
-                        </div>
 
-                        <button
-                            className="ggPagerBtn"
-                            type="button"
-                            onClick={goNext}
-                            disabled={page === totalPages || loading}
-                        >
-                            Siguiente
-                            <span className="material-icons-outlined">
-                                chevron_right
-                            </span>
-                        </button>
+                            <button
+                                className="ggPagerArrow"
+                                type="button"
+                                onClick={goNext}
+                                disabled={page === totalPages || loading}
+                                aria-label="Siguiente"
+                            >
+                                <span className="material-icons-outlined">chevron_right</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </main>
 
             {/* MODAL ASIGNAR JEFE */}
             {isAssignOpen && (
-                <div
-                    className="modalOverlay"
-                    role="dialog"
-                    aria-modal="true"
-                    aria-label="Asignar Jefe de Guardia"
-                >
+                <div className="modalOverlay centered" role="dialog" aria-modal="true" aria-label="Asignar Jefe de Guardia">
                     <div className="modalSheet">
                         <div className="modalBody">
                             <div className="modalHeader">
                                 <div className="modalIcon">
-                                    <span className="material-icons">
-                                        admin_panel_settings
-                                    </span>
+                                    <span className="material-icons">admin_panel_settings</span>
                                 </div>
                                 <div>
-                                    <div className="modalTitle">
-                                        Asignar jefe automáticamente
-                                    </div>
-                                    <div className="modalSubtitle">
-                                        Selecciona mes y año para el reparto.
-                                    </div>
+                                    <div className="modalTitle">Asignar jefe automáticamente</div>
+                                    <div className="modalSubtitle">Selecciona mes y año para el reparto.</div>
                                 </div>
                             </div>
-
                             <div className="formGrid">
                                 <label className="label">
                                     Mes
-                                    <Select2
-                                        options={monthOptions}
-                                        value={assignMonth}
-                                        onChange={setAssignMonth}
-                                        disabled={assignLoading}
-                                    />
+                                    <Select2 options={monthOptions} value={assignMonth} onChange={setAssignMonth} disabled={assignLoading} />
                                 </label>
-
                                 <label className="label">
                                     Año
-                                    <Select2
-                                        options={yearOptions}
-                                        value={assignYear}
-                                        onChange={setAssignYear}
-                                        disabled={assignLoading}
-                                    />
+                                    <Select2 options={yearOptions} value={assignYear} onChange={setAssignYear} disabled={assignLoading} />
                                 </label>
-
                                 {assignMsg && (
-                                    <div
-                                        className="label"
-                                        style={{ gridColumn: "1 / -1" }}
-                                    >
-                                        <div
-                                            className="control"
-                                            style={{ background: "#F9FAFB" }}
-                                        >
-                                            {assignMsg}
-                                        </div>
+                                    <div className="label" style={{ gridColumn: "1 / -1" }}>
+                                        <div className="control" style={{ background: "#F9FAFB" }}>{assignMsg}</div>
                                     </div>
                                 )}
                             </div>
                         </div>
-
                         <div className="modalFooter">
-                            <button
-                                className="btnPrimary"
-                                onClick={handleAssignChiefs}
-                                type="button"
-                                disabled={assignLoading}
-                            >
-                                {assignLoading
-                                    ? "Asignando..."
-                                    : "Asignar automáticamente"}
-                            </button>
-                            <button
-                                className="btnSecondary"
-                                onClick={() => setIsAssignOpen(false)}
-                                type="button"
-                                disabled={assignLoading}
-                            >
-                                Cancelar
+                            <button className="btnSecondary" onClick={() => setIsAssignOpen(false)} type="button" disabled={assignLoading}>Cancelar</button>
+                            <button className="btnPrimary" onClick={handleAssignChiefs} type="button" disabled={assignLoading}>
+                                {assignLoading ? "Asignando..." : "Asignar"}
                             </button>
                         </div>
                     </div>
@@ -1217,145 +1172,56 @@ export default function GestionGuardias() {
 
             {/* MODAL IMPORTAR EXCEL */}
             {importOpen && (
-                <div className="modalOverlay" role="dialog" aria-modal="true">
+                <div className="modalOverlay centered" role="dialog" aria-modal="true">
                     <div className="modalSheet">
                         <div className="modalBody">
                             <div className="modalHeader">
                                 <div className="modalIcon">
-                                    <span className="material-icons">
-                                        table_view
-                                    </span>
+                                    <span className="material-icons">table_view</span>
                                 </div>
                                 <div>
-                                    <div className="modalTitle">
-                                        Importar guardias desde Excel
-                                    </div>
-                                    <div className="modalSubtitle">
-                                        Aquí puedes importar las guardias desde
-                                        un archivo Excel. Asegúrate de
-                                        seleccionar el mes, año y especialidad
-                                        correctos.
-                                    </div>
+                                    <div className="modalTitle">Importar guardias desde Excel</div>
+                                    <div className="modalSubtitle">Selecciona el mes, año y especialidad correctos.</div>
                                 </div>
                             </div>
-
                             <div className="formGrid">
-                                <label
-                                    className="label"
-                                    style={{ gridColumn: "1 / -1" }}
-                                >
+                                <label className="label" style={{ gridColumn: "1 / -1" }}>
                                     <span>Especialidad</span>
-
                                     {specialitiesLoading ? (
-                                        <div className="control">
-                                            Cargando especialidades...
-                                        </div>
+                                        <div className="control">Cargando especialidades...</div>
                                     ) : specialitiesError ? (
-                                        <div className="control">
-                                            {specialitiesError}
-                                        </div>
+                                        <div className="control">{specialitiesError}</div>
                                     ) : (
-                                        <Select2
-                                            placeholder="-- Selecciona una especialidad --"
-                                            options={specialityOptions}
-                                            value={idSpeciality}
-                                            onChange={setIdSpeciality}
-                                        />
+                                        <Select2 placeholder="-- Selecciona una especialidad --" options={specialityOptions} value={idSpeciality} onChange={setIdSpeciality} />
                                     )}
                                 </label>
-
                                 <label className="label">
                                     <span>Mes</span>
-                                    <Select2
-                                        options={monthOptions}
-                                        value={importMonth}
-                                        onChange={setImportMonth}
-                                    />
+                                    <Select2 options={monthOptions} value={importMonth} onChange={setImportMonth} />
                                 </label>
-
                                 <label className="label">
                                     <span>Año</span>
-                                    <Select2
-                                        options={yearOptions}
-                                        value={importYear}
-                                        onChange={setImportYear}
-                                    />
+                                    <Select2 options={yearOptions} value={importYear} onChange={setImportYear} />
                                 </label>
-
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                                    style={{ display: "none" }}
-                                    onChange={onPickExcelFile}
-                                />
-
+                                <input ref={fileInputRef} type="file" accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style={{ display: "none" }} onChange={onPickExcelFile} />
                                 <div
+                                    className={`dropZone ${isDragging ? "dragging" : ""}`}
                                     onDragOver={onDragOver}
                                     onDragLeave={onDragLeave}
                                     onDrop={onDrop}
-                                    onClick={() =>
-                                        fileInputRef.current?.click()
-                                    }
-                                    style={{
-                                        gridColumn: "1 / -1",
-                                        marginTop: 12,
-                                        border: `2px dashed ${isDragging ? "#888" : "#ccc"}`,
-                                        borderRadius: 12,
-                                        padding: 16,
-                                        cursor: "pointer",
-                                        textAlign: "center",
-                                        userSelect: "none",
-                                    }}
+                                    onClick={() => fileInputRef.current?.click()}
                                     title="Arrastra Excel o haz clic para seleccionarlo"
                                 >
-                                    <div style={{ fontWeight: 600 }}>
-                                        Arrastra aquí tu Excel (.xls / .xlsx)
-                                    </div>
-                                    <div
-                                        style={{
-                                            marginTop: 6,
-                                            opacity: 0.8,
-                                        }}
-                                    >
-                                        o haz clic para seleccionarlo
-                                    </div>
-
-                                    {excelFile && (
-                                        <div style={{ marginTop: 10 }}>
-                                            Archivo: <b>{excelFile.name}</b>
-                                        </div>
-                                    )}
+                                    <div className="dropZoneTitle">Arrastra aquí tu Excel (.xls / .xlsx)</div>
+                                    <div className="dropZoneSub">o haz clic para seleccionarlo</div>
+                                    {excelFile && <div className="dropZoneFile">Archivo: {excelFile.name}</div>}
                                 </div>
-
-                                {importMsg && (
-                                    <div
-                                        style={{
-                                            marginTop: 12,
-                                            gridColumn: "1 / -1",
-                                        }}
-                                    >
-                                        {importMsg}
-                                    </div>
-                                )}
+                                {importMsg && <div className="importMsg">{importMsg}</div>}
                             </div>
                         </div>
-
                         <div className="modalFooter">
-                            <button
-                                className="btnSecondary"
-                                type="button"
-                                onClick={closeImportModal}
-                            >
-                                Cancelar
-                            </button>
-
-                            <button
-                                className="btnPrimary"
-                                type="button"
-                                disabled={importUploading}
-                                onClick={submitImport}
-                            >
+                            <button className="btnSecondary" type="button" onClick={closeImportModal}>Cancelar</button>
+                            <button className="btnPrimary" type="button" disabled={importUploading} onClick={submitImport}>
                                 {importUploading ? "Subiendo..." : "Importar"}
                             </button>
                         </div>
@@ -1397,17 +1263,7 @@ export default function GestionGuardias() {
                                 </div>
 
                                 {editError && (
-                                    <div
-                                        style={{
-                                            background: "#fef2f2",
-                                            border: "1px solid #fecaca",
-                                            color: "#b91c1c",
-                                            padding: 12,
-                                            borderRadius: 10,
-                                        }}
-                                    >
-                                        {editError}
-                                    </div>
+                                    <div className="modalAlert">{editError}</div>
                                 )}
 
                                 <div className="formGrid">
@@ -1476,31 +1332,9 @@ export default function GestionGuardias() {
                             </div>
 
                             <div className="modalFooter">
-                                <button
-                                    className="btnPrimary"
-                                    type="submit"
-                                    disabled={editSaving}
-                                >
-                                    {editSaving
-                                        ? isCreating
-                                            ? "Creando..."
-                                            : "Guardando..."
-                                        : isCreating
-                                          ? "Crear"
-                                          : "Guardar"}
-                                </button>
-                                <button
-                                    className="btnSecondary"
-                                    type="button"
-                                    onClick={() => {
-                                        setEditOpen(false);
-                                        setEditRowId(null);
-                                        setIsCreating(false);
-                                        setEditError("");
-                                    }}
-                                    disabled={editSaving}
-                                >
-                                    Cancelar
+                                <button className="btnSecondary" type="button" onClick={() => { setEditOpen(false); setEditRowId(null); setIsCreating(false); setEditError(""); }} disabled={editSaving}>Cancelar</button>
+                                <button className="btnPrimary" type="submit" disabled={editSaving}>
+                                    {editSaving ? (isCreating ? "Creando..." : "Guardando...") : (isCreating ? "Crear" : "Guardar")}
                                 </button>
                             </div>
                         </form>
@@ -1510,108 +1344,37 @@ export default function GestionGuardias() {
 
             {/* MODAL BORRAR */}
             {deleteOpen && deleteRow && (
-                <div
-                    className="modalOverlay centered"
-                    role="dialog"
-                    aria-modal="true"
-                    aria-label="Confirmar borrado"
-                >
+                <div className="modalOverlay centered" role="dialog" aria-modal="true" aria-label="Confirmar borrado">
                     <div className="modalSheet">
                         <div className="modalBody">
                             <div className="modalHeader">
-                                <div
-                                    className="modalIcon"
-                                    style={{
-                                        background: "rgba(185, 28, 28, .12)",
-                                        color: "#b91c1c",
-                                    }}
-                                >
-                                    <span className="material-icons">
-                                        delete_forever
-                                    </span>
+                                <div className="modalIcon danger">
+                                    <span className="material-icons">delete_forever</span>
                                 </div>
                                 <div>
-                                    <div className="modalTitle">
-                                        Eliminar guardia
-                                    </div>
-                                    <div className="modalSubtitle">
-                                        Esta acción no se puede deshacer.
-                                    </div>
+                                    <div className="modalTitle">Eliminar guardia</div>
+                                    <div className="modalSubtitle">Esta acción no se puede deshacer.</div>
                                 </div>
                             </div>
-
                             <div className="formGrid">
-                                <div
-                                    className="label"
-                                    style={{ gridColumn: "1 / -1" }}
-                                >
+                                <div className="label" style={{ gridColumn: "1 / -1" }}>
                                     Resumen
-                                    <div
-                                        className="control"
-                                        style={{ background: "#F9FAFB" }}
-                                    >
-                                        <div
-                                            style={{
-                                                display: "flex",
-                                                gap: 10,
-                                                flexWrap: "wrap",
-                                            }}
-                                        >
-                                            <span>
-                                                <b>ID:</b> {deleteRow.id}
-                                            </span>
-                                            <span>
-                                                <b>Fecha:</b> {deleteRow.date}
-                                            </span>
-                                            <span>
-                                                <b>Tipo:</b>{" "}
-                                                {deleteRow.duty_type}
-                                            </span>
-                                            <span>
-                                                <b>Trabajador:</b>{" "}
-                                                {deleteRow.id_worker}
-                                            </span>
+                                    <div className="control" style={{ background: "#F9FAFB" }}>
+                                        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                                            <span><b>ID:</b> {deleteRow.id}</span>
+                                            <span><b>Fecha:</b> {deleteRow.date}</span>
+                                            <span><b>Tipo:</b> {deleteRow.duty_type}</span>
+                                            <span><b>Trabajador:</b> {deleteRow.id_worker}</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-
-                            {deleteError && (
-                                <div
-                                    role="alert"
-                                    style={{
-                                        background: "#fef2f2",
-                                        border: "1px solid #fecaca",
-                                        color: "#b91c1c",
-                                        padding: "10px 14px",
-                                        borderRadius: "8px",
-                                        marginTop: 12,
-                                        fontSize: "14px",
-                                        fontWeight: 500,
-                                    }}
-                                >
-                                    {deleteError}
-                                </div>
-                            )}
+                            {deleteError && <div className="modalAlert" role="alert">{deleteError}</div>}
                         </div>
-
                         <div className="modalFooter">
-                            <button
-                                type="button"
-                                onClick={confirmDelete}
-                                className="btnPrimary"
-                                style={{ background: "#b91c1c" }}
-                                disabled={deleteLoading}
-                            >
+                            <button className="btnSecondary" type="button" onClick={cancelDelete} disabled={deleteLoading}>Cancelar</button>
+                            <button className="btnDanger" type="button" onClick={confirmDelete} disabled={deleteLoading}>
                                 {deleteLoading ? "Eliminando..." : "Eliminar"}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={cancelDelete}
-                                className="btnSecondary"
-                                disabled={deleteLoading}
-                            >
-                                Cancelar
                             </button>
                         </div>
                     </div>
@@ -1620,107 +1383,38 @@ export default function GestionGuardias() {
 
             {/* MODAL GENERAR PDF */}
             {pdfOpen && (
-                <div
-                    className="modalOverlay centered"
-                    role="dialog"
-                    aria-modal="true"
-                    aria-label="Generar PDF"
-                >
+                <div className="modalOverlay centered" role="dialog" aria-modal="true" aria-label="Generar PDF">
                     <div className="modalSheet">
                         <div className="modalBody">
                             <div className="modalHeader">
-                                <div
-                                    className="modalIcon"
-                                    style={{
-                                        background: "rgba(185, 28, 28, .12)",
-                                        color: "#b91c1c",
-                                    }}
-                                >
-                                    <span className="material-icons">
-                                        file_download
-                                    </span>
+                                <div className="modalIcon pdf">
+                                    <span className="material-icons">picture_as_pdf</span>
                                 </div>
                                 <div>
-                                    <div className="modalTitle">
-                                        Generar PDF
-                                    </div>
-                                    <div className="modalSubtitle">
-                                        Selecciona la fecha para generar el PDF
-                                    </div>
+                                    <div className="modalTitle">Generar PDF</div>
+                                    <div className="modalSubtitle">Selecciona la fecha para generar el PDF.</div>
                                 </div>
                             </div>
-
                             <div className="formGrid">
                                 <label className="label">
                                     Día
-                                    <Select2
-                                        options={pdfDayOptions}
-                                        value={pdfDay}
-                                        onChange={setPdfDay}
-                                        disabled={pdfLoading}
-                                    />
+                                    <Select2 options={pdfDayOptions} value={pdfDay} onChange={setPdfDay} disabled={pdfLoading} />
                                 </label>
-
                                 <label className="label">
                                     Mes
-                                    <Select2
-                                        options={pdfMonthOptions}
-                                        value={pdfMonth}
-                                        onChange={setPdfMonth}
-                                        disabled={pdfLoading}
-                                    />
+                                    <Select2 options={pdfMonthOptions} value={pdfMonth} onChange={setPdfMonth} disabled={pdfLoading} />
                                 </label>
-
-                                <label
-                                    className="label"
-                                    style={{ gridColumn: "1 / -1" }}
-                                >
+                                <label className="label" style={{ gridColumn: "1 / -1" }}>
                                     Año
-                                    <Select2
-                                        options={pdfYearOptions}
-                                        value={pdfYear}
-                                        onChange={setPdfYear}
-                                        disabled={pdfLoading}
-                                    />
+                                    <Select2 options={pdfYearOptions} value={pdfYear} onChange={setPdfYear} disabled={pdfLoading} />
                                 </label>
                             </div>
-
-                            {pdfError && (
-                                <div
-                                    role="alert"
-                                    style={{
-                                        background: "#fef2f2",
-                                        border: "1px solid #fecaca",
-                                        color: "#b91c1c",
-                                        padding: "10px 14px",
-                                        borderRadius: "8px",
-                                        marginTop: 12,
-                                        fontSize: "14px",
-                                        fontWeight: 500,
-                                    }}
-                                >
-                                    {pdfError}
-                                </div>
-                            )}
+                            {pdfError && <div className="modalAlert" role="alert">{pdfError}</div>}
                         </div>
-
                         <div className="modalFooter">
-                            <button
-                                type="button"
-                                onClick={confirmGeneratePdf}
-                                className="btnPrimary"
-                                style={{ background: "#b91c1c" }}
-                                disabled={pdfLoading}
-                            >
+                            <button className="btnSecondary" type="button" onClick={cancelPdf} disabled={pdfLoading}>Cancelar</button>
+                            <button className="btnDanger" type="button" onClick={confirmGeneratePdf} disabled={pdfLoading}>
                                 {pdfLoading ? "Generando..." : "Generar PDF"}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={cancelPdf}
-                                className="btnSecondary"
-                                disabled={pdfLoading}
-                            >
-                                Cancelar
                             </button>
                         </div>
                     </div>

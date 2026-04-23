@@ -1,248 +1,33 @@
+/* ============================================================
+   AppLayout.css — Shell principal: Sidebar | Header + Content
+   flex h-screen → sidebar 100% alto, header solo el ancho restante
+   ============================================================ */
+
 :root {
-    --appPrimary: #007041;
-    --appPrimaryHover: #244a3e;
-    --appBg: #F3F4F6;
+    --appPrimary: #006236;
+    --appPrimaryHover: #004d2a;
+    --appBg: #F8FAFC;
     --appSurface: #FFFFFF;
-    --appBorder: #E5E7EB;
-    --appText: #111827;
-    --appMuted: #6B7280;
-
-    --sidebarBg: #2f4f46;
-    /* el verde del sidebar */
-
-
-    /* Para tu cdHeader */
-    --primary: var(--appPrimary);
+    --appBorder: #E2E8F0;
+    --appText: #0F172A;
+    --appMuted: #64748B;
+    --appHeaderH: 64px;
+    --sidebarW: 260px;
 }
 
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-html,
-body {
+html, body {
     height: 100%;
     margin: 0;
     background: var(--appBg);
 }
 
+/* ===== RAÍZ: flex min-h-screen w-full ===== */
 .appShell {
+    display: flex;
     min-height: 100vh;
-    display: flex;
-    background: var(--appBg);
-}
-
-/* Overlay (móvil/tablet) */
-.appOverlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, .45);
-    backdrop-filter: blur(4px);
-    z-index: 55;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity .2s ease;
-}
-
-.appOverlay.show {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-/* ===== SIDEBAR (móvil/tablet por defecto: off-canvas) ===== */
-.appSidebar {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-
-    width: 288px;
-    background: var(--appPrimary);
-    color: #fff;
-
-    transform: translateX(-100%);
-    transition: transform .25s ease;
-    z-index: 65;
-
-    display: flex;
-    flex-direction: column;
-
-    box-shadow: 0 18px 40px rgba(0, 0, 0, .25);
-}
-
-.appSidebar.open {
-    transform: translateX(0);
-}
-
-.appSidebarBrand {
-    padding: 18px 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, .10);
-    position: relative;
-    background: var(--appPrimary);
-}
-
-.appSidebarLogo {
-    width: 32px;
-    height: 32px;
-    fill: currentColor;
-}
-
-.appSidebarTitle {
-    margin: 0;
-    font-size: 16px;
-    line-height: 1.1;
-    font-weight: 900;
-}
-
-/* Botón X: solo se usa en móvil/tablet */
-.closeOnlyMobile {
-    position: absolute;
-    right: 10px;
-}
-
-.appNav {
-    padding: 16px 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    overflow: auto;
-}
-
-.appNavItem {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 14px;
-    border-radius: 12px;
-    color: rgba(255, 255, 255, .82);
-    text-decoration: none;
-    font-weight: 700;
-    background: transparent;
-    border: none;
-    text-align: left;
-    cursor: pointer;
-}
-
-.appNavItem:hover {
-    background: rgba(255, 255, 255, .10);
-    color: #fff;
-}
-
-.appNavItem.active {
-    background: rgba(255, 255, 255, .20);
-    color: #fff;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .10);
-}
-
-.appNavDivider {
-    height: 1px;
-    background: rgba(255, 255, 255, .10);
-    margin: 10px 6px;
-}
-
-.appNavItem.danger {
-    color: rgba(255, 255, 255, .9);
-}
-
-.appNavItem.danger:hover {
-    background: rgba(239, 68, 68, .18);
-}
-
-.appSidebarFooter {
-    margin-top: auto;
-    padding: 14px 16px;
-    border-top: 1px solid rgba(255, 255, 255, .10);
-    font-size: 12px;
-    color: rgba(255, 255, 255, .55);
-    text-align: center;
-}
-
-/* Main */
-.appMain {
-    flex: 1;
     width: 100%;
-}
-
-/* Columna derecha: header arriba + contenido debajo */
-.appBody {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-}
-
-/* ===== DESKTOP: sidebar fijo visible ===== */
-@media (min-width: 1024px) {
-    .appOverlay {
-        display: none !important;
-    }
-
-
-    .appSidebar {
-        position: sticky;
-        top: 0;
-        height: 100vh;
-        overflow: auto;
-        transform: none;
-        transition: none;
-        box-shadow: none;
-    }
-
-    @media (min-width: 1024px) {
-        .appSidebar {
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            transform: none;
-            box-shadow: none;
-        }
-    }
-
-
-
-    .closeOnlyMobile {
-        display: none;
-    }
-
-    .appMain {
-        min-height: 100vh;
-    }
-}
-
-:root {
-    --appPrimary: #007041;
-    --appPrimaryHover: #244a3e;
-    --appBg: #F3F4F6;
-    --appSurface: #FFFFFF;
-    --appBorder: #E5E7EB;
-    --appText: #111827;
-    --appMuted: #6B7280;
-
-    --sidebarBg: #2f4f46;
-    /* el verde del sidebar */
-
-
-    /* Para tu cdHeader */
-    --primary: var(--appPrimary);
-}
-
-* {
-    box-sizing: border-box;
-}
-
-html,
-body {
-    height: 100%;
-    margin: 0;
-    background: var(--appBg);
-}
-
-.appShell {
-    min-height: 100vh;
-    display: flex;
     background: var(--appBg);
 }
 
@@ -263,150 +48,105 @@ body {
     pointer-events: auto;
 }
 
-/* ===== SIDEBAR (móvil/tablet por defecto: off-canvas) ===== */
+/* ===== SIDEBAR: h-full, solo border-right ===== */
 .appSidebar {
+    /* Móvil: off-canvas */
     position: fixed;
     top: 0;
     bottom: 0;
     left: 0;
-
-    width: 288px;
-    background: var(--appPrimary);
-    color: #fff;
-
+    width: var(--sidebarW);
+    height: 100%;
+    background: var(--appSurface);
+    color: var(--appText);
     transform: translateX(-100%);
     transition: transform .25s ease;
     z-index: 65;
-
     display: flex;
     flex-direction: column;
+    flex-shrink: 0;
 
-    box-shadow: 0 18px 40px rgba(0, 0, 0, .25);
+    /* SOLO borde derecho — sin top/bottom */
+    border-right: 1px solid var(--appBorder);
+    border-top: none;
+    border-bottom: none;
 }
 
 .appSidebar.open {
     transform: translateX(0);
 }
 
+/* Brand area en el sidebar */
 .appSidebarBrand {
-    padding: 18px 16px;
+    padding: 0 16px;
     display: flex;
     align-items: center;
     gap: 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, .10);
     position: relative;
-    background: var(--appPrimary);
+    background: var(--appSurface);
+    height: var(--appHeaderH);
+    flex-shrink: 0;
+
+    /* Línea inferior interna del sidebar, NO cruza con header */
+    border-bottom: 1px solid var(--appBorder);
 }
 
 .appSidebarLogo {
-    width: 32px;
-    height: 32px;
-    fill: currentColor;
+    width: 26px;
+    height: 26px;
+    fill: var(--appPrimary);
+    flex-shrink: 0;
 }
 
 .appSidebarTitle {
     margin: 0;
-    font-size: 16px;
-    line-height: 1.1;
-    font-weight: 900;
+    font-size: 14px;
+    line-height: 1.15;
+    font-weight: 800;
+    color: var(--appText);
 }
 
-/* Botón X: solo se usa en móvil/tablet */
-/* .closeOnlyMobile {
-    position: absolute;
-    right: 10px;
-    background-color: #fff;
-    border-radius: 5%;
-    
-} */
-
-/* Botón X (solo móvil/tablet) — PRO */
+/* Botón X (solo móvil) */
 .closeOnlyMobile {
     position: absolute;
-    right: 14px;
+    right: 12px;
     top: 50%;
     transform: translateY(-50%);
-
-    width: 42px;
-    height: 42px;
+    width: 36px;
+    height: 36px;
     border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, .18);
-
-    /* glass + depth */
-    background: rgba(255, 255, 255, .12);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-
-    color: #fff;
+    border: 1px solid var(--appBorder);
+    background: #fff;
+    color: var(--appText);
     display: grid;
     place-items: center;
     cursor: pointer;
-
-    /* micro-interactions */
-    transition:
-        background .16s ease,
-        border-color .16s ease,
-        box-shadow .16s ease,
-        transform .12s ease,
-        opacity .16s ease;
-
-    box-shadow:
-        0 10px 24px rgba(0, 0, 0, .18),
-        inset 0 1px 0 rgba(255, 255, 255, .22);
-
+    transition: all 0.16s ease;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
-    opacity: .95;
 }
 
-/* Icono */
 .closeOnlyMobile .material-icons-outlined {
-    font-size: 22px;
+    font-size: 20px;
     line-height: 1;
-    transform: translateY(-.5px);
-    /* centra óptico */
 }
 
-/* Hover (desktop/tablet) */
 .closeOnlyMobile:hover {
-    background: rgba(255, 255, 255, .18);
-    border-color: rgba(255, 255, 255, .28);
-    opacity: 1;
+    background: #f1f5f9;
 }
 
-/* Active (tap) */
 .closeOnlyMobile:active {
     transform: translateY(-50%) scale(.96);
-    box-shadow:
-        0 6px 14px rgba(0, 0, 0, .16),
-        inset 0 1px 0 rgba(255, 255, 255, .18);
 }
 
-/* Focus accesible (teclado) */
-.closeOnlyMobile:focus {
-    outline: none;
-}
-
-.closeOnlyMobile:focus-visible {
-    box-shadow:
-        0 0 0 3px rgba(255, 255, 255, .30),
-        0 10px 24px rgba(0, 0, 0, .18),
-        inset 0 1px 0 rgba(255, 255, 255, .22);
-}
-
-/* Respeta usuarios con menos animación */
-@media (prefers-reduced-motion: reduce) {
-    .closeOnlyMobile {
-        transition: none;
-    }
-}
-
+/* ===== NAV ===== */
 .appNav {
-    padding: 16px 10px;
+    padding: 12px 10px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    overflow: auto;
+    gap: 2px;
+    overflow-y: auto;
+    flex: 1;
 }
 
 .appNavItem {
@@ -414,57 +154,58 @@ body {
     align-items: center;
     gap: 12px;
     padding: 12px 14px;
-    border-radius: 12px;
-    color: rgba(255, 255, 255, .82);
+    border-radius: 10px;
+    color: var(--appMuted);
     text-decoration: none;
-    font-weight: 700;
+    font-weight: 600;
+    font-size: 15px;
     background: transparent;
     border: none;
     text-align: left;
     cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.appNavItem .material-icons-outlined {
+    font-size: 22px;
 }
 
 .appNavItem:hover {
-    background: rgba(255, 255, 255, .10);
-    color: #fff;
+    background: #F1F5F9;
+    color: var(--appText);
 }
 
 .appNavItem.active {
-    background: rgba(255, 255, 255, .20);
-    color: #fff;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .10);
+    background: #DCFCE7;
+    color: #006236;
+    font-weight: 700;
 }
 
 .appNavDivider {
     height: 1px;
-    background: rgba(255, 255, 255, .10);
-    margin: 10px 6px;
+    background: var(--appBorder);
+    margin: 6px 6px;
 }
 
 .appNavItem.danger {
-    color: rgba(255, 255, 255, .9);
+    color: #ef4444;
 }
 
 .appNavItem.danger:hover {
-    background: rgba(239, 68, 68, .18);
+    background: #fef2f2;
 }
 
 .appSidebarFooter {
     margin-top: auto;
-    padding: 14px 16px;
-    border-top: 1px solid rgba(255, 255, 255, .10);
-    font-size: 12px;
-    color: rgba(255, 255, 255, .55);
+    padding: 12px 16px;
+    border-top: 1px solid var(--appBorder);
+    font-size: 11px;
+    color: var(--appMuted);
     text-align: center;
 }
 
-/* Main */
-.appMain {
-    flex: 1;
-    width: 100%;
-}
-
-/* Columna derecha: header arriba + contenido debajo */
+/* ===== COLUMNA DERECHA (header + main) ===== */
 .appBody {
     flex: 1;
     min-width: 0;
@@ -472,96 +213,60 @@ body {
     flex-direction: column;
 }
 
-:root {
-    --appHeaderH: 72px;
-    /* ajusta si tu header es 64/70/72 */
-}
-
-/* 1) MISMA ALTURA para Header y SidebarBrand */
+/* Header: vive DENTRO de appBody → solo ocupa ancho restante */
 .cdHeader {
     height: var(--appHeaderH);
+    flex-shrink: 0;
+    /* SOLO borde inferior — sin borde izquierdo ni superior */
+    border-bottom: 1px solid var(--appBorder);
+    border-left: none;
+    border-top: none;
 }
 
 .cdHeaderInner {
     height: 100%;
 }
 
-.appSidebarBrand {
-    height: var(--appHeaderH);
-    display: flex;
-    align-items: center;
+/* Main: ocupa el espacio restante del body */
+.appMain {
+    flex: 1;
+    width: 100%;
 }
 
-/* 2) MISMO fondo (mismo verde exacto) */
-.cdHeader,
-.appSidebar,
-.appSidebarBrand {
-    background: var(--appPrimary);
-}
-
-/* 3) Unifica la “línea” inferior: o ambos, o ninguno */
-.cdHeader {
-    border-bottom: 1px solid rgba(255, 255, 255, .12);
-}
-
-.appSidebarBrand {
-    border-bottom: 1px solid rgba(255, 255, 255, .12);
-}
-
-/* 4) Evita que aparezca un “corte” por borde/sombra en desktop */
-@media (min-width: 1024px) {
-    .appSidebar {
-        box-shadow: none !important;
-        border-right: none !important;
-    }
-}
-
-/* ===== DESKTOP: sidebar fijo visible ===== */
+/* ===== DESKTOP: sidebar fijo al lado del body ===== */
 @media (min-width: 1024px) {
     .appOverlay {
         display: none !important;
     }
 
     .appSidebar {
+        /* Sale de fixed → sticky para que conviva con flex */
         position: sticky;
         top: 0;
         height: 100vh;
-        overflow: auto;
         transform: none;
         transition: none;
         box-shadow: none;
+        overflow-y: auto;
+        /* SOLO border-right */
+        border-right: 1px solid var(--appBorder);
+        border-top: none;
+        border-bottom: none;
     }
-
-    @media (min-width: 1024px) {
-        .appSidebar {
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            transform: none;
-            box-shadow: none;
-        }
-    }
-
-
 
     .closeOnlyMobile {
         display: none;
     }
-
-    .appMain {
-        min-height: 100vh;
-    }
-
-
 }
 
-/* Icono hamburguesa (móvil): blanco puro */
+/* Icono hamburguesa (móvil) */
 @media (max-width: 1023px) {
     .cdMenuBtn .material-icons-outlined {
-        color: #fff !important;
+        color: var(--appText) !important;
     }
 }
 
+/* ===== BADGES, TOAST ===== */
 .appNavBadge {
     background: #ef4444;
     color: white;
@@ -581,7 +286,7 @@ body {
     position: fixed;
     top: 20px;
     right: 20px;
-    background: #007041;
+    background: var(--appPrimary);
     color: white;
     padding: 14px 20px;
     border-radius: 10px;
@@ -597,5 +302,5 @@ body {
 
 @keyframes toastSlideIn {
     from { transform: translateX(110%); opacity: 0; }
-    to   { transform: translateX(0);   opacity: 1; }
+    to   { transform: translateX(0);    opacity: 1; }
 }

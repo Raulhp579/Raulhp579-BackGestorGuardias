@@ -188,14 +188,14 @@ export default function GestionUsuarios() {
         };
     }, []);
 
-    // clases botones
-    let workersBtnClass = "cdToggleBtn";
-    let adminsBtnClass = "cdToggleBtn";
+    // clases Segmented Control
+    let workersBtnClass = "guSegBtn";
+    let adminsBtnClass = "guSegBtn";
 
     if (view === "workers") {
-        workersBtnClass += " isActive";
+        workersBtnClass += " active";
     } else {
-        adminsBtnClass += " isActive";
+        adminsBtnClass += " active";
     }
 
     // Funciones para manejar eliminación y edición
@@ -687,9 +687,10 @@ export default function GestionUsuarios() {
     }
 
     return (
-        <div className="cdPage">
-            <main className="cdMain">
-                <div className="cdToggle tour-view-toggle">
+        <div className="guPage">
+            <main className="guMain">
+                {/* Segmented Control */}
+                <div className="guSegmentedControl tour-view-toggle">
                     <button
                         className={workersBtnClass}
                         type="button"
@@ -708,9 +709,32 @@ export default function GestionUsuarios() {
                 </div>
 
                 {/* Tabla Card */}
-                <div className="cdTableCard">
-                    <div className="cdTableCardTop">
-                        <div>
+                <div className="guCard">
+                    {/* HEADER DE LA TARJETA (Buscador y Botones) */}
+                    <div className="guHeaderRow">
+                        <div className="guHeaderLeft">
+                            <div className="guSearch">
+                                <span className="material-icons">search</span>
+                                <input
+                                    type="text"
+                                    className="tour-search-users"
+                                    placeholder="Buscar por nombre..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                                {searchTerm && (
+                                    <button
+                                        className="guSearchClear"
+                                        onClick={() => setSearchTerm("")}
+                                        title="Limpiar búsqueda"
+                                    >
+                                        <span className="material-icons">close</span>
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="guHeaderRight">
                             <input
                                 ref={fileInputRef}
                                 type="file"
@@ -719,104 +743,65 @@ export default function GestionUsuarios() {
                                 onChange={onPickExcel}
                             />
                             <button
-                                className="cdBtnSecondary tour-import-users"
+                                className="guBtn outline tour-import-users"
                                 type="button"
                                 disabled={importing}
                                 onClick={() => fileInputRef.current?.click()}
                             >
-                                <span className="material-icons excel">
-                                    table_view
-                                </span>
-                                {importing
-                                    ? "Importando..."
-                                    : "Importar usuarios"}
+                                <span className="material-icons-outlined">table_view</span>
+                                {importing ? "Importando..." : "Importar usuarios"}
                             </button>
 
                             {/* Botón CREAR TRABAJADOR (solo en vista workers) */}
                             {view === "workers" && (
                                 <button
-                                    className="cdBtnSecondary"
+                                    className="guBtn primary"
                                     type="button"
                                     onClick={handleCreateWorker}
-                                    style={{ marginLeft: "10px" }}
                                 >
-                                    <span className="material-icons">
-                                        add_circle
-                                    </span>
+                                    <span className="material-icons">add_circle</span>
                                     Crear trabajador
-                                </button>
-                            )}
-
-                            {/* TOAST de notificaciones */}
-                            {toast.visible && (
-                                <div
-                                    className={`cdToast ${toast.type === "error" ? "error" : "success"}`}
-                                >
-                                    {toast.message}
-                                </div>
-                            )}
-                            <Joyride
-                                steps={tourSteps}
-                                run={runTour}
-                                continuous
-                                showProgress
-                                showSkipButton={true}
-                                scrollOffset={150}
-                                callback={handleJoyrideCallback}
-                                styles={{
-                                    options: {
-                                        zIndex: 10000,
-                                        primaryColor: "#007bff",
-                                    },
-                                }}
-                                locale={{
-                                    back: "Atrás",
-                                    close: "Cerrar",
-                                    last: "Siguiente: Explicar Guardias",
-                                    next: "Siguiente",
-                                    skip: "Saltar tutorial",
-                                }}
-                            />
-                            {importMsg && (
-                                <p className="cdInfo" style={{ margin: 0 }}>
-                                    {importMsg}
-                                </p>
-                            )}
-                        </div>
-                        {/* Search Input */}
-                        <div className="cdSearchContainer">
-                            <span className="material-icons">search</span>
-                            <input
-                                type="text"
-                                className="cdSearchInput tour-search-users"
-                                placeholder="Buscar por nombre..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                            {searchTerm && (
-                                <button
-                                    className="cdSearchClear"
-                                    onClick={() => setSearchTerm("")}
-                                    title="Limpiar búsqueda"
-                                >
-                                    <span className="material-icons">
-                                        close
-                                    </span>
                                 </button>
                             )}
                         </div>
                     </div>
 
+                    {/* TOAST de notificaciones (Joyride, Errores) */}
+                    <div style={{ position: "absolute" }}>
+                        {toast.visible && (
+                            <div className={`cdToast ${toast.type === "error" ? "error" : "success"}`}>
+                                {toast.message}
+                            </div>
+                        )}
+                        <Joyride
+                            steps={tourSteps}
+                            run={runTour}
+                            continuous
+                            showProgress
+                            showSkipButton={true}
+                            scrollOffset={150}
+                            callback={handleJoyrideCallback}
+                            styles={{ options: { zIndex: 10000, primaryColor: "#007bff" } }}
+                            locale={{ back: "Atrás", close: "Cerrar", last: "Siguiente: Explicar Guardias", next: "Siguiente", skip: "Saltar tutorial" }}
+                        />
+                    </div>
+
+                    {importMsg && (
+                        <div style={{ padding: "10px 24px", background: "#F0FDF4", color: "#166534", borderBottom: "1px solid #DCFCE7", fontSize: "14px" }}>
+                            {importMsg}
+                        </div>
+                    )}
+
                     {view === "workers" && error && (
-                        <div className="cdTableError">{error}</div>
+                        <div className="guError">{error}</div>
                     )}
 
                     {view === "admins" && adminsError && (
-                        <div className="cdTableError">{adminsError}</div>
+                        <div className="guError">{adminsError}</div>
                     )}
 
-                    <div className="cdTableWrap">
-                        <table className="cdTable">
+                    <div className="guTableWrap">
+                        <table className="guTable">
                             <thead>
                                 <tr>
                                     {headers.map((header) => (
@@ -901,7 +886,20 @@ export default function GestionUsuarios() {
                                         >
                                             {view === "workers" ? (
                                                 <>
-                                                    <td>{row.name}</td>
+                                                    <td>
+                                                        {(() => {
+                                                            const relatedUser = admins.find(a => a.worker_id === row.id);
+                                                            const isAdminWorker = relatedUser && relatedUser.roles && relatedUser.roles.some(r => r.name === 'admin');
+                                                            return (
+                                                                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                                                    <span>{row.name}</span>
+                                                                    {isAdminWorker && (
+                                                                        <span className="material-icons-outlined" style={{ fontSize: "16px", color: "#006236" }} title="Administrador">shield</span>
+                                                                    )}
+                                                                </div>
+                                                            );
+                                                        })()}
+                                                    </td>
                                                     <td>{row.rank}</td>
                                                     <td>
                                                         {row.registration_date
@@ -938,8 +936,8 @@ export default function GestionUsuarios() {
                                                                         onSetChief={handleSetChief}
                                                                         isChief={isChief}
                                                                         disabled={loading}
-                                                                        hideEdit={isAdminWorker}
-                                                                        hideDelete={isAdminWorker}
+                                                                        disableEdit={isAdminWorker}
+                                                                        disableDelete={isAdminWorker}
                                                                     />
                                                                 </div>
                                                             );
@@ -948,7 +946,21 @@ export default function GestionUsuarios() {
                                                 </>
                                             ) : (
                                                 <>
-                                                    <td>{row.name}</td>
+                                                    <td>
+                                                        {(() => {
+                                                            const isAdminUser = row.roles && row.roles.some(r => r.name === 'admin');
+                                                            const isUserAdminName = row.name.includes("Santo Tomás") || row.name.includes("Javier Ruiz") || row.name.includes("Admin");
+                                                            const readOnly = isAdminUser || isUserAdminName;
+                                                            return (
+                                                                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                                                    <span>{row.name}</span>
+                                                                    {readOnly && (
+                                                                        <span className="material-icons-outlined" style={{ fontSize: "16px", color: "#006236" }} title="Administrador">shield</span>
+                                                                    )}
+                                                                </div>
+                                                            );
+                                                        })()}
+                                                    </td>
                                                     <td>{row.email}</td>
                                                     <td>
                                                         {new Date(
@@ -960,21 +972,17 @@ export default function GestionUsuarios() {
                                                     <td>
                                                         {(() => {
                                                             const isAdminUser = row.roles && row.roles.some(r => r.name === 'admin');
+                                                            const isUserAdminName = row.name.includes("Santo Tomás") || row.name.includes("Javier Ruiz") || row.name.includes("Admin");
+                                                            const readOnly = isAdminUser || isUserAdminName;
                                                             return (
                                                                 <div className="cdActionsCenter">
                                                                     <RowActions
                                                                         row={row}
-                                                                        onEdit={
-                                                                            editAdmin
-                                                                        }
-                                                                        onDelete={
-                                                                            deleteAdmin
-                                                                        }
-                                                                        disabled={
-                                                                            adminsLoading
-                                                                        }
-                                                                        hideEdit={isAdminUser}
-                                                                        hideDelete={isAdminUser}
+                                                                        onEdit={editAdmin}
+                                                                        onDelete={deleteAdmin}
+                                                                        disabled={adminsLoading}
+                                                                        disableEdit={readOnly}
+                                                                        disableDelete={readOnly}
                                                                     />
                                                                 </div>
                                                             );
@@ -989,69 +997,54 @@ export default function GestionUsuarios() {
                         </table>
                     </div>
 
-                    {!loading && !adminsLoading && totalPages > 1 && (
-                        <div className="cdPager">
+                    {/* PAGINACIÓN ESTANDARIZADA */}
+                    <div className="ggPager" style={{ borderTop: "1px solid #E2E8F0" }}>
+                        <div className="ggPagerInfo">
+                            Mostrando{" "}
+                            <strong>{Math.min((currentPage - 1) * PAGE_SIZE + 1, filteredRows.length)}</strong>
+                            {" "}a{" "}
+                            <strong>{Math.min(currentPage * PAGE_SIZE, filteredRows.length)}</strong>
+                            {" "}de{" "}
+                            <strong>{filteredRows.length}</strong> registros
+                        </div>
+
+                        <div className="ggPagerControls">
                             <button
-                                className="cdPagerBtn"
+                                className="ggPagerArrow"
                                 type="button"
                                 onClick={goPrevPage}
-                                disabled={currentPage === 1 || loading}
+                                disabled={currentPage === 1 || loading || adminsLoading}
+                                aria-label="Anterior"
                             >
-                                <span className="material-icons-outlined">
-                                    chevron_left
-                                </span>
-                                Anterior
+                                <span className="material-icons-outlined">chevron_left</span>
                             </button>
 
-                            <div className="cdPagerNums" aria-label="Páginas">
-                                {pageButtons.map((p, idx) =>
-                                    p === "..." ? (
-                                        <span
-                                            className="cdPagerEllipsis"
-                                            key={`e-${idx}`}
-                                        >
-                                            …
-                                        </span>
-                                    ) : (
-                                        <button
-                                            key={p}
-                                            type="button"
-                                            className={`cdPagerNum ${p === currentPage ? "active" : ""}`}
-                                            onClick={() => setCurrentPage(p)}
-                                            disabled={loading || adminsLoading}
-                                        >
-                                            {p}
-                                        </button>
-                                    ),
-                                )}
-                            </div>
+                            {pageButtons.map((p, idx) =>
+                                p === "..." ? (
+                                    <span className="ggPagerEllipsis" key={`e-${idx}`}>…</span>
+                                ) : (
+                                    <button
+                                        key={p}
+                                        type="button"
+                                        className={`ggPagerNum ${p === currentPage ? "active" : ""}`}
+                                        onClick={() => setCurrentPage(p)}
+                                        disabled={loading || adminsLoading}
+                                    >
+                                        {p}
+                                    </button>
+                                )
+                            )}
 
                             <button
-                                className="cdPagerBtn"
+                                className="ggPagerArrow"
                                 type="button"
                                 onClick={goNextPage}
-                                disabled={
-                                    currentPage === totalPages ||
-                                    loading ||
-                                    adminsLoading
-                                }
+                                disabled={currentPage === totalPages || loading || adminsLoading}
+                                aria-label="Siguiente"
                             >
-                                Siguiente
-                                <span className="material-icons-outlined">
-                                    chevron_right
-                                </span>
+                                <span className="material-icons-outlined">chevron_right</span>
                             </button>
                         </div>
-                    )}
-
-                    {/* Contador de registros al fondo */}
-                    <div className="cdTableCardBottom">
-                        <span className="cdTableCount">
-                            {filteredRows.length}{" "}
-                            {filteredRows.length === 1
-                                ? "registro"
-                                : "registros"}
-                        </span>
                     </div>
                 </div>
 
