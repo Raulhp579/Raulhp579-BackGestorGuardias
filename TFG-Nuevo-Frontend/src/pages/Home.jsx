@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 import "../styles/Home.css";
 
 export default function Home() {
@@ -12,32 +14,35 @@ export default function Home() {
     }, []);
 
 
-    const descargarPlantillas =async () => {
+    const descargarPlantillas = async () => {
         const zip = new JSZip()
-
         const carpeta = zip.folder('excels')
+        const base = import.meta.env.BASE_URL
         const archivos = {
-            'Plantilla_facultativos.xlsx': 'excels/LISTADO_FACULTATIVOS_PLANTILLA.xlsx',
-            'Plantilla_mes_especialidad.xlsx': 'excels/PLANTILLA_MES.xlsx'
+            'Plantilla_facultativos.xlsx': `${base}excels/LISTADO_FACULTATIVOS_PLANTILLA.xlsx`,
+            'Plantilla_mes_especialidad.xlsx': `${base}excels/PLANTILLA_MES.xlsx`
         }
 
-        try{
-            for(const [nombreArchivo, rutaArchivo] of Object.entries(archivos)){
+        try {
+            for (const [nombreArchivo, rutaArchivo] of Object.entries(archivos)) {
                 const response = await fetch(rutaArchivo)
-                
-                if(!response.ok) throw new Error(`Error al descargar ${nombreArchivo}`)
+                if (!response.ok) throw new Error(`Error al descargar ${nombreArchivo}`)
 
-                const blob = await response.blob()
-                carpeta.file(nombreArchivo, blob)
+                const buffer = await response.arrayBuffer()
+                const bytes = new Uint8Array(buffer)
+                const esZip = bytes[0] === 0x50 && bytes[1] === 0x4B
+                if (!esZip) throw new Error(`${nombreArchivo} no es un xlsx válido (primeros bytes no son PK). Ruta: ${rutaArchivo}`)
+
+                carpeta.file(nombreArchivo, buffer)
             }
 
             const blobZip = await zip.generateAsync({
-                type:"blob",
+                type: "blob",
                 compression: "DEFLATE",
             })
 
             saveAs(blobZip, "plantillas.zip")
-        }catch(error){
+        } catch (error) {
             console.error("error al descargar los archivos", error)
         }
     }
