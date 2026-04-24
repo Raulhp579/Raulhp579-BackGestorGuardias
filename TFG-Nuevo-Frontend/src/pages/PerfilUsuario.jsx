@@ -4,7 +4,6 @@ import {
     updateProfile,
     changePassword,
 } from "../services/ProfileService";
-import "../styles/PerfilUsuario.css";
 
 export default function PerfilUsuario() {
     const [user, setUser] = useState(null);
@@ -27,14 +26,6 @@ export default function PerfilUsuario() {
     const [passwordError, setPasswordError] = useState("");
     const [passwordSuccess, setPasswordSuccess] = useState("");
     const [changingPassword, setChangingPassword] = useState(false);
-
-    // Estado para próximas guardias
-    const [upcomingDuties, setUpcomingDuties] = useState([]);
-    const [loadingDuties, setLoadingDuties] = useState(false);
-
-    // Estado para modal de detalles de guardia
-    const [selectedDuty, setSelectedDuty] = useState(null);
-    const [dutyModalOpen, setDutyModalOpen] = useState(false);
 
     const fileInputRef = useRef(null);
 
@@ -240,12 +231,15 @@ export default function PerfilUsuario() {
 
     if (loading) {
         return (
-            <div className="puContent">
-                <div className="puLoading">
-                    <span className="material-icons-outlined puSpinner">
-                        sync
-                    </span>
-                    <span>Cargando perfil...</span>
+            <div className="bg-light min-vh-100 d-flex align-items-center justify-content-center">
+                <div className="text-center">
+                    <div
+                        className="spinner-border text-primary mb-3"
+                        role="status"
+                    >
+                        <span className="visually-hidden">Cargando...</span>
+                    </div>
+                    <p className="text-muted">Cargando perfil...</p>
                 </div>
             </div>
         );
@@ -253,11 +247,18 @@ export default function PerfilUsuario() {
 
     if (error) {
         return (
-            <div className="puContent">
-                <div className="puError">
-                    <span className="material-icons-outlined">error</span>
-                    <span>{error}</span>
-                    <button className="puBtn primary" onClick={loadProfile}>
+            <div className="bg-light min-vh-100 d-flex align-items-center justify-content-center">
+                <div
+                    className="text-center card border-0 shadow-sm p-5 rounded-4"
+                    style={{ maxWidth: "400px" }}
+                >
+                    <i className="bi bi-exclamation-triangle text-danger fs-1 mb-3"></i>
+                    <h4 className="fw-bold mb-3">Error</h4>
+                    <p className="text-muted mb-4">{error}</p>
+                    <button
+                        className="btn btn-primary w-100 rounded-3"
+                        onClick={loadProfile}
+                    >
                         Reintentar
                     </button>
                 </div>
@@ -269,373 +270,306 @@ export default function PerfilUsuario() {
         avatarPreview || (user?.avatarUrl ? `/${user.avatarUrl}` : null);
 
     return (
-        <div className="puContent">
-            <h2 className="puTitle">Mi Perfil</h2>
+        <div className="bg-light min-vh-100">
+            <div className="container-fluid pt-5 mt-4 pb-5">
+                <div className="mx-auto" style={{ maxWidth: "900px" }}>
+                <h2 className="fw-bold mb-4 text-dark">Mi Perfil</h2>
 
-            {/* Card principal */}
-            <section className="puCard">
-                <div className="puCardTop">
-                    {/* Avatar */}
-                    <div className="puAvatarSection">
-                        <div
-                            className={`puAvatar ${editMode ? "editable" : ""}`}
-                            onClick={editMode ? handleAvatarClick : undefined}
-                            title={
-                                editMode ? "Haz clic para cambiar la foto" : ""
-                            }
-                        >
-                            {avatarUrl ? (
-                                <img
-                                    src={avatarUrl}
-                                    alt="Avatar"
-                                    className="puAvatarImg"
+                {/* Card principal */}
+                <div className="card border-0 shadow-sm rounded-4 mb-4">
+                    <div className="card-body p-4 p-md-5">
+                        <div className="row align-items-center">
+                            {/* Columna Izquierda (Avatar y Botón) */}
+                            <div className="col-md-4 text-center border-md-end pe-md-4">
+                                <div
+                                    className="position-relative d-inline-block mb-3"
+                                    onClick={
+                                        editMode ? handleAvatarClick : undefined
+                                    }
+                                    style={{
+                                        cursor: editMode
+                                            ? "pointer"
+                                            : "default",
+                                    }}
+                                >
+                                    {avatarUrl ? (
+                                        <img
+                                            src={avatarUrl}
+                                            alt="Avatar"
+                                            className="rounded-circle shadow-sm"
+                                            style={{
+                                                width: "160px",
+                                                height: "160px",
+                                                objectFit: "cover",
+                                            }}
+                                        />
+                                    ) : (
+                                        <div
+                                            className="rounded-circle bg-success-subtle text-success border border-success-subtle d-flex align-items-center justify-content-center shadow-sm"
+                                            style={{
+                                                width: "160px",
+                                                height: "160px",
+                                                fontSize: "3rem",
+                                                fontWeight: "600",
+                                            }}
+                                        >
+                                            {getInitials(user?.name)}
+                                        </div>
+                                    )}
+                                    {editMode && (
+                                        <div
+                                            className="position-absolute bottom-0 end-0 bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+                                            style={{
+                                                width: "40px",
+                                                height: "40px",
+                                                border: "1px solid #eee",
+                                            }}
+                                        >
+                                            <i className="bi bi-camera-fill text-secondary"></i>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/jpg,image/gif"
+                                    style={{ display: "none" }}
+                                    onChange={handleAvatarChange}
                                 />
-                            ) : (
-                                <span className="puAvatarInitials">
-                                    {getInitials(user?.name)}
-                                </span>
-                            )}
-                            {editMode && (
-                                <div className="puAvatarOverlay">
-                                    <span className="material-icons-outlined">
-                                        camera_alt
+
+                                {!editMode && (
+                                    <button
+                                        className="btn btn-light border shadow-sm text-dark fw-medium mt-4 w-100 rounded-3"
+                                        onClick={startEdit}
+                                    >
+                                        <i className="bi bi-pencil-square me-2"></i>
+                                        Editar Perfil
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Columna Derecha (Datos) */}
+                            <div className="col-md-8 ps-md-5">
+                                <div className="d-flex align-items-center mb-4">
+                                    {editMode ? (
+                                        <input
+                                            type="text"
+                                            className="form-control form-control-lg rounded-3 me-3"
+                                            value={editName}
+                                            onChange={(e) =>
+                                                setEditName(e.target.value)
+                                            }
+                                            placeholder="Tu nombre"
+                                        />
+                                    ) : (
+                                        <h3 className="fw-bold mb-0 me-3 text-dark">
+                                            {user?.name || "Usuario"}
+                                        </h3>
+                                    )}
+                                    <span className="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-2 flex-shrink-0">
+                                        {getRoleLabel(
+                                            sessionStorage.getItem("roles"),
+                                        )}
                                     </span>
                                 </div>
-                            )}
+
+                                <div className="row g-4">
+                                    <div className="col-sm-6">
+                                        <p className="text-muted small fw-bold text-uppercase mb-1">
+                                            <i className="bi bi-envelope me-1"></i>{" "}
+                                            Email
+                                        </p>
+                                        <p className="fs-6 fw-medium text-dark mb-4 text-break">
+                                            {user?.email || "-"}
+                                        </p>
+                                    </div>
+                                    <div className="col-sm-6">
+                                        <p className="text-muted small fw-bold text-uppercase mb-1">
+                                            <i className="bi bi-calendar3 me-1"></i>{" "}
+                                            Cuenta creada
+                                        </p>
+                                        <p className="fs-6 fw-medium text-dark mb-4">
+                                            {user?.created_at
+                                                ? new Date(
+                                                      user.created_at,
+                                                  ).toLocaleDateString(
+                                                      "es-ES",
+                                                      {
+                                                          year: "numeric",
+                                                          month: "long",
+                                                          day: "numeric",
+                                                      },
+                                                  )
+                                                : "-"}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Mensaje de estado */}
+                                {saveMsg && (
+                                    <div
+                                        className={`alert mt-4 py-2 px-3 small rounded-3 ${saveMsg.includes("Error") ? "alert-danger" : "alert-success"}`}
+                                    >
+                                        {saveMsg}
+                                    </div>
+                                )}
+
+                                {/* Botones de edición */}
+                                {editMode && (
+                                    <div className="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                                        <button
+                                            className="btn btn-light rounded-3 px-4"
+                                            onClick={cancelEdit}
+                                            disabled={saving}
+                                        >
+                                            Cancelar
+                                        </button>
+                                        <button
+                                            className="btn rounded-3 px-4 shadow-sm"
+                                            style={{
+                                                backgroundColor: "#006236",
+                                                color: "white",
+                                            }}
+                                            onClick={saveProfile}
+                                            disabled={saving}
+                                        >
+                                            {saving ? (
+                                                <>
+                                                    <span
+                                                        className="spinner-border spinner-border-sm me-2"
+                                                        role="status"
+                                                        aria-hidden="true"
+                                                    ></span>
+                                                    Guardando...
+                                                </>
+                                            ) : (
+                                                "Guardar Cambios"
+                                            )}
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/jpeg,image/png,image/jpg,image/gif"
-                            style={{ display: "none" }}
-                            onChange={handleAvatarChange}
-                        />
-                        {!editMode && (
+                    </div>
+                </div>
+
+                {/* Tarjeta Secundaria (Seguridad) */}
+                <div className="card border-0 shadow-sm rounded-4">
+                    <div className="card-body p-4">
+                        <h5 className="fw-bold mb-3">Acciones de cuenta</h5>
+                        <div className="d-flex flex-wrap gap-3">
                             <button
-                                className="puBtn primary puEditBtn"
-                                onClick={startEdit}
+                                className="btn btn-outline-dark rounded-3 px-4"
+                                onClick={openPasswordModal}
                             >
-                                <span className="material-icons-outlined">
-                                    edit
-                                </span>
-                                Editar Perfil
+                                <i className="bi bi-shield-lock me-2"></i>
+                                Cambiar Contraseña
                             </button>
-                        )}
-                    </div>
-
-                    {/* Info */}
-                    <div className="puInfoSection">
-                        <div className="puUserHeader">
-                            {editMode ? (
-                                <input
-                                    type="text"
-                                    className="puNameInput"
-                                    value={editName}
-                                    onChange={(e) =>
-                                        setEditName(e.target.value)
-                                    }
-                                    placeholder="Tu nombre"
-                                />
-                            ) : (
-                                <h3 className="puUserName">
-                                    {user?.name || "Usuario"}
-                                </h3>
-                            )}
-                            <span className="puUserRole">
-                                {getRoleLabel(sessionStorage.getItem("roles"))}
-                            </span>
-                        </div>
-
-                        <div className="puInfoGrid">
-                            <div className="puInfoRow">
-                                <span className="puInfoLabel">Nombre:</span>
-                                <span className="puInfoValue">
-                                    {user?.name || "-"}
-                                </span>
-                            </div>
-                            <div className="puInfoRow">
-                                <span className="puInfoLabel">Email:</span>
-                                <span className="puInfoValue">
-                                    {user?.email || "-"}
-                                </span>
-                            </div>
-                            <div className="puInfoRow">
-                                <span className="puInfoLabel">
-                                    Cuenta creada:
-                                </span>
-                                <span className="puInfoValue">
-                                    {user?.created_at
-                                        ? new Date(
-                                              user.created_at,
-                                          ).toLocaleDateString("es-ES", {
-                                              year: "numeric",
-                                              month: "long",
-                                              day: "numeric",
-                                          })
-                                        : "-"}
-                                </span>
-                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
+            </div>
 
-                {/* Mensaje de estado */}
-                {saveMsg && (
-                    <div
-                        className={`puMessage ${saveMsg.includes("Error") ? "error" : "success"}`}
-                    >
-                        {saveMsg}
-                    </div>
-                )}
-
-                {/* Botones de edición */}
-                {editMode && (
-                    <div className="puEditActions">
-                        <button
-                            className="puBtn light"
-                            onClick={cancelEdit}
-                            disabled={saving}
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            className="puBtn primary"
-                            onClick={saveProfile}
-                            disabled={saving}
-                        >
-                            {saving ? "Guardando..." : "Guardar Cambios"}
-                        </button>
-                    </div>
-                )}
-            </section>
-
-            {/* Acciones de cuenta */}
-            <section className="puCard puActionsCard">
-                <h4 className="puCardTitle">Acciones de Cuenta</h4>
-                <div className="puActionsGrid">
-                    <button className="puActionBtn" onClick={openPasswordModal}>
-                        <span className="material-icons-outlined">lock</span>
-                        <span>Cambiar Contraseña</span>
-                    </button>
-                </div>
-            </section>
-
-            {/* Modal Cambiar Contraseña */}
+            {/* Modal Cambiar Contraseña (Rediseñado con Bootstrap) */}
             {passwordModalOpen && (
-                <div className="puModalOverlay" role="dialog" aria-modal="true">
-                    <div className="puModalCard">
-                        <div className="puModalHead">
-                            <h3 className="puModalTitle">Cambiar Contraseña</h3>
-                            <button
-                                className="puModalClose"
-                                onClick={closePasswordModal}
-                                type="button"
-                                aria-label="Cerrar"
-                            >
-                                <span className="material-icons-outlined">
-                                    close
-                                </span>
-                            </button>
-                        </div>
-
-                        <div className="puModalBody">
-                            {passwordError && (
-                                <div className="puMessage error">
-                                    {passwordError}
-                                </div>
-                            )}
-                            {passwordSuccess && (
-                                <div className="puMessage success">
-                                    {passwordSuccess}
-                                </div>
-                            )}
-
-                            <label className="puField">
-                                <span>Contraseña Actual</span>
-                                <input
-                                    type="password"
-                                    value={currentPassword}
-                                    onChange={(e) =>
-                                        setCurrentPassword(e.target.value)
-                                    }
-                                    className="puControl"
-                                    placeholder="Tu contraseña actual"
-                                />
-                            </label>
-
-                            <label className="puField">
-                                <span>Nueva Contraseña</span>
-                                <input
-                                    type="password"
-                                    value={newPassword}
-                                    onChange={(e) =>
-                                        setNewPassword(e.target.value)
-                                    }
-                                    className="puControl"
-                                    placeholder="Mínimo 8 caracteres"
-                                />
-                            </label>
-
-                            <label className="puField">
-                                <span>Confirmar Nueva Contraseña</span>
-                                <input
-                                    type="password"
-                                    value={confirmPassword}
-                                    onChange={(e) =>
-                                        setConfirmPassword(e.target.value)
-                                    }
-                                    className="puControl"
-                                    placeholder="Repite la nueva contraseña"
-                                />
-                            </label>
-                        </div>
-
-                        <div className="puModalFooter">
-                            <button
-                                className="puBtn light"
-                                type="button"
-                                onClick={closePasswordModal}
-                                disabled={changingPassword}
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                className="puBtn primary"
-                                type="button"
-                                onClick={handleChangePassword}
-                                disabled={changingPassword}
-                            >
-                                {changingPassword
-                                    ? "Cambiando..."
-                                    : "Cambiar Contraseña"}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Modal Detalles de Guardia */}
-            {dutyModalOpen && selectedDuty && (
-                <div className="puModalOverlay" role="dialog" aria-modal="true">
-                    <div className="puModalCard puDutyModalCard">
-                        <div className="puModalHead">
-                            <h3 className="puModalTitle">
-                                Detalles de la Guardia
-                            </h3>
-                            <button
-                                className="puModalClose"
-                                onClick={() => {
-                                    setDutyModalOpen(false);
-                                    setSelectedDuty(null);
-                                }}
-                                type="button"
-                                aria-label="Cerrar"
-                            >
-                                <span className="material-icons-outlined">
-                                    close
-                                </span>
-                            </button>
-                        </div>
-
-                        <div className="puModalBody puDutyModalBody">
-                            {/* Fecha destacada */}
-                            <div className="puDutyModalDate">
-                                <span className="material-icons-outlined">
-                                    calendar_today
-                                </span>
-                                <div className="puDutyModalDateText">
-                                    <span className="puDutyModalDateFull">
-                                        {new Date(
-                                            selectedDuty.date,
-                                        ).toLocaleDateString("es-ES", {
-                                            weekday: "long",
-                                            year: "numeric",
-                                            month: "long",
-                                            day: "numeric",
-                                        })}
-                                    </span>
-                                </div>
+                <div
+                    className="modal fade show d-block"
+                    tabIndex="-1"
+                    style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+                >
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content border-0 shadow rounded-4">
+                            <div className="modal-header border-0 pb-0 pt-4 px-4">
+                                <h5 className="modal-title fw-bold">
+                                    Cambiar Contraseña
+                                </h5>
+                                <button
+                                    type="button"
+                                    className="btn-close"
+                                    onClick={closePasswordModal}
+                                ></button>
                             </div>
-
-                            {/* Detalles en grid */}
-                            <div className="puDutyModalGrid">
-                                <div className="puDutyModalItem">
-                                    <span className="puDutyModalLabel">
-                                        <span className="material-icons-outlined">
-                                            work
-                                        </span>
-                                        Tipo de Guardia
-                                    </span>
-                                    <span className="puDutyModalValue">
-                                        {selectedDuty.duty_type}
-                                    </span>
-                                </div>
-
-                                {selectedDuty.speciality && (
-                                    <div className="puDutyModalItem">
-                                        <span className="puDutyModalLabel">
-                                            <span className="material-icons-outlined">
-                                                local_hospital
-                                            </span>
-                                            Especialidad
-                                        </span>
-                                        <span className="puDutyModalValue">
-                                            {selectedDuty.speciality}
-                                        </span>
+                            <div className="modal-body p-4">
+                                {passwordError && (
+                                    <div className="alert alert-danger py-2 px-3 small rounded-3 mb-3">
+                                        {passwordError}
+                                    </div>
+                                )}
+                                {passwordSuccess && (
+                                    <div className="alert alert-success py-2 px-3 small rounded-3 mb-3">
+                                        {passwordSuccess}
                                     </div>
                                 )}
 
-                                <div className="puDutyModalItem">
-                                    <span className="puDutyModalLabel">
-                                        <span className="material-icons-outlined">
-                                            person
-                                        </span>
-                                        Trabajador
-                                    </span>
-                                    <span className="puDutyModalValue">
-                                        {selectedDuty.worker ||
-                                            user?.name ||
-                                            "-"}
-                                    </span>
+                                <div className="mb-3">
+                                    <label className="form-label small fw-bold text-muted text-uppercase">
+                                        Contraseña Actual
+                                    </label>
+                                    <input
+                                        type="password"
+                                        value={currentPassword}
+                                        onChange={(e) =>
+                                            setCurrentPassword(e.target.value)
+                                        }
+                                        className="form-control rounded-3"
+                                        placeholder="Tu contraseña actual"
+                                    />
                                 </div>
 
-                                {selectedDuty.chief_worker && (
-                                    <div className="puDutyModalItem">
-                                        <span className="puDutyModalLabel">
-                                            <span className="material-icons-outlined">
-                                                supervisor_account
-                                            </span>
-                                            Jefe de Guardia
-                                        </span>
-                                        <span className="puDutyModalValue">
-                                            {selectedDuty.chief_worker}
-                                        </span>
-                                    </div>
-                                )}
+                                <div className="mb-3">
+                                    <label className="form-label small fw-bold text-muted text-uppercase">
+                                        Nueva Contraseña
+                                    </label>
+                                    <input
+                                        type="password"
+                                        value={newPassword}
+                                        onChange={(e) =>
+                                            setNewPassword(e.target.value)
+                                        }
+                                        className="form-control rounded-3"
+                                        placeholder="Mínimo 8 caracteres"
+                                    />
+                                </div>
+
+                                <div className="mb-0">
+                                    <label className="form-label small fw-bold text-muted text-uppercase">
+                                        Confirmar Nueva Contraseña
+                                    </label>
+                                    <input
+                                        type="password"
+                                        value={confirmPassword}
+                                        onChange={(e) =>
+                                            setConfirmPassword(e.target.value)
+                                        }
+                                        className="form-control rounded-3"
+                                        placeholder="Repite la nueva contraseña"
+                                    />
+                                </div>
                             </div>
-
-                            {/* Badge de jefe si aplica */}
-                            {selectedDuty.is_chief && (
-                                <div className="puDutyModalChiefBadge">
-                                    <span className="material-icons-outlined">
-                                        star
-                                    </span>
-                                    <span>Eres el Jefe de esta Guardia</span>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="puModalFooter">
-                            <button
-                                className="puBtn primary"
-                                type="button"
-                                onClick={() => {
-                                    setDutyModalOpen(false);
-                                    setSelectedDuty(null);
-                                }}
-                            >
-                                Cerrar
-                            </button>
+                            <div className="modal-footer border-0 pt-0 pb-4 px-4">
+                                <button
+                                    className="btn btn-light rounded-3 px-4"
+                                    onClick={closePasswordModal}
+                                    disabled={changingPassword}
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    className="btn rounded-3 px-4"
+                                    style={{
+                                        backgroundColor: "#006236",
+                                        color: "white",
+                                    }}
+                                    onClick={handleChangePassword}
+                                    disabled={changingPassword}
+                                >
+                                    {changingPassword
+                                        ? "Cambiando..."
+                                        : "Actualizar Contraseña"}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
