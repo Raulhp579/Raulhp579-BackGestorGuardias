@@ -1,23 +1,27 @@
 /* ============================================================
    AppLayout.css — Shell principal: Sidebar | Header + Content
-   flex h-screen → sidebar 100% alto, header solo el ancho restante
+   Paleta Institucional Junta de Andalucía
    ============================================================ */
 
 :root {
-    --appPrimary: #006236;
-    --appPrimaryHover: #004d2a;
-    --appBg: #F8FAFC;
-    --appSurface: #FFFFFF;
-    --appBorder: #E2E8F0;
-    --appText: #0F172A;
-    --appMuted: #64748B;
+    --appPrimary: #005a36;
+    --appPrimaryHover: #063725;
+    --appBg: #eef2f6;
+    --appSurface: #ffffff;
+    --appBorder: #e0e4e8;
+    --appText: #063725;
+    --appMuted: #6b7280;
     --appHeaderH: 64px;
     --sidebarW: 260px;
+    --softShadow: 0 4px 20px rgba(0, 0, 0, 0.04);
 }
 
-* { box-sizing: border-box; }
+* {
+    box-sizing: border-box;
+}
 
-html, body {
+html,
+body {
     height: 100%;
     margin: 0;
     background: var(--appBg);
@@ -35,12 +39,12 @@ html, body {
 .appOverlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, .45);
+    background: rgba(0, 0, 0, 0.45);
     backdrop-filter: blur(4px);
     z-index: 55;
     opacity: 0;
     pointer-events: none;
-    transition: opacity .2s ease;
+    transition: opacity 0.2s ease;
 }
 
 .appOverlay.show {
@@ -48,7 +52,7 @@ html, body {
     pointer-events: auto;
 }
 
-/* ===== SIDEBAR: h-full, solo border-right ===== */
+/* ===== SIDEBAR: VERDE CORPORATIVO OSCURO ===== */
 .appSidebar {
     /* Móvil: off-canvas */
     position: fixed;
@@ -57,17 +61,17 @@ html, body {
     left: 0;
     width: var(--sidebarW);
     height: 100%;
-    background: var(--appSurface);
-    color: var(--appText);
+    background: #005a36;
+    color: #ffffff;
     transform: translateX(-100%);
-    transition: transform .25s ease;
+    transition: transform 0.25s ease;
     z-index: 65;
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
 
-    /* SOLO borde derecho — sin top/bottom */
-    border-right: 1px solid var(--appBorder);
+    /* Sin borde — el contraste ya separa */
+    border-right: none;
     border-top: none;
     border-bottom: none;
 }
@@ -83,18 +87,18 @@ html, body {
     align-items: center;
     gap: 12px;
     position: relative;
-    background: var(--appSurface);
+    background: transparent;
     height: var(--appHeaderH);
     flex-shrink: 0;
 
-    /* Línea inferior interna del sidebar, NO cruza con header */
-    border-bottom: 1px solid var(--appBorder);
+    /* Línea inferior sutil en el sidebar */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .appSidebarLogo {
     width: 26px;
     height: 26px;
-    fill: var(--appPrimary);
+    fill: #ffffff;
     flex-shrink: 0;
 }
 
@@ -103,7 +107,7 @@ html, body {
     font-size: 14px;
     line-height: 1.15;
     font-weight: 800;
-    color: var(--appText);
+    color: #ffffff;
 }
 
 /* Botón X (solo móvil) */
@@ -115,9 +119,9 @@ html, body {
     width: 36px;
     height: 36px;
     border-radius: 999px;
-    border: 1px solid var(--appBorder);
-    background: #fff;
-    color: var(--appText);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
     display: grid;
     place-items: center;
     cursor: pointer;
@@ -132,11 +136,11 @@ html, body {
 }
 
 .closeOnlyMobile:hover {
-    background: #f1f5f9;
+    background: rgba(255, 255, 255, 0.2);
 }
 
 .closeOnlyMobile:active {
-    transform: translateY(-50%) scale(.96);
+    transform: translateY(-50%) scale(0.96);
 }
 
 /* ===== NAV ===== */
@@ -155,12 +159,13 @@ html, body {
     gap: 12px;
     padding: 12px 14px;
     border-radius: 10px;
-    color: var(--appMuted);
+    color: rgba(255, 255, 255, 0.7);
     text-decoration: none;
     font-weight: 600;
     font-size: 15px;
     background: transparent;
     border: none;
+    border-left: 4px solid transparent;
     text-align: left;
     cursor: pointer;
     transition: all 0.15s ease;
@@ -172,36 +177,38 @@ html, body {
 }
 
 .appNavItem:hover {
-    background: #F1F5F9;
-    color: var(--appText);
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
 }
 
 .appNavItem.active {
-    background: #DCFCE7;
-    color: #006236;
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
     font-weight: 700;
+    border-left: 4px solid #ffffff;
 }
 
 .appNavDivider {
     height: 1px;
-    background: var(--appBorder);
+    background: rgba(255, 255, 255, 0.15);
     margin: 6px 6px;
 }
 
 .appNavItem.danger {
-    color: #ef4444;
+    color: #fca5a5;
 }
 
 .appNavItem.danger:hover {
-    background: #fef2f2;
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
 }
 
 .appSidebarFooter {
     margin-top: auto;
     padding: 12px 16px;
-    border-top: 1px solid var(--appBorder);
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
     font-size: 11px;
-    color: var(--appMuted);
+    color: rgba(255, 255, 255, 0.5);
     text-align: center;
 }
 
@@ -213,14 +220,15 @@ html, body {
     flex-direction: column;
 }
 
-/* Header: vive DENTRO de appBody → solo ocupa ancho restante */
+/* Header: vive DENTRO de appBody — flota con sombra suave */
 .cdHeader {
     height: var(--appHeaderH);
     flex-shrink: 0;
-    /* SOLO borde inferior — sin borde izquierdo ni superior */
-    border-bottom: 1px solid var(--appBorder);
-    border-left: none;
-    border-top: none;
+    /* Sin borde — separación por sombra */
+    border: none;
+    box-shadow: var(--softShadow);
+    position: relative;
+    z-index: 10;
 }
 
 .cdHeaderInner {
@@ -231,6 +239,7 @@ html, body {
 .appMain {
     flex: 1;
     width: 100%;
+    background: var(--appBg);
 }
 
 /* ===== DESKTOP: sidebar fijo al lado del body ===== */
@@ -248,8 +257,8 @@ html, body {
         transition: none;
         box-shadow: none;
         overflow-y: auto;
-        /* SOLO border-right */
-        border-right: 1px solid var(--appBorder);
+        /* Sin borde — el color ya delimita */
+        border-right: none;
         border-top: none;
         border-bottom: none;
     }
@@ -301,6 +310,12 @@ html, body {
 }
 
 @keyframes toastSlideIn {
-    from { transform: translateX(110%); opacity: 0; }
-    to   { transform: translateX(0);    opacity: 1; }
+    from {
+        transform: translateX(110%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
 }

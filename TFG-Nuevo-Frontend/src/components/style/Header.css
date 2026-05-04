@@ -1,12 +1,13 @@
-/* ===== HEADER: WHITE TOP BAR ===== */
+/* ===== HEADER: WHITE TOP BAR — Floating Soft UI ===== */
 .cdHeader {
     position: sticky;
     top: 0;
     z-index: 50;
-    background: #FFFFFF;
-    color: #0F172A;
+    background: #ffffff;
+    color: #063725;
     flex-shrink: 0;
-    border-bottom: 1px solid #E2E8F0;
+    border: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
 }
 
 .cdHeaderInner {
@@ -32,7 +33,7 @@
     border: none;
     border-radius: 10px;
     background: transparent;
-    color: #64748B;
+    color: #64748b;
     display: grid;
     place-items: center;
     cursor: pointer;
@@ -40,8 +41,8 @@
 }
 
 .cdIconBtn:hover {
-    background: #F1F5F9;
-    color: #0F172A;
+    background: #f1f5f9;
+    color: #0f172a;
 }
 
 /* ===== CENTER: GuardiApp brand ===== */
@@ -56,13 +57,13 @@
 
 .cdBrandCenter {
     justify-self: center;
-    color: #006236;
+    color: #005a36;
 }
 
 .cdLogo {
     width: 22px;
     height: 22px;
-    fill: #006236;
+    fill: #005a36;
 }
 
 /* ===== RIGHT: Notificaciones + Avatar ===== */
@@ -74,7 +75,7 @@
 }
 
 .cdNotifBtn .material-icons-outlined {
-    color: #94A3B8;
+    color: #94a3b8;
     font-size: 22px;
     line-height: 1;
     transition: color 150ms ease;
@@ -86,7 +87,7 @@
 }
 
 .cdNotifBtn:hover .material-icons-outlined {
-    color: #0F172A;
+    color: #0f172a;
 }
 
 /* ===== Avatar ===== */
@@ -100,8 +101,8 @@
     min-width: 38px;
     min-height: 38px;
     border-radius: 50%;
-    border: 1px solid #E2E8F0;
-    background: #F1F5F9;
+    border: 1px solid #e2e8f0;
+    background: #f1f5f9;
     color: #334155;
     display: flex;
     align-items: center;
@@ -113,7 +114,7 @@
 }
 
 .cdAvatarBtn:hover {
-    background: #E2E8F0;
+    background: #e2e8f0;
     transform: scale(1.04);
 }
 
@@ -150,7 +151,7 @@
     right: 0;
     z-index: 200;
     background: #fff !important;
-    border: 1px solid #E2E8F0 !important;
+    border: 1px solid #e2e8f0 !important;
     border-radius: 12px !important;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12) !important;
     overflow: hidden !important;
@@ -159,7 +160,7 @@
 
 .cdAvatarWrap .cdMenuHeader {
     padding: 14px 14px 12px !important;
-    border-bottom: 1px solid #F1F5F9 !important;
+    border-bottom: 1px solid #f1f5f9 !important;
     background: #fff !important;
 }
 
@@ -174,7 +175,7 @@
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #006236;
+    border: 2px solid #005a36;
     flex-shrink: 0;
 }
 
@@ -182,14 +183,14 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #DCFCE7 0%, #BBF7D0 100%);
-    border: 2px solid #006236;
+    background: linear-gradient(135deg, #d1fae5 0%, #bbf7d0 100%);
+    border: 2px solid #005a36;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 900;
     font-size: 15px;
-    color: #006236;
+    color: #005a36;
     flex-shrink: 0;
 }
 
@@ -200,7 +201,7 @@
 
 .cdAvatarWrap .cdMenuName {
     font-weight: 800 !important;
-    color: #0F172A !important;
+    color: #0f172a !important;
     font-size: 14px;
     white-space: nowrap;
     overflow: hidden;
@@ -210,7 +211,7 @@
 .cdAvatarWrap .cdMenuEmail {
     margin-top: 2px !important;
     font-size: 12px !important;
-    color: #64748B !important;
+    color: #64748b !important;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -227,36 +228,36 @@
     cursor: pointer;
     font-weight: 600;
     font-size: 14px;
-    color: #0F172A;
+    color: #0f172a;
     transition: background 120ms ease;
 }
 
 .cdAvatarWrap .cdMenuItem:hover {
-    background: #F8FAFC;
+    background: #f8fafc;
 }
 
 .cdAvatarWrap .cdMenuItem .material-icons-outlined {
     font-size: 20px;
     line-height: 1;
-    color: #64748B;
+    color: #64748b;
 }
 
 .cdAvatarWrap .cdMenuDivider {
     height: 1px;
-    background: #F1F5F9;
+    background: #f1f5f9;
     margin: 4px 0;
 }
 
 .cdAvatarWrap .cdMenuItem.danger {
-    color: #DC2626;
+    color: #dc2626;
 }
 
 .cdAvatarWrap .cdMenuItem.danger .material-icons-outlined {
-    color: #DC2626;
+    color: #dc2626;
 }
 
 .cdAvatarWrap .cdMenuItem.danger:hover {
-    background: #FEF2F2;
+    background: #fef2f2;
 }
 
 /* Overlay para cerrar al hacer click fuera */
@@ -285,7 +286,7 @@
     height: 18px;
     padding: 0 5px;
     border-radius: 999px;
-    background: #EF4444;
+    background: #ef4444;
     color: #fff;
     font-size: 11px;
     font-weight: 900;
@@ -302,9 +303,9 @@
     width: 320px;
     max-width: calc(100vw - 24px);
     background: #fff;
-    color: #0F172A;
+    color: #0f172a;
     border-radius: 12px;
-    border: 1px solid #E2E8F0;
+    border: 1px solid #e2e8f0;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
     overflow: hidden;
     z-index: 200;
@@ -315,8 +316,8 @@
     align-items: center;
     justify-content: space-between;
     padding: 12px 14px;
-    border-bottom: 1px solid #F1F5F9;
-    background: #F8FAFC;
+    border-bottom: 1px solid #f1f5f9;
+    background: #f8fafc;
 }
 
 .cdNotifTitle {
@@ -330,17 +331,17 @@
     cursor: pointer;
     font-weight: 600;
     font-size: 13px;
-    color: #64748B;
+    color: #64748b;
     transition: color 150ms ease;
 }
 
 .cdNotifClear:hover {
-    color: #0F172A;
+    color: #0f172a;
 }
 
 .cdNotifEmpty {
     padding: 20px 14px;
-    color: #94A3B8;
+    color: #94a3b8;
     font-weight: 600;
     text-align: center;
     font-size: 14px;
@@ -353,12 +354,12 @@
 
 .cdNotifItem {
     padding: 12px 14px;
-    border-bottom: 1px solid #F1F5F9;
+    border-bottom: 1px solid #f1f5f9;
     transition: background 120ms ease;
 }
 
 .cdNotifItem:hover {
-    background: #F8FAFC;
+    background: #f8fafc;
 }
 
 .cdNotifItem:last-child {
@@ -368,11 +369,11 @@
 .cdNotifText {
     font-weight: 600;
     font-size: 13px;
-    color: #0F172A;
+    color: #0f172a;
 }
 
 .cdNotifTime {
     margin-top: 4px;
     font-size: 12px;
-    color: #94A3B8;
+    color: #94a3b8;
 }

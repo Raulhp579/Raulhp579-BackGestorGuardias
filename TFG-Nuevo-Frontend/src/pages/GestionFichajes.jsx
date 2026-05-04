@@ -386,7 +386,7 @@ export default function GestionFichajes() {
                                             key={f.id}
                                             className={`${updatedRowId === f.id ? "ggRowUpdated" : ""} ${deletingId === f.id ? "ggRowExit" : ""}`}
                                         >
-                                            <td className="ggMono">{formatDateTime(f.date_time)}</td>
+                                            <td>{formatDateTime(f.date_time)}</td>
                                             <td>
                                                 <div style={{ display: "flex", flexDirection: "column" }}>
                                                     <span style={{ fontWeight: 700 }}>{f.worker?.user?.name || "N/A"}</span>
