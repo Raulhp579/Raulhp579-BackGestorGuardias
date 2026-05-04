@@ -1,0 +1,431 @@
+.riPage {
+    padding: 2.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    font-family: "Inter", "Outfit", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    color: #1e293b;
+}
+
+.riHeaderRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.riTitleWrap {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.riTitleIcon {
+    font-size: 2.5rem;
+    color: var(--primary-color, #1a7f37);
+    background: #f0fdf4;
+    padding: 0.5rem;
+    border-radius: 12px;
+}
+
+.riTitle {
+    font-size: 2.25rem;
+    color: #0f172a;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.025em;
+}
+
+.riLoadingState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 50vh;
+    color: #64748b;
+    gap: 1rem;
+    font-size: 1.1rem;
+}
+
+.riError {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #fef2f2;
+    color: #b91c1c;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid #ef4444;
+}
+
+.riSection {
+    margin-bottom: 3.5rem;
+}
+
+.riSectionHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    color: #334155;
+}
+
+.riSectionHeader .material-icons-outlined {
+    font-size: 1.75rem;
+    color: #475569;
+}
+
+.riSectionHeader h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.riGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 1.5rem;
+}
+
+.riEmptyState {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    background: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    border-radius: 16px;
+    color: #94a3b8;
+    text-align: center;
+}
+
+.riEmptyState .material-icons-outlined {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #cbd5e1;
+}
+
+.riEmptyState p {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.riCard {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.riCard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    border-color: #cbd5e1;
+}
+
+.riCardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.25rem;
+}
+
+.riUserInfo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.riAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1.2rem;
+}
+
+.riUsersDual {
+    display: flex;
+    align-items: center;
+}
+
+.riDualAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    border: 2px solid white;
+}
+
+.riDualAvatar--left {
+    background: #e0e7ff;
+    color: #3730a3;
+    z-index: 2;
+}
+
+.riDualAvatar--right {
+    background: #fee2e2;
+    color: #991b1b;
+    margin-left: -12px;
+    z-index: 1;
+}
+
+.riUserMeta {
+    display: flex;
+    flex-direction: column;
+}
+
+.riMetaLabel {
+    font-size: 0.75rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+
+.riUserName {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.riCardBody {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+    flex-grow: 1;
+}
+
+.riSwapDatesWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.riDateBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    width: 40%;
+}
+
+.riDateBox .material-icons-outlined {
+    font-size: 1.5rem;
+}
+
+.riDateBox--from .material-icons-outlined {
+    color: #ef4444;
+}
+
+.riDateBox--to .material-icons-outlined {
+    color: #10b981;
+}
+
+.riDateText {
+    font-weight: 600;
+    color: #334155;
+    font-size: 0.95rem;
+}
+
+.riArrowIcon {
+    color: #94a3b8;
+    background: white;
+    border-radius: 50%;
+    padding: 0.25rem;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+}
+
+.riComments {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px dashed #cbd5e1;
+    display: flex;
+    gap: 0.5rem;
+    color: #64748b;
+    align-items: flex-start;
+}
+
+.riComments .material-icons-outlined {
+    font-size: 1.1rem;
+    margin-top: 2px;
+}
+
+.riComments p {
+    margin: 0;
+    font-size: 0.9rem;
+    font-style: italic;
+    line-height: 1.4;
+}
+
+.riActions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.riBtn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border: none;
+    transition: all 0.2s;
+}
+
+.riBtn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    filter: brightness(110%);
+}
+
+.riBtn--accept {
+    background: #10b981;
+    color: white;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+.riBtn--reject {
+    background: #fef2f2;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+}
+
+.riBtn--reject:hover:not(:disabled) {
+    background: #fee2e2;
+}
+
+.riBtn--approve {
+    background: #3b82f6;
+    color: white;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.riBtn--decline {
+    background: #fffbeb;
+    color: #f59e0b;
+    border: 1px solid #fde68a;
+}
+
+.riBtn--decline:hover:not(:disabled) {
+    background: #fef3c7;
+}
+
+.riBtn--primary {
+    background: var(--primary-color, #1a7f37);
+    color: white;
+    padding: 0.75rem 1.25rem;
+    border-radius: 9999px;
+    box-shadow: 0 4px 6px rgba(26, 127, 55, 0.2);
+    flex: none;
+}
+
+.riStatus {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.riStatus .material-icons-outlined {
+    font-size: 1rem;
+}
+
+.riStatus--pending {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.riStatus--accepted {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.riStatus--rejected,
+.riStatus--declined {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.riStatus--approved {
+    background: #e0e7ff;
+    color: #4338ca;
+}
+
+.riToast {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    color: white;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 500;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.riToast .material-icons-outlined {
+    font-size: 1.25rem;
+}
+
+.riToast--success {
+    background: #10b981;
+}
+
+.riToast--error {
+    background: #ef4444;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .riHeaderRow {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    .riPage {
+        padding: 1.5rem 1rem;
+    }
+    .riGrid {
+        grid-template-columns: 1fr;
+    }
+}

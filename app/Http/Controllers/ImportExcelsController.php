@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\DutyType;
 use App\Models\Duty;
 use App\Models\Speciality;
 use App\Models\User;
@@ -10,10 +11,10 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-use Illuminate\Support\Facades\Validator;
-use App\Enums\DutyType;
 
 class ImportExcelsController extends Controller
 {
@@ -21,7 +22,7 @@ class ImportExcelsController extends Controller
     public static function convertDate($date)
     {
         $date = str_replace('/', '-', $date);
-        $timestamp = strtotime($date); //converts a date string into timestamp
+        $timestamp = strtotime($date); // converts a date string into timestamp
         $convertDate = date('Y-m-d', $timestamp);
 
         return $convertDate;
@@ -30,13 +31,13 @@ class ImportExcelsController extends Controller
     private function validateWorkersImport(Request $request)
     {
         $rules = [
-            'file' => 'required|file|mimes:xlsx,xls,ods'
+            'file' => 'required|file|mimes:xlsx,xls,ods',
         ];
 
         $messages = [
             'file.required' => 'the file is required',
             'file.file' => 'the file must be a valid file',
-            'file.mimes' => 'the file must be an Excel file (xlsx, xls or ods)'
+            'file.mimes' => 'the file must be an Excel file (xlsx, xls or ods)',
         ];
 
         return [$rules, $messages];
@@ -83,6 +84,7 @@ class ImportExcelsController extends Controller
                 return $speciality->id;
             }
         }
+
         return null;
     }
 
@@ -98,9 +100,9 @@ class ImportExcelsController extends Controller
                 ]);
             }
 
-           $file = $request->file('file'); //the fetch mut contain the name file. COMENTAR ESTO PARA PROBAR
-           $tmpFile = IOFactory::load($file->getPathname());
-            
+            $file = $request->file('file'); // the fetch mut contain the name file. COMENTAR ESTO PARA PROBAR
+            $tmpFile = IOFactory::load($file->getPathname());
+
             /* $tmpFile = IOFactory::load('excels/LISTADO_FACULTATIVOS_FICTICIO.xlsx'); */
             $sheet = $tmpFile->getSheet(0);
             $data = $sheet->toArray(null, true, true, true);
@@ -115,14 +117,13 @@ class ImportExcelsController extends Controller
                         $persons[] = $pieces[0];
                         $charges[] = $pieces[1];
                         $registrationsDate[] = $this->convertDate($person['B']);
-                        
-                        
+
                     } else {
                         $pieces = explode('.', $person['A']);
                         $persons[] = $pieces[0];
                         $charges[] = null;
                         $registrationsDate[] = $this->convertDate($person['B']);
-                        
+
                     }
                 }
             }
@@ -138,18 +139,22 @@ class ImportExcelsController extends Controller
                 $worker->id_speciality = $this->associateSpeciality($charges[$i]);
                 $worker->registration_date = $registrationsDate[$i];
                 $worker->save();
+                $user = new User;
+                $user->name = $persons[$i];
+                $user->email = strtolower(str_replace(' ', '', $persons[$i])).'@alu.medac.es';
+                $user->password = Hash::make("password");
+                $user->worker_id = $worker->id;
+                $user->save();
             }
 
             return response()->json(['success' => 'The workers has been exported']);
         } catch (Exception $e) {
             return response()->json([
                 'error' => 'there is a problem to import the dutys of the excel',
-                'mistake' => $e->getMessage()
+                'mistake' => $e->getMessage(),
             ]);
         }
     }
-
-
 
     // function to import the Duties
     // it need the month ,the year and the idSpeciality id of the front
@@ -166,12 +171,12 @@ class ImportExcelsController extends Controller
 
             // Ensure month is 2 digits for building dates
             $request->merge([
-                'month' => str_pad((string) $request->month, 2, '0', STR_PAD_LEFT)
+                'month' => str_pad((string) $request->month, 2, '0', STR_PAD_LEFT),
             ]);
 
-           $file = $request->file("file");
+            $file = $request->file('file');
             $tmpFile = IOFactory::load($file->getPathname());
-           /*  $tmpFile = IOFactory::load('excels/DICIEMBRE2025_ANESTESIA.ods'); */
+            /*  $tmpFile = IOFactory::load('excels/DICIEMBRE2025_ANESTESIA.ods'); */
             $sheet = $tmpFile->getSheet(0);
             $data = $sheet->toArray(null, true, true, true);
 
@@ -245,7 +250,6 @@ class ImportExcelsController extends Controller
             foreach ($duties as $duty) {
                 $pieces = explode('.', $duty);
 
-
                 if (str_contains($pieces[0], 'Dra')) {
                     $nameWithDra = explode(' ', $pieces[0]);
 
@@ -254,32 +258,29 @@ class ImportExcelsController extends Controller
                     /* for ($i = 1; $i < count($nameWithDra); $i++) {
                         $name = $name.' '.$nameWithDra[$i];
                     } */
-                    
 
                     $type = $pieces[2];
 
                     // date
                     $day = trim($pieces[3], ' ');
-                    
 
                 } else {
-                    
+
                     $name = $pieces[1];
-                    
+
                     $type = $pieces[2];
                     // date
                     $day = trim($pieces[3], ' ');
 
-                    
                 }
 
-                $dateWithoutFormat = $request->year . '-' . $request->month . '-' . $day;
+                $dateWithoutFormat = $request->year.'-'.$request->month.'-'.$day;
 
                 try {
                     $date = Carbon::createStrict(
-                        (int)$request->year,
-                        (int)$request->month,
-                        (int)$day,
+                        (int) $request->year,
+                        (int) $request->month,
+                        (int) $day,
                         0,
                         0,
                         0
@@ -290,8 +291,9 @@ class ImportExcelsController extends Controller
                         'type' => trim($type ?? ''),
                         'speciality' => $request->idSpeciality,
                         'date' => $dateWithoutFormat,
-                        'error' => 'invalid date'
+                        'error' => 'invalid date',
                     ];
+
                     continue;
                 }
 
@@ -306,12 +308,12 @@ class ImportExcelsController extends Controller
                     'time' => $time,
                 ]; */
 
-                if (!is_int($idWorker)) {
+                if (! is_int($idWorker)) {
                     $errors[] = [
                         'Worker' => $idWorker,
                         'type' => trim($type),
                         'speciality' => $request->idSpeciality,
-                        'date' => $date
+                        'date' => $date,
                     ];
                 } else {
 
@@ -328,8 +330,9 @@ class ImportExcelsController extends Controller
                             'type' => $cleanType,
                             'speciality' => $request->idSpeciality,
                             'date' => $date,
-                            'error' => 'invalid duty type'
+                            'error' => 'invalid duty type',
                         ];
+
                         continue;
                     }
 
@@ -344,24 +347,25 @@ class ImportExcelsController extends Controller
                         continue;
                     }
 
-                    $duty = new Duty();
+                    $duty = new Duty;
                     $duty->date = $date;
                     $duty->duty_type = $cleanType;
                     $duty->id_speciality = $request->idSpeciality;
                     $duty->id_worker = $idWorker;
-                    //$duty->id_chief_worker = null;para despues
+                    // $duty->id_chief_worker = null;para despues
                     $duty->save();
                 }
             }
+
             return response()->json([
-                "success"=>"Duties has been exported",
-                "Duties not exported"=>$errors
+                'success' => 'Duties has been exported',
+                'Duties not exported' => $errors,
             ]);
             /*  return response()->json($workers); */
         } catch (Exception $e) {
             return response()->json([
                 'error' => 'there is a problem to import the dutys of the excel',
-                'mistake' => $e->getMessage()
+                'mistake' => $e->getMessage(),
             ]);
         }
     }
@@ -375,9 +379,11 @@ class ImportExcelsController extends Controller
         } elseif (str_contains($type, 'LOC')) {
             return 24;
         }
+
         return 0;
     }
-    //mirar falla en algunos nombres
+
+    // mirar falla en algunos nombres
     public function associateIdUser($name)
     {
         /* $workers = Worker::where('id',23)->first();
@@ -385,13 +391,11 @@ class ImportExcelsController extends Controller
         $workers = Worker::all();
         $nameWithOutSpace = trim($name);
 
-
         foreach ($workers as $worker) {
             if (str_contains(strtoupper($worker->name), strtoupper($nameWithOutSpace))) {
                 return $worker->id;
             }
         }
-
 
         return Str::upper($nameWithOutSpace);
     }

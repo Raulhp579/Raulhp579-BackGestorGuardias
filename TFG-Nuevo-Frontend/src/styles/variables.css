@@ -1,0 +1,21 @@
+:root {
+    --primary: #007041;
+    --primary-dark: #256d2b;
+    --secondary: #2D453C;
+
+    --bg: #F3F4F6;
+    --card: #FFFFFF;
+    --border: #E5E7EB;
+
+    --text: #111827;
+    --muted: #6B7280;
+
+    --shadow-soft: 0 6px 12px rgba(0, 0, 0, .06);
+    --r: 14px;
+
+    /* Reds */
+    --red-600: #dc2626;
+    --red-700: #b91c1c;
+    --red-700-alpha: rgba(185, 28, 28, 0.90);
+    --red-600-alpha-light: rgba(220, 38, 38, 0.06);
+}

@@ -1,0 +1,16 @@
+html,
+body {
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+}
+
+:root {
+    --appPrimary: #006236;
+    --appPrimaryHover: #004d2a;
+    --appBg: #F8FAFC;
+    --appSurface: #FFFFFF;
+    --appBorder: #E2E8F0;
+    --appText: #0F172A;
+    --appMuted: #64748B;
+
+    --primary: #006236;
+}

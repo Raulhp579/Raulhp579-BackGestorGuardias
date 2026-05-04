@@ -1,0 +1,82 @@
+.raWrap {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    align-items: center;
+}
+
+.raIconBtn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    transition: all 150ms ease;
+}
+
+.raIconBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.raIconBtn .material-icons-outlined {
+    font-size: 20px;
+    line-height: 1;
+    color: #94A3B8; /* Gris medio */
+    transition: color 150ms ease;
+}
+
+.raIconBtn:hover:not(:disabled) {
+    background: #F1F5F9;
+}
+
+.raIconBtn:hover:not(:disabled) .material-icons-outlined {
+    color: #0F172A; /* Gris oscuro en hover */
+}
+
+.raIconBtn.raDanger .material-icons-outlined {
+    color: #94A3B8; /* Mismo gris discreto inicialmente */
+}
+
+.raIconBtn.raDanger:hover:not(:disabled) {
+    background: #FEF2F2;
+}
+
+.raIconBtn.raDanger:hover:not(:disabled) .material-icons-outlined {
+    color: #EF4444; /* Rojo al hacer hover */
+}
+
+/* Chief Assignment Styles */
+.raIconBtn.raStar .material-icons,
+.raIconBtn.raStar .material-icons-outlined {
+    color: #eab308 !important;
+}
+
+.raIconBtn.raActive {
+    background: rgba(234, 179, 8, .1) !important;
+}
+
+.raIconBtn.raStar:hover:not(:disabled) {
+    background: rgba(234, 179, 8, .2) !important;
+}
+
+@media (max-width: 560px) {
+    .raWrap {
+        gap: 8px;
+    }
+
+    .raIconBtn {
+        width: 32px;
+        height: 32px;
+    }
+
+    .raIconBtn .material-icons-outlined {
+        font-size: 18px;
+    }
+}

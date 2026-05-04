@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Worker;
 use App\Models\Speciality;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 
@@ -47,11 +49,28 @@ class WorkerController extends Controller
     /**
      * Get all workers
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
             // Traer trabajadores con su especialidad relacionada
-            $workers = Worker::with('speciality')->get();
+            if(isset($request->name)){
+                $workersAll = Worker::where("name",'LIKE',"%$request->name%")->get();
+            }else{
+                $workersAll = Worker::with('speciality')->get();
+            }
+            
+            $workers = [];
+            foreach($workersAll as $worker){
+                $workers[]=[
+                    "id"=>$worker->id,
+                    "name"=>$worker->name,
+                    "rank"=>$worker->rank,
+                    "registration_date"=>$worker->registration_date,
+                    "discharge_date"=>$worker->discharge_date,
+                    "id_speciality"=>$worker->id_speciality,
+                    "speciality"=>$worker->speciality ? $worker->speciality->name : null
+                ];
+            }
 
             return response()->json($workers);
         } catch (Exception $e) {
@@ -113,6 +132,17 @@ class WorkerController extends Controller
             $worker->discharge_date = $request->discharge_date;
             $worker->id_speciality = $request->id_speciality;
             $worker->save();
+
+            // Create User automatically
+            $user = new User;
+            $user->name = $request->name;
+            // Generate email: name.surname@alu.medac.es (simplified logic based on ImportExcelsController)
+            // ImportExcelsController uses: strtolower(str_replace(' ', '', $persons[$i])).'@alu.medac.es';
+            $user->email = strtolower(str_replace(' ', '', $request->name)).'@alu.medac.es';
+            $password = $request->password ? $request->password : "password";
+            $user->password = Hash::make($password);
+            $user->worker_id = $worker->id;
+            $user->save();
 
             return response()->json([
                 'success' => 'El trabajador ha sido creado correctamente',
@@ -263,6 +293,42 @@ class WorkerController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'error' => 'Hay un problema al obtener los trabajadores activos',
+                'mistake' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get all duties for a specific worker
+     */
+    public function getDuties(string $id)
+    {
+        try {
+            $worker = Worker::find($id);
+            if (!$worker) {
+                return response()->json(['error' => 'Worker not found'], 404);
+            }
+
+            $duties = $worker->duties()
+                ->with(['speciality', 'worker'])
+                ->orderBy('date', 'asc')
+                ->get()
+                ->map(function($duty) {
+                    return [
+                        'id' => $duty->id,
+                        'date' => $duty->date,
+                        'duty_type' => $duty->duty_type,
+                        'id_speciality' => $duty->id_speciality,
+                        'speciality' => $duty->speciality?->name ?? null,
+                        'id_worker' => $duty->id_worker,
+                        'worker' => $duty->worker?->name ?? null,
+                    ];
+                });
+
+            return response()->json($duties);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => 'Error fetching worker duties',
                 'mistake' => $e->getMessage(),
             ], 500);
         }

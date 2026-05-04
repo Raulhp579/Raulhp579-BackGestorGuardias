@@ -1,0 +1,50 @@
+/* Centralized button styles (used across the app) */
+
+.btnPrimary {
+    border: none;
+    background: var(--primary);
+    color: #fff;
+    font-weight: 900;
+    padding: 10px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 180ms ease;
+}
+
+.btnPrimary:hover:not(:disabled) {
+    background: var(--primary-dark);
+}
+
+.btnSecondary {
+    border: 1px solid var(--border);
+    background: #fff;
+    color: #374151;
+    font-weight: 900;
+    padding: 10px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease;
+}
+
+.btnSecondary:hover:not(:disabled) {
+    background: #F3F4F6;
+}
+
+/* Destructive variant for secondary buttons (modal Cancel used as destructive-like) */
+.btnSecondary--destructive {
+    background: var(--red-600-alpha-light);
+    border-color: rgba(220, 38, 38, 0.12);
+    color: #7f1d1d;
+}
+
+.btnSecondary--destructive:hover:not(:disabled) {
+    background: var(--red-700-alpha);
+    border-color: var(--red-700-alpha);
+    color: #fff;
+}
+
+.btnSecondary:disabled,
+.btnPrimary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

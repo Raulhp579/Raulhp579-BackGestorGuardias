@@ -27,4 +27,19 @@ class Worker extends Model
     {
         return $this->belongsTo(Speciality::class, 'id_speciality');
     }
+
+    public function chiefOf()
+    {
+        return $this->hasOne(Speciality::class, 'id_chief');
+    }
+
+    public function fichajes()
+    {
+        return $this->hasMany(Fichaje::class, 'worker_id');
+    }
+
+    public function user()
+    {
+        return $this->hasOne(User::class, 'worker_id');
+    }
 }

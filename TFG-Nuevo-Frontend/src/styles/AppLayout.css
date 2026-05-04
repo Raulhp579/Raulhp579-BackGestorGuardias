@@ -1,14 +1,19 @@
-:root {
-    --appPrimary: #2F5D4E;
-    --appPrimaryHover: #244a3e;
-    --appBg: #F3F4F6;
-    --appSurface: #FFFFFF;
-    --appBorder: #E5E7EB;
-    --appText: #111827;
-    --appMuted: #6B7280;
+/* ============================================================
+   AppLayout.css — Shell principal: Sidebar | Header + Content
+   Paleta Institucional Junta de Andalucía
+   ============================================================ */
 
-    /* Para tu cdHeader */
-    --primary: var(--appPrimary);
+:root {
+    --appPrimary: #005a36;
+    --appPrimaryHover: #063725;
+    --appBg: #eef2f6;
+    --appSurface: #ffffff;
+    --appBorder: #e0e4e8;
+    --appText: #063725;
+    --appMuted: #6b7280;
+    --appHeaderH: 64px;
+    --sidebarW: 260px;
+    --softShadow: 0 4px 20px rgba(0, 0, 0, 0.04);
 }
 
 * {
@@ -22,9 +27,11 @@ body {
     background: var(--appBg);
 }
 
+/* ===== RAÍZ: flex min-h-screen w-full ===== */
 .appShell {
-    min-height: 100vh;
     display: flex;
+    min-height: 100vh;
+    width: 100%;
     background: var(--appBg);
 }
 
@@ -32,12 +39,12 @@ body {
 .appOverlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, .45);
+    background: rgba(0, 0, 0, 0.45);
     backdrop-filter: blur(4px);
     z-index: 55;
     opacity: 0;
     pointer-events: none;
-    transition: opacity .2s ease;
+    transition: opacity 0.2s ease;
 }
 
 .appOverlay.show {
@@ -45,65 +52,105 @@ body {
     pointer-events: auto;
 }
 
-/* ===== SIDEBAR (móvil/tablet por defecto: off-canvas) ===== */
+/* ===== SIDEBAR: VERDE CORPORATIVO OSCURO ===== */
 .appSidebar {
+    /* Móvil: off-canvas */
     position: fixed;
     top: 0;
     bottom: 0;
     left: 0;
-
-    width: 288px;
-    background: var(--appPrimary);
-    color: #fff;
-
+    width: var(--sidebarW);
+    height: 100%;
+    background: #005a36;
+    color: #ffffff;
     transform: translateX(-100%);
-    transition: transform .25s ease;
+    transition: transform 0.25s ease;
     z-index: 65;
-
     display: flex;
     flex-direction: column;
+    flex-shrink: 0;
 
-    box-shadow: 0 18px 40px rgba(0, 0, 0, .25);
+    /* Sin borde — el contraste ya separa */
+    border-right: none;
+    border-top: none;
+    border-bottom: none;
 }
 
 .appSidebar.open {
     transform: translateX(0);
 }
 
+/* Brand area en el sidebar */
 .appSidebarBrand {
-    padding: 18px 16px;
+    padding: 0 16px;
     display: flex;
     align-items: center;
     gap: 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, .10);
     position: relative;
+    background: transparent;
+    height: var(--appHeaderH);
+    flex-shrink: 0;
+
+    /* Línea inferior sutil en el sidebar */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .appSidebarLogo {
-    width: 32px;
-    height: 32px;
-    fill: currentColor;
+    width: 26px;
+    height: 26px;
+    fill: #ffffff;
+    flex-shrink: 0;
 }
 
 .appSidebarTitle {
     margin: 0;
-    font-size: 16px;
-    line-height: 1.1;
-    font-weight: 900;
+    font-size: 14px;
+    line-height: 1.15;
+    font-weight: 800;
+    color: #ffffff;
 }
 
-/* Botón X: solo se usa en móvil/tablet */
+/* Botón X (solo móvil) */
 .closeOnlyMobile {
     position: absolute;
-    right: 10px;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: all 0.16s ease;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
 }
 
+.closeOnlyMobile .material-icons-outlined {
+    font-size: 20px;
+    line-height: 1;
+}
+
+.closeOnlyMobile:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.closeOnlyMobile:active {
+    transform: translateY(-50%) scale(0.96);
+}
+
+/* ===== NAV ===== */
 .appNav {
-    padding: 16px 10px;
+    padding: 12px 10px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    overflow: auto;
+    gap: 2px;
+    overflow-y: auto;
+    flex: 1;
 }
 
 .appNavItem {
@@ -111,57 +158,61 @@ body {
     align-items: center;
     gap: 12px;
     padding: 12px 14px;
-    border-radius: 12px;
-    color: rgba(255, 255, 255, .82);
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.7);
     text-decoration: none;
-    font-weight: 700;
+    font-weight: 600;
+    font-size: 15px;
     background: transparent;
     border: none;
+    border-left: 4px solid transparent;
     text-align: left;
     cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.appNavItem .material-icons-outlined {
+    font-size: 22px;
 }
 
 .appNavItem:hover {
-    background: rgba(255, 255, 255, .10);
-    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
 }
 
 .appNavItem.active {
-    background: rgba(255, 255, 255, .20);
-    color: #fff;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .10);
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    font-weight: 700;
+    border-left: 4px solid #ffffff;
 }
 
 .appNavDivider {
     height: 1px;
-    background: rgba(255, 255, 255, .10);
-    margin: 10px 6px;
+    background: rgba(255, 255, 255, 0.15);
+    margin: 6px 6px;
 }
 
 .appNavItem.danger {
-    color: rgba(255, 255, 255, .9);
+    color: #fca5a5;
 }
 
 .appNavItem.danger:hover {
-    background: rgba(239, 68, 68, .18);
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
 }
 
 .appSidebarFooter {
     margin-top: auto;
-    padding: 14px 16px;
-    border-top: 1px solid rgba(255, 255, 255, .10);
-    font-size: 12px;
-    color: rgba(255, 255, 255, .55);
+    padding: 12px 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
     text-align: center;
 }
 
-/* Main */
-.appMain {
-    flex: 1;
-    width: 100%;
-}
-
-/* Columna derecha: header arriba + contenido debajo */
+/* ===== COLUMNA DERECHA (header + main) ===== */
 .appBody {
     flex: 1;
     min-width: 0;
@@ -169,40 +220,102 @@ body {
     flex-direction: column;
 }
 
-/* ===== DESKTOP: sidebar fijo visible ===== */
+/* Header: vive DENTRO de appBody — flota con sombra suave */
+.cdHeader {
+    height: var(--appHeaderH);
+    flex-shrink: 0;
+    /* Sin borde — separación por sombra */
+    border: none;
+    box-shadow: var(--softShadow);
+    position: relative;
+    z-index: 10;
+}
+
+.cdHeaderInner {
+    height: 100%;
+}
+
+/* Main: ocupa el espacio restante del body */
+.appMain {
+    flex: 1;
+    width: 100%;
+    background: var(--appBg);
+}
+
+/* ===== DESKTOP: sidebar fijo al lado del body ===== */
 @media (min-width: 1024px) {
     .appOverlay {
         display: none !important;
     }
 
-
     .appSidebar {
+        /* Sale de fixed → sticky para que conviva con flex */
         position: sticky;
         top: 0;
         height: 100vh;
-        overflow: auto;
         transform: none;
         transition: none;
         box-shadow: none;
+        overflow-y: auto;
+        /* Sin borde — el color ya delimita */
+        border-right: none;
+        border-top: none;
+        border-bottom: none;
     }
-
-    @media (min-width: 1024px) {
-        .appSidebar {
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            transform: none;
-            box-shadow: none;
-        }
-    }
-
-
 
     .closeOnlyMobile {
         display: none;
     }
+}
 
-    .appMain {
-        min-height: 100vh;
+/* Icono hamburguesa (móvil) */
+@media (max-width: 1023px) {
+    .cdMenuBtn .material-icons-outlined {
+        color: var(--appText) !important;
+    }
+}
+
+/* ===== BADGES, TOAST ===== */
+.appNavBadge {
+    background: #ef4444;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    padding: 0 0.25rem;
+}
+
+.appToast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--appPrimary);
+    color: white;
+    padding: 14px 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.95rem;
+    max-width: 360px;
+    animation: toastSlideIn 0.3s ease;
+}
+
+@keyframes toastSlideIn {
+    from {
+        transform: translateX(110%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
     }
 }

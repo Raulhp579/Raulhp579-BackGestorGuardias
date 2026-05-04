@@ -1,10 +1,16 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import AppLayout from "../layout/AppLayout";
+import ProtectedRoute from "../components/ProtectedRoute/ProtectedRoute";
 
+import Home from "../pages/Home";
 import Login from "../pages/Login";
 import HomeDashboard from "../pages/HomeDashboard";
 import Guardias from "../pages/GestionGuardias";
-import Calculos from "../pages/CalculosDocumentos";
+import GestionFichajes from "../pages/GestionFichajes";
+import GestionUsuarios from "../pages/GestionUsuarios";
+import PerfilUsuario from "../pages/PerfilUsuario";
+import MisGuardias from "../pages/MisGuardias";
+import RequestsInbox from "../pages/RequestsInbox";
 
 // Nuevas páginas legales
 import AvisoLegal from "../pages/AvisoLegal";
@@ -13,27 +19,54 @@ import Privacidad from "../pages/Privacidad";
 // import PanelAdmin from "../pages/PanelAdministracion";
 
 export default function AppRouter() {
-  return (
-    <Routes>
-      {/* Pública */}
-      <Route path="/login" element={<Login />} />
+    return (
+        <Routes>
+            {/* Público */}
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
 
-      {/* Privadas con layout (Header + Sidebar + Footer si lo metes en AppLayout) */}
-      <Route element={<AppLayout />}>
-        <Route path="/home" element={<HomeDashboard />} />
-        <Route path="/guardias" element={<Guardias />} />
-        <Route path="/calculos" element={<Calculos />} />
+            {/* Privadas con layout (Header + Sidebar + Footer) */}
+            <Route element={<AppLayout />}>
+                <Route path="/home" element={<HomeDashboard />} />
+                <Route path="/perfil" element={<PerfilUsuario />} />
+                <Route path="/mis-guardias" element={<MisGuardias />} />
+                <Route path="/solicitudes" element={<RequestsInbox />} />
 
-        {/* Legales (también dentro del layout para mantener header/sidebar) */}
-        <Route path="/aviso-legal" element={<AvisoLegal />} />
-        <Route path="/privacidad" element={<Privacidad />} />
+                {/* SOLO ADMIN - Protegido con ProtectedRoute */}
+                <Route
+                    path="/guardias"
+                    element={
+                        <ProtectedRoute requireAdmin={true}>
+                            <Guardias />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/fichajes"
+                    element={
+                        <ProtectedRoute requireAdmin={true}>
+                            <GestionFichajes />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/usuarios"
+                    element={
+                        <ProtectedRoute requireAdmin={true}>
+                            <GestionUsuarios />
+                        </ProtectedRoute>
+                    }
+                />
 
-        {/* <Route path="/panelAdmin" element={<PanelAdmin />} /> */}
-      </Route>
+                {/* Legales (también dentro del layout para mantener header/sidebar) */}
+                <Route path="/aviso-legal" element={<AvisoLegal />} />
+                <Route path="/privacidad" element={<Privacidad />} />
 
-      {/* Default */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
-      <Route path="*" element={<Navigate to="/login" replace />} />
-    </Routes>
-  );
+                {/* <Route path="/panelAdmin" element={<PanelAdmin />} /> */}
+            </Route>
+
+            {/* Default */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+    );
 }

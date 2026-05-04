@@ -1,0 +1,150 @@
+.contactPage {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background:
+        radial-gradient(900px 520px at 18% 22%,
+            rgba(46, 125, 77, 0.08) 0%,
+            transparent 62%),
+        radial-gradient(980px 620px at 82% 30%,
+            rgba(36, 100, 61, 0.07) 0%,
+            transparent 64%),
+        #f3f4f6;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.contactContainer {
+    width: 100%;
+    max-width: 600px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06), 0 4px 10px rgba(0, 0, 0, 0.04);
+    padding: 50px;
+    position: relative;
+    z-index: 2;
+    animation: slideInUp 0.6s ease-out;
+}
+
+.contactContainer h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #2e7d4d;
+    margin: 0 0 12px 0;
+    text-align: center;
+}
+
+/* FORMULARIO */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    animation: slideInUp 0.6s ease-out;
+}
+
+.formGroup:nth-child(2) { animation-delay: 0.1s; }
+.formGroup:nth-child(3) { animation-delay: 0.2s; }
+.formGroup:nth-child(4) { animation-delay: 0.3s; }
+.formGroup:nth-child(5) { animation-delay: 0.4s; }
+
+.formGroup label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
+
+.formGroup input,
+.formGroup textarea {
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus {
+    outline: none;
+    border-color: #2e7d4d;
+    box-shadow: 0 0 0 2px rgba(46, 125, 77, 0.1);
+    transform: translateY(-2px);
+}
+
+.formGroup textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* BOTÓN */
+.submitButton {
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #2e7d4d 0%, #24643d 100%);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: all 0.3s ease;
+    animation: slideInUp 0.6s ease-out 0.5s both;
+}
+
+.submitButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(46, 125, 77, 0.3);
+}
+
+.submitButton:active {
+    transform: translateY(0);
+}
+
+/* ANIMACIONES */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+    .contactContainer {
+        padding: 20px;
+    }
+
+    .contactContainer h1 {
+        font-size: 22px;
+    }
+
+    form {
+        gap: 12px;
+    }
+}
+
+

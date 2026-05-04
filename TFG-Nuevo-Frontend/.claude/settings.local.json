@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php artisan *)",
+      "Bash(curl -s -X POST http://localhost:8000/api/fichajes -H 'Authorization: Bearer 3|XXomzVjXYZwdDq2zKtxpU8vBweXbLjz4jWbLINGa6dafced7' -H 'Content-Type: application/json' -d '{}')",
+      "Bash(python -m json.tool)",
+      "Bash(curl -s http://localhost:8000/api/login -X GET)",
+      "Bash(curl -s -X POST http://localhost:8080/api/fichajes -H 'Authorization: Bearer 3|XXomzVjXYZwdDq2zKtxpU8vBweXbLjz4jWbLINGa6dafced7' -H 'Content-Type: application/json' -H 'Accept: application/json' -d '{}')",
+      "Bash(curl -s -X POST https://raulhp579-backgestorguardias.test/api/fichajes -H 'Authorization: Bearer 3|XXomzVjXYZwdDq2zKtxpU8vBweXbLjz4jWbLINGa6dafced7' -H 'Content-Type: application/json' -H 'Accept: application/json' -d '{}' -k)",
+      "Bash(curl -s -X POST https://raulhp579-backgestorguardias.test/api/fichajes -H 'Authorization: Bearer 3|XXomzVjXYZwdDq2zKtxpU8vBweXbLjz4jWbLINGa6dafced7' -H 'Content-Type: application/json' -H 'Accept: application/json' -d '{\"latitude\": 40.4168, \"longitude\": -3.7038}' -k)",
+      "Bash(curl -s -X POST https://raulhp579-backgestorguardias.test/api/fichajes -H 'Authorization: Bearer 3|XXomzVjXYZwdDq2zKtxpU8vBweXbLjz4jWbLINGa6dafced7' -H 'Content-Type: application/json' -H 'Accept: application/json' -d '{\"latitude\": 37.876, \"longitude\": -4.814}' -k)",
+      "Bash(curl -s -X POST https://raulhp579-backgestorguardias.test/api/fichajes -H 'Authorization: Bearer 6|TKnUe67GB2SazNLLxQJOaSMg9neWcE9AMan1usit3c0d9b10' -H 'Content-Type: application/json' -H 'Accept: application/json' -d '{\"latitude\": 37.876, \"longitude\": -4.814}' -k)",
+      "Bash(awk '/broadcaster/{print NR\": \"substr\\($0, index\\($0,\"broadcaster\"\\)-80, 300\\)}' C:/proyectos/Raulhp579-BackGestorGuardias/public/app/assets/index-kTpCAD-j.js)"
+    ]
+  }
+}

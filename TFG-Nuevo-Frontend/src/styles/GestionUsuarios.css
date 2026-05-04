@@ -1,0 +1,276 @@
+/* ===================================================================
+   GestionUsuarios.css — Refactorización SaaS Premium (Basado en Guardias)
+   =================================================================== */
+
+:root {
+    --primary: #006236;
+    --primaryHover: #004d2a;
+    --primaryLight: #DCFCE7;
+
+    --bg: #F1F5F9; /* slate-100 */
+    --bg-50: #F8FAFC; /* slate-50 */
+    --card: #FFFFFF;
+    --border: #E2E8F0;
+    --borderLight: #F1F5F9;
+
+    --text: #0F172A;
+    --muted: #64748B;
+    --subtle: #94A3B8;
+
+    --shadow-card: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+    height: 100%;
+    margin: 0;
+    background: var(--bg);
+    font-family: Inter, system-ui, -apple-system, sans-serif;
+}
+
+.guPage {
+    width: 100%;
+    min-height: calc(100vh - 64px);
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+}
+
+.guMain {
+    width: 100%;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+/* ===== CARD PRINCIPAL ===== */
+.guCard {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-card);
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/* ===== SEGMENTED CONTROL ===== */
+.guSegmentedControl {
+    display: inline-flex;
+    width: fit-content;
+    background-color: #E2E8F0;
+    padding: 6px;
+    border-radius: 9999px;
+    margin-bottom: 24px;
+}
+
+.guSegBtn {
+    padding: 10px 32px;
+    font-size: 14px;
+    border-radius: 9999px;
+    font-weight: 500;
+    color: #475569;
+    transition: all 150ms ease;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+}
+
+.guSegBtn:hover {
+    color: #0F172A;
+}
+
+.guSegBtn.active {
+    background: #FFFFFF;
+    color: #006236;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+}
+
+/* ===== HEADER (Buscador y Botones) ===== */
+.guHeaderRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--card);
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.guHeaderLeft {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.guHeaderRight {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Search Bar */
+.guSearch {
+    display: flex;
+    align-items: center;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 16px;
+    width: 320px;
+    gap: 10px;
+    transition: border-color 150ms ease;
+}
+
+.guSearch:focus-within {
+    border-color: var(--primary);
+}
+
+.guSearch input {
+    border: none;
+    outline: none;
+    background: transparent;
+    width: 100%;
+    font-size: 14px;
+    color: var(--text);
+}
+
+.guSearch .material-icons {
+    color: var(--subtle);
+    font-size: 20px;
+}
+
+.guSearchClear {
+    background: none;
+    border: none;
+    color: var(--subtle);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 0;
+}
+.guSearchClear:hover { color: var(--text); }
+
+/* ===== BOTONES ===== */
+.guBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 150ms ease;
+    border: 1px solid transparent;
+}
+
+.guBtn .material-icons {
+    font-size: 18px;
+}
+
+.guBtn.primary {
+    background: var(--primary);
+    color: #FFFFFF;
+}
+
+.guBtn.primary:hover {
+    background: var(--primaryHover);
+}
+
+.guBtn.outline {
+    background: var(--card);
+    border-color: var(--border);
+    color: var(--muted);
+}
+
+.guBtn.outline:hover {
+    background: var(--bg-50);
+    color: var(--text);
+}
+
+/* ===== TABLA ===== */
+.guTableWrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.guTable {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.guTable thead th {
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    background: var(--bg-50);
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+}
+
+.guTable tbody td {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--borderLight);
+    font-size: 14px;
+    color: var(--text);
+}
+
+.guTable tbody tr:hover {
+    background: var(--bg-50);
+}
+
+/* ===== ACCIONES / ESTADOS ===== */
+.guReadOnly {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #94A3B8; /* slate-400 */
+    font-size: 13px;
+    font-weight: 500;
+    user-select: none;
+}
+.guReadOnly .material-icons-outlined {
+    font-size: 16px;
+}
+
+/* Loading/Error */
+.guError {
+    padding: 20px 24px;
+    color: #DC2626;
+    background: #FEF2F2;
+    border-bottom: 1px solid #FECACA;
+    font-weight: 500;
+}
+
+/* ===== SKELETON LOADER ===== */
+.cdSkRow td {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--borderLight);
+}
+
+.cdSk {
+    background: #E2E8F0;
+    border-radius: 4px;
+    height: 16px;
+    animation: pulse 1.5s infinite;
+}
+
+.skMd { width: 120px; }
+.skSm { width: 80px; }
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
