@@ -415,14 +415,12 @@ export default function GestionUsuarios() {
                         a.id === editRow.id ? { ...a, ...payload } : a,
                     ),
                 );
+                handleSuccessEdit(editRow.id);
+                showToast("Administrador actualizado correctamente", "success");
             }
 
-            if (editType === "worker") {
+            if (!isCreating && editType === "worker") {
                 handleSuccessEdit(editRow.id);
-                showToast("Trabajador actualizado correctamente", "success");
-            } else {
-                handleSuccessEdit(editRow.id);
-                showToast("Usuario actualizado correctamente", "success");
             }
             closeEdit();
         } catch (err) {
@@ -515,15 +513,50 @@ export default function GestionUsuarios() {
         setDeleteError("");
     }
 
-    // Toast notifications
-    const [toast, setToast] = useState({
-        visible: false,
-        message: "",
-        type: "success",
-    });
-    function showToast(message, type = "success", ms = 3000) {
-        setToast({ visible: true, message, type });
-        setTimeout(() => setToast((t) => ({ ...t, visible: false })), ms);
+    // Toast notifications — DOM imperativo, sin React state
+    function showToast(message, type = "success", ms = 3500) {
+        const prev = document.getElementById("__guToast__");
+        if (prev) prev.remove();
+
+        const el = document.createElement("div");
+        el.id = "__guToast__";
+        el.setAttribute("role", "status");
+
+        const icon = document.createElement("span");
+        icon.className = "material-icons";
+        icon.textContent = type === "success" ? "check_circle" : "error";
+        icon.style.cssText = "font-size:20px;flex-shrink:0;line-height:1";
+
+        const text = document.createElement("span");
+        text.textContent = message;
+
+        el.appendChild(icon);
+        el.appendChild(text);
+
+        Object.assign(el.style, {
+            position:   "fixed",
+            bottom:     "32px",
+            right:      "28px",
+            zIndex:     "99999",
+            display:    "flex",
+            alignItems: "center",
+            gap:        "10px",
+            padding:    "14px 20px",
+            borderRadius: "14px",
+            color:      "#fff",
+            fontSize:   "14px",
+            fontWeight: "600",
+            fontFamily: "Inter,system-ui,sans-serif",
+            boxShadow:  "0 8px 32px rgba(0,0,0,0.28)",
+            background: type === "success"
+                ? "linear-gradient(135deg,#10B981,#059669)"
+                : "linear-gradient(135deg,#EF4444,#DC2626)",
+            minWidth:   "220px",
+            maxWidth:   "360px",
+        });
+
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), ms);
     }
 
     function onEditFieldChange(e) {
@@ -687,6 +720,7 @@ export default function GestionUsuarios() {
     }
 
     return (
+        <>
         <div className="guPage">
             <main className="guMain">
                 {/* Segmented Control */}
@@ -768,11 +802,6 @@ export default function GestionUsuarios() {
 
                     {/* TOAST de notificaciones (Joyride, Errores) */}
                     <div style={{ position: "absolute" }}>
-                        {toast.visible && (
-                            <div className={`cdToast ${toast.type === "error" ? "error" : "success"}`}>
-                                {toast.message}
-                            </div>
-                        )}
                         <Joyride
                             steps={tourSteps}
                             run={runTour}
@@ -1279,16 +1308,8 @@ export default function GestionUsuarios() {
                     </div>
                 )}
 
-                {toast.visible && (
-                    <div
-                        className={`toast ${toast.type === "success" ? "toast--success" : "toast--error"}`}
-                        role="status"
-                        aria-live="polite"
-                    >
-                        {toast.message}
-                    </div>
-                )}
             </main>
         </div>
+        </>
     );
 }

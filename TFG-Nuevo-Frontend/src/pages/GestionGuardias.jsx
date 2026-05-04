@@ -10,15 +10,41 @@ import {
 import { assignChiefs, getWorkers, isUserAdmin } from "../services/userService";
 import { getSpecialities } from "../services/SpecialitiesService";
 import { importExcel } from "../services/importExcelService";
-import { useNotifications } from "../context/NotificationsContext";
 
 import RowActions from "../components/RowActions/RowActions";
 import Select2 from "../components/Select2/Select2";
 import Joyride, { STATUS } from "react-joyride-react-19";
 
+function showToast(message, type = "success", ms = 3500) {
+    const prev = document.getElementById("__guToast__");
+    if (prev) prev.remove();
+    const el = document.createElement("div");
+    el.id = "__guToast__";
+    const icon = document.createElement("span");
+    icon.className = "material-icons";
+    icon.textContent = type === "success" ? "check_circle" : "error";
+    icon.style.cssText = "font-size:20px;flex-shrink:0;line-height:1";
+    const text = document.createElement("span");
+    text.textContent = message;
+    el.appendChild(icon);
+    el.appendChild(text);
+    Object.assign(el.style, {
+        position: "fixed", bottom: "32px", right: "28px", zIndex: "99999",
+        display: "flex", alignItems: "center", gap: "10px",
+        padding: "14px 20px", borderRadius: "14px", color: "#fff",
+        fontSize: "14px", fontWeight: "600", fontFamily: "Inter,system-ui,sans-serif",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.28)",
+        background: type === "success"
+            ? "linear-gradient(135deg,#10B981,#059669)"
+            : "linear-gradient(135deg,#EF4444,#DC2626)",
+        minWidth: "220px", maxWidth: "360px",
+    });
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), ms);
+}
+
 export default function GestionGuardias() {
     const navigate = useNavigate();
-    const { addNotification } = useNotifications();
     const SKELETON_ROWS = 8;
 
     // micro-animaciones filas (EDIT + DELETE)
@@ -213,9 +239,7 @@ export default function GestionGuardias() {
 
             await reloadDuties();
 
-            addNotification(
-                `Se han importado guardias desde Excel (${new Date().toLocaleTimeString()}).`,
-            );
+            showToast(`Se han importado guardias desde Excel (${new Date().toLocaleTimeString()}).`);
         } catch (error) {
             setImportMsg(error?.message || "Error al importar el archivo");
         }
@@ -705,24 +729,19 @@ export default function GestionGuardias() {
         setEditSaving(true);
         try {
             if (isCreating) {
-                // Crear nueva guardia
-                // Crear nueva guardia
                 const response = await createDuty(payload);
-
                 setGuardias((prev) => [response.data || response, ...prev]);
+                showToast("Guardia creada correctamente.");
             } else {
-                // Editar guardia existente
                 if (!editRowId) return;
                 const response = await updateDuty(editRowId, payload);
-                // Extraer el objeto actualizado (según tu servicio, puede venir en response.data o response directo)
                 const updatedDuty = response.data || response;
-
                 setGuardias((prev) =>
                     prev.map((g) => (g.id === editRowId ? updatedDuty : g)),
                 );
-
                 setUpdatedRowId(editRowId);
                 setTimeout(() => setUpdatedRowId(null), 1200);
+                showToast("Guardia actualizada correctamente.");
             }
 
             setEditOpen(false);
@@ -763,10 +782,12 @@ export default function GestionGuardias() {
 
             setDeleteOpen(false);
             setDeleteRow(null);
+            showToast("Guardia eliminada correctamente.");
         } catch (err) {
             console.error(err);
             setDeletingId(null);
             setDeleteError(err?.message || "No se pudo eliminar la guardia.");
+            showToast("Error al eliminar la guardia.", "error");
         } finally {
             setDeleteLoading(false);
         }

@@ -9,7 +9,6 @@ import {
 } from "../services/FichajeService";
 import { getWorkers, isUserAdmin } from "../services/userService";
 import { getDuties } from "../services/DutyService";
-import { useNotifications } from "../context/NotificationsContext";
 import RowActions from "../components/RowActions/RowActions";
 import Select2 from "../components/Select2/Select2";
 import L from "leaflet";
@@ -24,9 +23,36 @@ L.Icon.Default.mergeOptions({
     shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
 });
 
+function showToast(message, type = "success", ms = 3500) {
+    const prev = document.getElementById("__guToast__");
+    if (prev) prev.remove();
+    const el = document.createElement("div");
+    el.id = "__guToast__";
+    const icon = document.createElement("span");
+    icon.className = "material-icons";
+    icon.textContent = type === "success" ? "check_circle" : "error";
+    icon.style.cssText = "font-size:20px;flex-shrink:0;line-height:1";
+    const text = document.createElement("span");
+    text.textContent = message;
+    el.appendChild(icon);
+    el.appendChild(text);
+    Object.assign(el.style, {
+        position: "fixed", bottom: "32px", right: "28px", zIndex: "99999",
+        display: "flex", alignItems: "center", gap: "10px",
+        padding: "14px 20px", borderRadius: "14px", color: "#fff",
+        fontSize: "14px", fontWeight: "600", fontFamily: "Inter,system-ui,sans-serif",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.28)",
+        background: type === "success"
+            ? "linear-gradient(135deg,#10B981,#059669)"
+            : "linear-gradient(135deg,#EF4444,#DC2626)",
+        minWidth: "220px", maxWidth: "360px",
+    });
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), ms);
+}
+
 export default function GestionFichajes() {
     const navigate = useNavigate();
-    const { addNotification } = useNotifications();
     const pageSize = 10;
 
     // Table state
@@ -268,12 +294,12 @@ export default function GestionFichajes() {
 
             if (isCreating) {
                 await createFichaje(payload);
-                addNotification("Fichaje creado correctamente.");
+                showToast("Fichaje creado correctamente.");
             } else {
                 await updateFichaje(editRowId, payload);
                 setUpdatedRowId(editRowId);
                 setTimeout(() => setUpdatedRowId(null), 1200);
-                addNotification("Fichaje actualizado correctamente.");
+                showToast("Fichaje actualizado correctamente.");
             }
             setEditOpen(false);
             reloadData();
@@ -294,14 +320,14 @@ export default function GestionFichajes() {
         setDeletingId(deleteRow.id);
         try {
             await deleteFichaje(deleteRow.id);
-            addNotification("Fichaje eliminado.");
+            showToast("Fichaje eliminado.");
             setDeleteOpen(false);
             setTimeout(() => {
                 setFichajes(prev => prev.filter(f => f.id !== deleteRow.id));
                 setDeletingId(null);
             }, 200);
         } catch (e) {
-            addNotification("Error al eliminar el fichaje.", "error");
+            showToast("Error al eliminar el fichaje.", "error");
             setDeletingId(null);
         } finally {
             setDeleteLoading(false);
@@ -409,7 +435,7 @@ export default function GestionFichajes() {
                                                                 if(f.latitude && f.longitude) {
                                                                     setMapRow(f); setMapOpen(true);
                                                                 } else {
-                                                                    addNotification("Este fichaje no tiene ubicación GPS guardada.", "error");
+                                                                    showToast("Este fichaje no tiene ubicación GPS guardada.", "error");
                                                                 }
                                                             }}>
                                                             <span className="material-icons-outlined" style={{color: f.latitude ? '#3b82f6' : '#cbd5e1', fontSize: '20px'}}>map</span>
