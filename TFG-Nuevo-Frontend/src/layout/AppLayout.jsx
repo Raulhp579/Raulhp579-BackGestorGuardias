@@ -105,8 +105,10 @@ export default function AppLayout() {
         const globalDone = localStorage.getItem("global_tutorial_done");
         if (globalDone) return;
 
-        const phase = localStorage.getItem("tutorial_phase");
         const pathname = location.pathname;
+        if (pathname === "/") return;
+
+        const phase = localStorage.getItem("tutorial_phase");
 
         if (!phase) {
             if (pathname !== "/usuarios") {

@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from "react";
 import "../components/style/Header.css";
 import { useNotifications } from "../context/NotificationsContext";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 function getInitials(name = "") {
     const clean = name.trim();
@@ -13,6 +13,7 @@ function getInitials(name = "") {
 }
 
 export default function Header({ onMenuClick, user, onLogout, onProfile }) {
+    const navigate = useNavigate();
     const [menuOpen, setMenuOpen] = useState(false);
     const { items, unreadCount, markAllRead, clearAll, openNotifTick } = useNotifications();
     const [notifOpen, setNotifOpen] = useState(false);
@@ -35,9 +36,13 @@ export default function Header({ onMenuClick, user, onLogout, onProfile }) {
                     </button>
                 </div>
 
-                <div className="cdBrand cdBrandCenter">
-                    <span>GuardiApp</span>
-                </div>
+                <button
+                    type="button"
+                    className="cdBrand cdBrandCenter cdBrandLink"
+                    onClick={() => navigate("/")}
+                >
+                    GuardiApp
+                </button>
 
                 <div className="cdHeaderRight">
                     <div className="cdNotifWrap">
