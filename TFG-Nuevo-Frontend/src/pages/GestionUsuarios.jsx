@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import "../styles/GestionUsuarios.css";
 import "../styles/AppLayout.css";
 import "../styles/GestionUsuarios.extra.css";
@@ -97,37 +98,70 @@ export default function GestionUsuarios() {
 
     // import excel
     const fileInputRef = useRef(null);
-    const [importMsg, setImportMsg] = useState("");
     const [importing, setImporting] = useState(false);
-    const [importSuccess, setImportSuccess] = useState(false);
+
+    const swalBase = {
+        confirmButtonColor: "#006236",
+        cancelButtonColor: "#64748B",
+        fontFamily: "Inter, system-ui, sans-serif",
+        customClass: {
+            popup: "swal-gu-popup",
+            confirmButton: "swal-gu-confirm",
+            cancelButton: "swal-gu-cancel",
+        },
+    };
 
     async function onPickExcel(e) {
-        // coge el archivo elegido
         const file = e.target.files[0];
-        e.target.value = ""; // resetea el input para poder elegir el mismo archivo otra vez
+        e.target.value = "";
         if (!file) {
-            setImportMsg("Debes seleccionar un archivo");
-            setImportSuccess(false);
+            Swal.fire({
+                ...swalBase,
+                icon: "warning",
+                title: "Sin archivo",
+                text: "Debes seleccionar un archivo Excel (.xls o .xlsx).",
+            });
             return;
         }
 
-        // limpìa mensaje pa cuando importando
-        setImportMsg("");
         setImporting(true);
-        setImportSuccess(false);
 
-        try {
-            await importWorkersExcel(file);
-            setImportMsg("Usuarios importados correctamente");
-            setImportSuccess(true);
-            setView("workers");
-            await loadWorkers();
-        } catch (err) {
-            setImportMsg("Error al importar: " + err.message);
-            setImportSuccess(false);
-        } finally {
-            setImporting(false);
-        }
+        // Abre el Swal de carga y espera a que esté renderizado antes de importar
+        await Swal.fire({
+            ...swalBase,
+            title: "Importando usuarios…",
+            text: "Por favor espera mientras se procesan los datos.",
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showConfirmButton: false,
+            didOpen: async () => {
+                Swal.showLoading();
+                try {
+                    await importWorkersExcel(file);
+                    setView("workers");
+                    await loadWorkers();
+                    Swal.fire({
+                        ...swalBase,
+                        icon: "success",
+                        title: "¡Usuarios importados correctamente!",
+                        text: "Todos los trabajadores se han añadido con éxito.",
+                        timer: 3500,
+                        timerProgressBar: true,
+                        showConfirmButton: true,
+                        confirmButtonText: "Aceptar",
+                    });
+                } catch (err) {
+                    Swal.fire({
+                        ...swalBase,
+                        icon: "error",
+                        title: "Error al importar",
+                        text: err.message || "No se pudo procesar el archivo.",
+                    });
+                } finally {
+                    setImporting(false);
+                }
+            },
+        });
     }
 
     async function loadWorkers() {
@@ -814,12 +848,6 @@ export default function GestionUsuarios() {
                             locale={{ back: "Atrás", close: "Cerrar", last: "Siguiente: Explicar Guardias", next: "Siguiente", skip: "Saltar tutorial" }}
                         />
                     </div>
-
-                    {importMsg && (
-                        <div style={{ padding: "10px 24px", background: "#F0FDF4", color: "#166534", borderBottom: "1px solid #DCFCE7", fontSize: "14px" }}>
-                            {importMsg}
-                        </div>
-                    )}
 
                     {view === "workers" && error && (
                         <div className="guError">{error}</div>

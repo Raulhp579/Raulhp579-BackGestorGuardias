@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import "../styles/GestionGuardias.css";
 import {
     getDuties,
@@ -87,6 +88,17 @@ export default function GestionGuardias() {
     const [isDragging, setIsDragging] = useState(false);
     const [importUploading, setImportUploading] = useState(false);
     const [importMsg, setImportMsg] = useState("");
+
+    const swalBase = {
+        confirmButtonColor: "#006236",
+        cancelButtonColor: "#64748B",
+        fontFamily: "Inter, system-ui, sans-serif",
+        customClass: {
+            popup: "swal-gg-popup",
+            confirmButton: "swal-gg-confirm",
+            cancelButton: "swal-gg-cancel",
+        },
+    };
 
     // modal asignar jefes
     const [isAssignOpen, setIsAssignOpen] = useState(false);
@@ -222,28 +234,6 @@ export default function GestionGuardias() {
         return hasValidExtension || hasValidMimeType;
     }
 
-    async function importDutysExcel({ file, year, month, idSpeciality }) {
-        if (!file) return setImportMsg("No se ha seleccionado ningún archivo");
-        if (!year || !month || !idSpeciality)
-            return setImportMsg(
-                "Por favor, seleccione año, mes y especialidad",
-            );
-
-        try {
-            setImportMsg("Procesando archivo...");
-
-            await importExcel({ file, year, month, idSpeciality });
-
-            setImportMsg("Archivo importado correctamente");
-            setExcelFile(null);
-
-            await reloadDuties();
-
-            showToast(`Se han importado guardias desde Excel (${new Date().toLocaleTimeString()}).`);
-        } catch (error) {
-            setImportMsg(error?.message || "Error al importar el archivo");
-        }
-    }
 
     async function openImportModal() {
         setImportMonth(String(new Date().getMonth() + 1).padStart(2, "0"));
@@ -322,33 +312,67 @@ export default function GestionGuardias() {
     }
 
     async function submitImport() {
-        if (!excelFile) return setImportMsg("Debes adjuntar un archivo Excel.");
-        if (!isExcelFile(excelFile))
-            return setImportMsg("Solo se permiten archivos .xls o .xlsx");
-        if (!idSpeciality)
-            return setImportMsg("Debes seleccionar una especialidad.");
-        if (!importYear || !importMonth)
-            return setImportMsg("Debes seleccionar año y mes.");
-
-        const maxMB = 10;
-        if (excelFile.size > maxMB * 1024 * 1024)
-            return setImportMsg(`El archivo supera ${maxMB}MB`);
-
-        setImportUploading(true);
-        setImportMsg("");
-
-        try {
-            await importDutysExcel({
-                file: excelFile,
-                year: importYear,
-                month: importMonth,
-                idSpeciality: idSpeciality,
-            });
-        } catch (e) {
-            setImportMsg(`Error al subir: ${e.message}`);
-        } finally {
-            setImportUploading(false);
+        if (!excelFile) {
+            Swal.fire({ ...swalBase, icon: "warning", title: "Sin archivo", text: "Debes adjuntar un archivo Excel." });
+            return;
         }
+        if (!isExcelFile(excelFile)) {
+            Swal.fire({ ...swalBase, icon: "warning", title: "Formato incorrecto", text: "Solo se permiten archivos .xls o .xlsx." });
+            return;
+        }
+        if (!idSpeciality) {
+            Swal.fire({ ...swalBase, icon: "warning", title: "Especialidad requerida", text: "Debes seleccionar una especialidad." });
+            return;
+        }
+        if (!importYear || !importMonth) {
+            Swal.fire({ ...swalBase, icon: "warning", title: "Fecha incompleta", text: "Debes seleccionar año y mes." });
+            return;
+        }
+        const maxMB = 10;
+        if (excelFile.size > maxMB * 1024 * 1024) {
+            Swal.fire({ ...swalBase, icon: "warning", title: "Archivo demasiado grande", text: `El archivo supera los ${maxMB} MB.` });
+            return;
+        }
+
+        const file = excelFile;
+        const year = importYear;
+        const month = importMonth;
+        const spec = idSpeciality;
+        closeImportModal();
+
+        await Swal.fire({
+            ...swalBase,
+            title: "Importando guardias…",
+            text: "Por favor espera mientras se procesan los datos.",
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showConfirmButton: false,
+            didOpen: async () => {
+                Swal.showLoading();
+                try {
+                    await importExcel({ file, year, month, idSpeciality: spec });
+                    setExcelFile(null);
+                    await reloadDuties();
+                    Swal.fire({
+                        ...swalBase,
+                        icon: "success",
+                        title: "¡Guardias importadas correctamente!",
+                        text: "Todas las guardias del Excel se han añadido con éxito.",
+                        timer: 3500,
+                        timerProgressBar: true,
+                        showConfirmButton: true,
+                        confirmButtonText: "Aceptar",
+                    });
+                } catch (err) {
+                    Swal.fire({
+                        ...swalBase,
+                        icon: "error",
+                        title: "Error al importar",
+                        text: err?.message || "No se pudo procesar el archivo.",
+                    });
+                }
+            },
+        });
     }
 
     const years = useMemo(() => {
@@ -560,34 +584,52 @@ export default function GestionGuardias() {
     }
 
     async function handleAssignChiefs() {
-        setAssignLoading(true);
-        setAssignMsg("");
-        setLoadError("");
+        const monthNum = Number(assignMonth);
+        const yearNum = Number(assignYear);
 
-        try {
-            const monthNum = Number(assignMonth);
-            const yearNum = Number(assignYear);
-
-            if (!monthNum || monthNum < 1 || monthNum > 12) {
-                setAssignMsg("Mes inválido.");
-                return;
-            }
-            if (!yearNum || yearNum < 2000 || yearNum > 2100) {
-                setAssignMsg("Año inválido.");
-                return;
-            }
-
-            await assignChiefs(monthNum, yearNum);
-            await reloadDuties();
-
-            setAssignMsg("Jefes asignados correctamente.");
-            setIsAssignOpen(false);
-        } catch (e) {
-            console.error(e);
-            setAssignMsg(e?.message || "Error asignando jefes.");
-        } finally {
-            setAssignLoading(false);
+        if (!monthNum || monthNum < 1 || monthNum > 12) {
+            Swal.fire({ ...swalBase, icon: "warning", title: "Mes inválido", text: "Selecciona un mes entre 1 y 12." });
+            return;
         }
+        if (!yearNum || yearNum < 2000 || yearNum > 2100) {
+            Swal.fire({ ...swalBase, icon: "warning", title: "Año inválido", text: "Selecciona un año válido." });
+            return;
+        }
+
+        setIsAssignOpen(false);
+
+        await Swal.fire({
+            ...swalBase,
+            title: "Asignando jefes de guardia…",
+            text: "Por favor espera mientras se realiza el reparto automático.",
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showConfirmButton: false,
+            didOpen: async () => {
+                Swal.showLoading();
+                try {
+                    await assignChiefs(monthNum, yearNum);
+                    await reloadDuties();
+                    Swal.fire({
+                        ...swalBase,
+                        icon: "success",
+                        title: "¡Jefes asignados correctamente!",
+                        text: `Se han asignado los jefes de guardia para ${assignMonth}/${assignYear}.`,
+                        timer: 3500,
+                        timerProgressBar: true,
+                        showConfirmButton: true,
+                        confirmButtonText: "Aceptar",
+                    });
+                } catch (e) {
+                    Swal.fire({
+                        ...swalBase,
+                        icon: "error",
+                        title: "Error al asignar jefes",
+                        text: e?.message || "No se pudo completar la asignación.",
+                    });
+                }
+            },
+        });
     }
 
     // -------- Modal EDITAR ----------
@@ -646,58 +688,76 @@ export default function GestionGuardias() {
     }
 
     async function confirmGeneratePdf() {
-        setPdfLoading(true);
-        setPdfError("");
-        try {
-            const token = localStorage.getItem("token");
-            const url = new URL(
-                "/api/plantilla-dia-pdf",
-                window.location.origin,
-            );
-            url.searchParams.append("day", pdfDay);
-            url.searchParams.append("month", pdfMonth);
-            url.searchParams.append("year", pdfYear);
+        const day = pdfDay;
+        const month = pdfMonth;
+        const year = pdfYear;
+        setPdfOpen(false);
 
-            const response = await fetch(url.toString(), {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            if (!response.ok) {
-                let errorMsg = `Error: ${response.status} ${response.statusText}`;
+        await Swal.fire({
+            ...swalBase,
+            title: "Generando PDF…",
+            text: `Preparando la plantilla del ${day}/${month}/${year}.`,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showConfirmButton: false,
+            didOpen: async () => {
+                Swal.showLoading();
                 try {
-                    const errorData = await response.json();
-                    errorMsg = errorData.error || errorMsg;
-                } catch (e) {}
-                throw new Error(errorMsg);
-            }
+                    const token = localStorage.getItem("token");
+                    const url = new URL("/api/plantilla-dia-pdf", window.location.origin);
+                    url.searchParams.append("day", day);
+                    url.searchParams.append("month", month);
+                    url.searchParams.append("year", year);
 
-            const blob = await response.blob();
-            if (blob.type === "application/json") {
-                const text = await blob.text();
-                throw new Error(
-                    JSON.parse(text).error || "Error al generar PDF",
-                );
-            }
+                    const response = await fetch(url.toString(), {
+                        method: "GET",
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
 
-            const urlBlob = window.URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = urlBlob;
-            a.download = `guardias-${pdfYear}-${pdfMonth}-${pdfDay}.pdf`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(urlBlob);
-            document.body.removeChild(a);
+                    if (!response.ok) {
+                        let errorMsg = `Error: ${response.status} ${response.statusText}`;
+                        try {
+                            const errorData = await response.json();
+                            errorMsg = errorData.error || errorMsg;
+                        } catch (_) {}
+                        throw new Error(errorMsg);
+                    }
 
-            setPdfOpen(false);
-        } catch (err) {
-            console.error("Error al generar PDF:", err);
-            setPdfError(err.message || "Error al generar el PDF");
-        } finally {
-            setPdfLoading(false);
-        }
+                    const blob = await response.blob();
+                    if (blob.type === "application/json") {
+                        const text = await blob.text();
+                        throw new Error(JSON.parse(text).error || "Error al generar PDF");
+                    }
+
+                    const urlBlob = window.URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = urlBlob;
+                    a.download = `guardias-${year}-${month}-${day}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(urlBlob);
+                    document.body.removeChild(a);
+
+                    Swal.fire({
+                        ...swalBase,
+                        icon: "success",
+                        title: "¡PDF generado correctamente!",
+                        text: `La plantilla del ${day}/${month}/${year} se ha descargado.`,
+                        timer: 3500,
+                        timerProgressBar: true,
+                        showConfirmButton: true,
+                        confirmButtonText: "Aceptar",
+                    });
+                } catch (err) {
+                    Swal.fire({
+                        ...swalBase,
+                        icon: "error",
+                        title: "Error al generar el PDF",
+                        text: err.message || "No se pudo generar el archivo.",
+                    });
+                }
+            },
+        });
     }
 
     function cancelPdf() {
@@ -1168,23 +1228,18 @@ export default function GestionGuardias() {
                             <div className="formGrid">
                                 <label className="label">
                                     Mes
-                                    <Select2 options={monthOptions} value={assignMonth} onChange={setAssignMonth} disabled={assignLoading} />
+                                    <Select2 options={monthOptions} value={assignMonth} onChange={setAssignMonth} />
                                 </label>
                                 <label className="label">
                                     Año
-                                    <Select2 options={yearOptions} value={assignYear} onChange={setAssignYear} disabled={assignLoading} />
+                                    <Select2 options={yearOptions} value={assignYear} onChange={setAssignYear} />
                                 </label>
-                                {assignMsg && (
-                                    <div className="label" style={{ gridColumn: "1 / -1" }}>
-                                        <div className="control" style={{ background: "#F9FAFB" }}>{assignMsg}</div>
-                                    </div>
-                                )}
                             </div>
                         </div>
                         <div className="modalFooter">
-                            <button className="btnSecondary" onClick={() => setIsAssignOpen(false)} type="button" disabled={assignLoading}>Cancelar</button>
-                            <button className="btnPrimary" onClick={handleAssignChiefs} type="button" disabled={assignLoading}>
-                                {assignLoading ? "Asignando..." : "Asignar"}
+                            <button className="btnSecondary" onClick={() => setIsAssignOpen(false)} type="button">Cancelar</button>
+                            <button className="btnPrimary" onClick={handleAssignChiefs} type="button">
+                                Asignar
                             </button>
                         </div>
                     </div>
@@ -1237,13 +1292,12 @@ export default function GestionGuardias() {
                                     <div className="dropZoneSub">o haz clic para seleccionarlo</div>
                                     {excelFile && <div className="dropZoneFile">Archivo: {excelFile.name}</div>}
                                 </div>
-                                {importMsg && <div className="importMsg">{importMsg}</div>}
                             </div>
                         </div>
                         <div className="modalFooter">
                             <button className="btnSecondary" type="button" onClick={closeImportModal}>Cancelar</button>
-                            <button className="btnPrimary" type="button" disabled={importUploading} onClick={submitImport}>
-                                {importUploading ? "Subiendo..." : "Importar"}
+                            <button className="btnPrimary" type="button" onClick={submitImport}>
+                                Importar
                             </button>
                         </div>
                     </div>
@@ -1430,12 +1484,11 @@ export default function GestionGuardias() {
                                     <Select2 options={pdfYearOptions} value={pdfYear} onChange={setPdfYear} disabled={pdfLoading} />
                                 </label>
                             </div>
-                            {pdfError && <div className="modalAlert" role="alert">{pdfError}</div>}
                         </div>
                         <div className="modalFooter">
-                            <button className="btnSecondary" type="button" onClick={cancelPdf} disabled={pdfLoading}>Cancelar</button>
-                            <button className="btnDanger" type="button" onClick={confirmGeneratePdf} disabled={pdfLoading}>
-                                {pdfLoading ? "Generando..." : "Generar PDF"}
+                            <button className="btnSecondary" type="button" onClick={cancelPdf}>Cancelar</button>
+                            <button className="btnDanger" type="button" onClick={confirmGeneratePdf}>
+                                Generar PDF
                             </button>
                         </div>
                     </div>

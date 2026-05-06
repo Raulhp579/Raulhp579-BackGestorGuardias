@@ -945,6 +945,29 @@ select.control {
     cursor: not-allowed;
 }
 
+/* ===== SWEETALERT2 — importar guardias / asignar jefes ===== */
+.swal-gg-popup {
+    font-family: Inter, system-ui, sans-serif !important;
+    border-radius: 16px !important;
+    border: 1px solid #E2E8F0 !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12) !important;
+    color: #0F172A !important;
+}
+
+.swal-gg-confirm {
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    padding: 10px 22px !important;
+}
+
+.swal-gg-cancel {
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    padding: 10px 22px !important;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
     .ggMain {
