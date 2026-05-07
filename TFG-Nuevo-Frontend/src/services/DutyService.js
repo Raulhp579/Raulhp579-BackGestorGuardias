@@ -173,6 +173,25 @@ export async function createDuty(data) {
 }
 
 
+export async function sendPdfByEmail({ day, month, year, email }) {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`${endpoint}/send-pdf-email`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ day, month, year, email }),
+    });
+
+    const json = await response.json();
+    if (!response.ok) {
+        throw new Error(json?.error || `HTTP error! status: ${response.status}`);
+    }
+    return json;
+}
+
 export async function getDutiesLastUpdate(params = {}) {
     try {
         let url = `${endpoint}/duties/last-update`;

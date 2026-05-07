@@ -7,6 +7,7 @@ import {
     updateDuty,
     deleteDuty,
     createDuty,
+    sendPdfByEmail,
 } from "../services/DutyService";
 import { assignChiefs, getWorkers, isUserAdmin } from "../services/userService";
 import { getSpecialities } from "../services/SpecialitiesService";
@@ -136,6 +137,10 @@ export default function GestionGuardias() {
     );
     const [pdfLoading, setPdfLoading] = useState(false);
     const [pdfError, setPdfError] = useState("");
+
+    // modal enviar PDF por correo
+    const [emailPdfOpen, setEmailPdfOpen] = useState(false);
+    const [emailPdfAddress, setEmailPdfAddress] = useState("");
     const [editSaving, setEditSaving] = useState(false);
     const [editError, setEditError] = useState("");
 
@@ -764,6 +769,48 @@ export default function GestionGuardias() {
         setPdfOpen(false);
         setPdfLoading(false);
         setPdfError("");
+    }
+
+    async function handleSendPdfByEmail() {
+        if (!emailPdfAddress || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailPdfAddress)) {
+            Swal.fire({ ...swalBase, icon: "warning", title: "Correo inválido", text: "Introduce un correo electrónico válido." });
+            return;
+        }
+
+        const email = emailPdfAddress;
+        setEmailPdfOpen(false);
+
+        await Swal.fire({
+            ...swalBase,
+            title: "Enviando PDF por correo…",
+            text: `Enviando la plantilla del ${pdfDay}/${pdfMonth}/${pdfYear} a ${email}.`,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showConfirmButton: false,
+            didOpen: async () => {
+                Swal.showLoading();
+                try {
+                    await sendPdfByEmail({ day: pdfDay, month: pdfMonth, year: pdfYear, email });
+                    Swal.fire({
+                        ...swalBase,
+                        icon: "success",
+                        title: "¡Correo enviado!",
+                        text: `El PDF se ha enviado correctamente a ${email}.`,
+                        timer: 3500,
+                        timerProgressBar: true,
+                        showConfirmButton: true,
+                        confirmButtonText: "Aceptar",
+                    });
+                } catch (err) {
+                    Swal.fire({
+                        ...swalBase,
+                        icon: "error",
+                        title: "Error al enviar el correo",
+                        text: err?.message || "No se pudo enviar el PDF.",
+                    });
+                }
+            },
+        });
     }
 
     async function handleSaveEdit(e) {
@@ -1487,6 +1534,19 @@ export default function GestionGuardias() {
                         </div>
                         <div className="modalFooter">
                             <button className="btnSecondary" type="button" onClick={cancelPdf}>Cancelar</button>
+                            <button
+                                className="ggCtaBtn outline"
+                                type="button"
+                                onClick={() => {
+                                    setPdfOpen(false);
+                                    setEmailPdfAddress("");
+                                    setEmailPdfOpen(true);
+                                }}
+                                style={{ display: "flex", alignItems: "center", gap: 6 }}
+                            >
+                                <span className="material-icons" style={{ fontSize: 18 }}>email</span>
+                                <span>Enviar por correo</span>
+                            </button>
                             <button className="btnDanger" type="button" onClick={confirmGeneratePdf}>
                                 Generar PDF
                             </button>
@@ -1494,6 +1554,48 @@ export default function GestionGuardias() {
                     </div>
                 </div>
             )}
+            {/* MODAL ENVIAR PDF POR CORREO */}
+            {emailPdfOpen && (
+                <div className="modalOverlay centered" role="dialog" aria-modal="true" aria-label="Enviar PDF por correo">
+                    <div className="modalSheet">
+                        <div className="modalBody">
+                            <div className="modalHeader">
+                                <div className="modalIcon">
+                                    <span className="material-icons">email</span>
+                                </div>
+                                <div>
+                                    <div className="modalTitle">Enviar PDF por correo</div>
+                                    <div className="modalSubtitle">
+                                        Se enviará la plantilla del {pdfDay}/{pdfMonth}/{pdfYear}.
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="formGrid">
+                                <label className="label" style={{ gridColumn: "1 / -1" }}>
+                                    Correo electrónico
+                                    <input
+                                        className="control"
+                                        type="email"
+                                        placeholder="ejemplo@correo.com"
+                                        value={emailPdfAddress}
+                                        onChange={(e) => setEmailPdfAddress(e.target.value)}
+                                        autoFocus
+                                    />
+                                </label>
+                            </div>
+                        </div>
+                        <div className="modalFooter">
+                            <button className="btnSecondary" type="button" onClick={() => setEmailPdfOpen(false)}>
+                                Cancelar
+                            </button>
+                            <button className="btnPrimary" type="button" onClick={handleSendPdfByEmail}>
+                                Enviar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <Joyride
                 steps={tourSteps}
                 run={runTour}

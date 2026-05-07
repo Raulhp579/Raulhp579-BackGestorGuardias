@@ -67,6 +67,7 @@ Route::middleware(['auth:sanctum', isAdmin::class])->group(function () {
     Route::get('/assingChiefs', [DutyController::class, 'assignChief']);
 
     Route::get('/plantilla-dia-pdf', [PdfController::class, 'generarPdfDia']);
+    Route::post('/send-pdf-email', [PdfController::class, 'sendPdfByEmail']);
 
     Route::prefix('admin')->group(function () {
         Route::apiResource('/fichajes', FichajeController::class);
