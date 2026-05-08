@@ -8,6 +8,7 @@ import HomeDashboard from "../pages/HomeDashboard";
 import Guardias from "../pages/GestionGuardias";
 import GestionFichajes from "../pages/GestionFichajes";
 import GestionUsuarios from "../pages/GestionUsuarios";
+import GestionEspecialidades from "../pages/GestionEspecialidades";
 import PerfilUsuario from "../pages/PerfilUsuario";
 import MisGuardias from "../pages/MisGuardias";
 import RequestsInbox from "../pages/RequestsInbox";
@@ -54,6 +55,14 @@ export default function AppRouter() {
                     element={
                         <ProtectedRoute requireAdmin={true}>
                             <GestionUsuarios />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/especialidades"
+                    element={
+                        <ProtectedRoute requireAdmin={true}>
+                            <GestionEspecialidades />
                         </ProtectedRoute>
                     }
                 />

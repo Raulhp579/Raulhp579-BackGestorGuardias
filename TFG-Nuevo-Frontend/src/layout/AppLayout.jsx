@@ -227,6 +227,19 @@ export default function AppLayout() {
                                     <span>Fichajes</span>
                                 </NavLink>
 
+                                <NavLink
+                                    to="/especialidades"
+                                    onClick={closeMenu}
+                                    className={({ isActive }) =>
+                                        `appNavItem ${isActive ? "active" : ""}`
+                                    }
+                                >
+                                    <span className="material-icons-outlined">
+                                        category
+                                    </span>
+                                    <span>Especialidades</span>
+                                </NavLink>
+
                                 <div className="appNavDivider" />
                             </>
                         )}

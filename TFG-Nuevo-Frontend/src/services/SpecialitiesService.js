@@ -27,6 +27,20 @@ export async function getSpecialities() {
         throw error;
     }
 }
+export async function createSpeciality(data) {
+    const response = await fetch(`${url}/speciality`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+        let msg = "Error al crear la especialidad";
+        try { const err = await response.json(); msg = err?.error || msg; } catch (_) {}
+        throw new Error(msg);
+    }
+    return await response.json();
+}
+
 export async function updateSpeciality(id, data) {
     try {
         let response = await fetch(`${url}/speciality/${id}`, {
@@ -44,4 +58,17 @@ export async function updateSpeciality(id, data) {
         console.error("Error al actualizar especialidad:", error);
         throw error;
     }
+}
+
+export async function deleteSpeciality(id) {
+    const response = await fetch(`${url}/speciality/${id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+        let msg = "Error al eliminar la especialidad";
+        try { const err = await response.json(); msg = err?.error || msg; } catch (_) {}
+        throw new Error(msg);
+    }
+    return await response.json();
 }
