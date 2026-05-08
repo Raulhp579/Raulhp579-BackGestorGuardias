@@ -7,10 +7,38 @@ import "../styles/Home.css";
 export default function Home() {
     const navigate = useNavigate();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [checkingAuth, setCheckingAuth] = useState(true);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
-        setIsLoggedIn(!!token);
+        if (!token) {
+            setCheckingAuth(false);
+            return;
+        }
+
+        fetch("/api/profile", {
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        })
+            .then((res) => {
+                if (res.ok) {
+                    setIsLoggedIn(true);
+                } else {
+                    localStorage.removeItem("token");
+                    localStorage.removeItem("auth");
+                    sessionStorage.removeItem("roles");
+                    setIsLoggedIn(false);
+                }
+            })
+            .catch(() => {
+                setIsLoggedIn(false);
+            })
+            .finally(() => {
+                setCheckingAuth(false);
+            });
     }, []);
 
 
@@ -60,21 +88,21 @@ export default function Home() {
                         <span className="homeNavTitle">GuardiApp</span>
                     </div>
                     <div className="homeNavLinks">
-                        {isLoggedIn ? (
-                            <button 
+                        {!checkingAuth && (isLoggedIn ? (
+                            <button
                                 className="homeNavButton homeNavButtonPrimary"
                                 onClick={() => navigate("/home")}
                             >
                                 Ir al Dashboard
                             </button>
                         ) : (
-                            <button 
+                            <button
                                 className="homeNavButton homeNavButtonPrimary"
                                 onClick={() => navigate("/login")}
                             >
                                 Iniciar Sesión
                             </button>
-                        )}
+                        ))}
                     </div>
                 </div>
             </nav>
@@ -89,8 +117,8 @@ export default function Home() {
                             con una plataforma moderna y fácil de usar.
                         </p>
                         <div className="homeHeroButtons">
-                            {isLoggedIn ? (
-                                <button 
+                            {!checkingAuth && (isLoggedIn ? (
+                                <button
                                     className="homeHeroButton homeHeroButtonPrimary"
                                     onClick={() => navigate("/home")}
                                 >
@@ -98,16 +126,14 @@ export default function Home() {
                                     Acceder al Sistema
                                 </button>
                             ) : (
-                                <>
-                                    <button 
-                                        className="homeHeroButton homeHeroButtonPrimary"
-                                        onClick={() => navigate("/login")}
-                                    >
-                                        <span className="material-icons">login</span>
-                                        Acceder al Sistema
-                                    </button>
-                                </>
-                            )}
+                                <button
+                                    className="homeHeroButton homeHeroButtonPrimary"
+                                    onClick={() => navigate("/login")}
+                                >
+                                    <span className="material-icons">login</span>
+                                    Acceder al Sistema
+                                </button>
+                            ))}
                         </div>
                     </div>
                     <div className="homeHeroImage">
@@ -321,8 +347,8 @@ export default function Home() {
                     <p className="homeCTASubtitle">
                         Simplifica la gestión de guardias de tu equipo hoy mismo
                     </p>
-                    {isLoggedIn && (
-                        <button 
+                    {!checkingAuth && isLoggedIn && (
+                        <button
                             className="homeCTAButton"
                             onClick={() => navigate("/home")}
                         >
