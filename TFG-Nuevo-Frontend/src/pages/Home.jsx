@@ -177,7 +177,7 @@ export default function Home() {
                                 Guía paso a paso directamente donde necesitas, con explicaciones contextuales 
                                 y demostraciones en tiempo real. Acceso completo desde tu cuenta.
                             </p>
-                            <button className="homeResourceButton" >Acceder a Tutorial</button>
+                            <button className="homeResourceButton" onClick={() => navigate("/tutorial")}>Acceder a Tutorial</button>
                         </div>
 
                         {/* Excel Template Resource */}

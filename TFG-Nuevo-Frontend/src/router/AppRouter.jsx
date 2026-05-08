@@ -4,6 +4,7 @@ import ProtectedRoute from "../components/ProtectedRoute/ProtectedRoute";
 
 import Home from "../pages/Home";
 import Login from "../pages/Login";
+import Tutorial from "../pages/Tutorial";
 import HomeDashboard from "../pages/HomeDashboard";
 import Guardias from "../pages/GestionGuardias";
 import GestionFichajes from "../pages/GestionFichajes";
@@ -25,6 +26,7 @@ export default function AppRouter() {
             {/* Público */}
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/tutorial" element={<Tutorial />} />
 
             {/* Privadas con layout (Header + Sidebar + Footer) */}
             <Route element={<AppLayout />}>
