@@ -65,7 +65,8 @@ html, body {
     background-color: #E2E8F0;
     padding: 6px;
     border-radius: 9999px;
-    margin-bottom: 24px;
+    margin: 0;
+    flex-shrink: 0;
 }
 
 .guSegBtn {
@@ -106,7 +107,9 @@ html, body {
 .guHeaderLeft {
     display: flex;
     align-items: center;
+    gap: 16px;
     flex: 1;
+    flex-wrap: wrap;
 }
 
 .guHeaderRight {

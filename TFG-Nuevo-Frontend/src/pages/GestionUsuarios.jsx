@@ -757,25 +757,6 @@ export default function GestionUsuarios() {
         <>
         <div className="guPage">
             <main className="guMain">
-                {/* Segmented Control */}
-                <div className="guSegmentedControl tour-view-toggle">
-                    <button
-                        className={workersBtnClass}
-                        type="button"
-                        onClick={() => setView("workers")}
-                    >
-                        Ver trabajadores
-                    </button>
-
-                    <button
-                        className={adminsBtnClass}
-                        type="button"
-                        onClick={() => setView("admins")}
-                    >
-                        Ver usuarios
-                    </button>
-                </div>
-
                 {/* Tabla Card */}
                 <div className="guCard">
                     {/* HEADER DE LA TARJETA (Buscador y Botones) */}
@@ -799,6 +780,23 @@ export default function GestionUsuarios() {
                                         <span className="material-icons">close</span>
                                     </button>
                                 )}
+                            </div>
+                            <div className="guSegmentedControl tour-view-toggle">
+                                <button
+                                    className={workersBtnClass}
+                                    type="button"
+                                    onClick={() => setView("workers")}
+                                >
+                                    Ver trabajadores
+                                </button>
+
+                                <button
+                                    className={adminsBtnClass}
+                                    type="button"
+                                    onClick={() => setView("admins")}
+                                >
+                                    Ver usuarios
+                                </button>
                             </div>
                         </div>
 
