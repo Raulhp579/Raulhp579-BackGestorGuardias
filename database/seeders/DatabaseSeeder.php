@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\Duty;
 use App\Models\User;
+use App\Enums\DutyType;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -83,5 +85,25 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
             'worker_id' => $w4->id,
         ])->assignRole('empleado');
+
+        // 4. Crear 2 guardias por cada trabajador, con días distintos
+        $workers = [
+            ['worker' => $w1, 'dates' => ['2026-06-05', '2026-06-12'], 'types' => [DutyType::CA,  DutyType::PF]],
+            ['worker' => $w2, 'dates' => ['2026-06-06', '2026-06-13'], 'types' => [DutyType::PF,  DutyType::LOC]],
+            ['worker' => $w3, 'dates' => ['2026-06-07', '2026-06-14'], 'types' => [DutyType::LOC, DutyType::CA]],
+            ['worker' => $w4, 'dates' => ['2026-06-08', '2026-06-15'], 'types' => [DutyType::CA,  DutyType::LOC]],
+        ];
+
+        foreach ($workers as $entry) {
+            foreach ([0, 1] as $i) {
+                Duty::create([
+                    'date'            => $entry['dates'][$i],
+                    'duty_type'       => $entry['types'][$i],
+                    'id_speciality'   => $dirId,
+                    'id_worker'       => $entry['worker']->id,
+                    'id_chief_worker' => $w1->id,
+                ]);
+            }
+        }
     }
 }
